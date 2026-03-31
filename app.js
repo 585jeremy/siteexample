@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260331g";
+const SITE_ASSET_VERSION = "20260331h";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -799,54 +799,131 @@ function renderLanding() {
 
 function renderLandingHome() {
   setView(`
-    <div class="home-shell">
-      <section class="home-hero" aria-label="Welcome">
-        <div class="home-main">
-          <div class="home-kicker">Los Santos hub</div>
-          <div class="home-banner">
+    <div class="portal-home">
+      <div class="portal-home__grain" aria-hidden="true"></div>
+      <div class="portal-home__wash" aria-hidden="true"></div>
+
+      <section class="portal-home__hero" aria-label="Welcome">
+        <div class="portal-home__copy">
+          <div class="portal-home__eyebrow">SGCNR Los Santos Portal</div>
+          <div class="portal-home__chips">
+            <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
+            <span class="portal-home__chip portal-home__chip--red">Cops &amp; Robbers</span>
+            <span class="portal-home__chip">Rules + Status + Map</span>
+          </div>
+          <h1 class="portal-home__title">Clean access to the server, live tools, and everything players actually need.</h1>
+          <p class="portal-home__text">A darker, sharper homepage built around quick joining, fast server info, cleaner rules access, and service-map navigation without the old clutter.</p>
+          <div class="portal-home__actions">
+            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+            <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+            <a class="auth__btn" href="#/status">Live Status</a>
+          </div>
+          <div class="portal-home__stats">
+            <div class="portal-home__stat">
+              <div class="portal-home__statLabel">Server Type</div>
+              <div class="portal-home__statValue">FiveM CnR</div>
+            </div>
+            <div class="portal-home__stat">
+              <div class="portal-home__statLabel">Region</div>
+              <div class="portal-home__statValue">${escapeHtml(SERVER_CONFIG.region || "EU")}</div>
+            </div>
+            <div class="portal-home__stat">
+              <div class="portal-home__statLabel">Access</div>
+              <div class="portal-home__statValue">Fast Join</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="portal-home__brand">
+          <div class="portal-home__brandGlow" aria-hidden="true"></div>
+          <div class="portal-home__bannerCard">
             <img
-              class="home-banner__image"
+              class="portal-home__bannerLogo"
               src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
               alt="SG Cops and Robbers logo"
               loading="eager"
               onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
               onerror="this.remove();"
             />
-            <div class="home-banner__fallback">SG Cops &amp; Robbers</div>
+            <div class="portal-home__bannerFallback">SG Cops &amp; Robbers</div>
           </div>
-          <div class="home-copy">
-            <div class="home-title">Rules, live status, and service locations in one clean portal.</div>
-            <div class="home-text">A darker, faster hub for players to join the server, open the map, check live status, and get straight to the important pages.</div>
-            <div class="home-actions">
-              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          <div class="portal-home__badgeCard">
+            <div class="portal-home__badgeWrap">
+              <img
+                class="portal-home__badgeLogo"
+                src="${escapeHtml(BRAND_LOGO_BADGE_URL)}"
+                alt="SGCNR badge"
+                loading="eager"
+                onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+                onerror="this.remove();"
+              />
+              <div class="portal-home__badgeFallback">SGCNR</div>
+            </div>
+            <div class="portal-home__badgeMeta">
+              <div class="portal-home__badgeTitle">Los Santos Hub</div>
+              <div class="portal-home__badgeText">Quick server access, rules, live tools, and service navigation in one branded entry point.</div>
             </div>
           </div>
-        </div>
-        <aside class="home-side">
-          <div class="home-side__logo">
-            <img
-              class="home-side__image"
-              src="${escapeHtml(BRAND_LOGO_BADGE_URL)}"
-              alt="SGCNR badge"
-              loading="eager"
-              onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
-              onerror="this.remove();"
-            />
-            <div class="home-side__fallback">SGCNR</div>
-          </div>
-          <div class="home-links">
-            <a class="home-link" href="#/start"><span class="home-link__label">Start Here</span><span class="home-link__meta">Setup and join info</span></a>
-            <a class="home-link" href="#/rules"><span class="home-link__label">Rules</span><span class="home-link__meta">Server rules and conduct</span></a>
-            <a class="home-link" href="#/map"><span class="home-link__label">Map</span><span class="home-link__meta">Police, hospitals, fire, Lester</span></a>
-            <a class="home-link" href="#/status"><span class="home-link__label">Live Status</span><span class="home-link__meta">Server and player overview</span></a>
-          </div>
-          <div class="home-stats">
-            <div class="home-stat"><span class="home-stat__label">Access</span><span class="home-stat__value">Fast</span></div>
-            <div class="home-stat"><span class="home-stat__label">Support</span><span class="home-stat__value">Discord</span></div>
-            <div class="home-stat"><span class="home-stat__label">Server</span><span class="home-stat__value">Live Ready</span></div>
-          </div>
         </aside>
+      </section>
+
+      <section class="portal-home__navGrid" aria-label="Quick access">
+        <a class="portal-home__navCard portal-home__navCard--primary" href="#/start">
+          <div class="portal-home__navLabel">Start Here</div>
+          <div class="portal-home__navTitle">Get in fast</div>
+          <div class="portal-home__navText">Join details, starter info, and first-stop guidance for new players.</div>
+        </a>
+        <a class="portal-home__navCard" href="#/rules">
+          <div class="portal-home__navLabel">Rules</div>
+          <div class="portal-home__navTitle">Know the basics</div>
+          <div class="portal-home__navText">Server rules, conduct, gameplay expectations, and quick navigation.</div>
+        </a>
+        <a class="portal-home__navCard" href="#/map">
+          <div class="portal-home__navLabel">Map</div>
+          <div class="portal-home__navTitle">Find service locations</div>
+          <div class="portal-home__navText">Police departments, hospitals, fire stations, car washes, and Lester's House.</div>
+        </a>
+        <a class="portal-home__navCard" href="#/status">
+          <div class="portal-home__navLabel">Live Status</div>
+          <div class="portal-home__navTitle">Check the server</div>
+          <div class="portal-home__navText">Status, quick join access, and live server information in one place.</div>
+        </a>
+      </section>
+
+      <section class="portal-home__lower">
+        <div class="portal-home__panel">
+          <div class="portal-home__panelEyebrow">Why this portal</div>
+          <div class="portal-home__panelTitle">Built to cut the clutter</div>
+          <div class="portal-home__panelText">The homepage is now focused on what matters most: getting players into the server fast, surfacing important pages immediately, and keeping the brand visible without making the layout messy.</div>
+          <div class="portal-home__bulletGrid">
+            <div class="portal-home__bullet">Direct join path and Discord access</div>
+            <div class="portal-home__bullet">Live status and service map tools</div>
+            <div class="portal-home__bullet">Cleaner branding with the actual server logos</div>
+            <div class="portal-home__bullet">Sharper dark theme with less empty space</div>
+          </div>
+        </div>
+
+        <div class="portal-home__panel portal-home__panel--rail">
+          <div class="portal-home__panelEyebrow">Essential links</div>
+          <div class="portal-home__rail">
+            <a class="portal-home__railItem" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">
+              <span class="portal-home__railTitle">Direct Join</span>
+              <span class="portal-home__railMeta">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</span>
+            </a>
+            <a class="portal-home__railItem" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">
+              <span class="portal-home__railTitle">Discord</span>
+              <span class="portal-home__railMeta">Support, tickets, announcements</span>
+            </a>
+            <a class="portal-home__railItem" href="#/map">
+              <span class="portal-home__railTitle">Service Map</span>
+              <span class="portal-home__railMeta">Hospitals, police, fire, Lester</span>
+            </a>
+            <a class="portal-home__railItem" href="#/status">
+              <span class="portal-home__railTitle">Server Status</span>
+              <span class="portal-home__railMeta">Live server and player information</span>
+            </a>
+          </div>
+        </div>
       </section>
     </div>
   `);
