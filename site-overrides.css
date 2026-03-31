@@ -368,19 +368,84 @@ body.is-map .footer{
 }
 
 .service-map__marker .service-marker__pin{
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 34px;
   transition: transform .18s ease;
+}
+
+.service-map__marker .service-marker__halo{
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--map-glow, rgba(255,255,255,.24)) 0%, rgba(0,0,0,0) 72%);
+  opacity: .42;
+  filter: blur(1.5px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.service-map__marker .service-marker__core{
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  border: 2px solid rgba(9,14,20,.82);
+  background:
+    radial-gradient(circle at 28% 26%, rgba(255,255,255,.28), rgba(255,255,255,0) 34%),
+    linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 38%),
+    var(--map-accent, #9bc4ff);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.12),
+    0 12px 22px rgba(0,0,0,.34),
+    0 0 18px var(--map-glow, rgba(255,255,255,.18));
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.service-map__marker .service-marker__icon{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(247,251,255,.98);
+  text-shadow: 0 1px 0 rgba(9,14,20,.5);
+}
+
+.service-map__marker .service-marker__icon svg{
+  width: 16px;
+  height: 16px;
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.28));
+}
+
+.service-map__marker .service-marker__pin--underground .service-marker__core{
+  background:
+    radial-gradient(circle at 28% 26%, rgba(255,255,255,.22), rgba(255,255,255,0) 34%),
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 38%),
+    linear-gradient(180deg, #ffb65d, #ff8f41);
 }
 
 .service-map__marker:hover .service-marker__pin,
 .service-map__marker.is-active .service-marker__pin,
 .service-map__marker.is-jumped .service-marker__pin{
-  transform: scale(1.18);
+  transform: scale(1.14);
 }
 
 .service-map__marker:hover .service-marker__halo,
 .service-map__marker.is-active .service-marker__halo,
 .service-map__marker.is-jumped .service-marker__halo{
-  opacity: 1;
+  opacity: .92;
+  transform: scale(1.08);
+}
+
+.service-map__marker:hover .service-marker__core,
+.service-map__marker.is-active .service-marker__core,
+.service-map__marker.is-jumped .service-marker__core{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.18),
+    0 18px 30px rgba(0,0,0,.4),
+    0 0 24px var(--map-glow, rgba(255,255,255,.24));
 }
 
 .service-map__marker:focus-visible{
