@@ -123,7 +123,7 @@ body.is-landing .brandmark__sub{
   display: grid;
   grid-template-columns: minmax(0, 1.06fr) minmax(360px, 470px);
   gap: 20px;
-  padding: 26px;
+  padding: 24px;
 }
 
 .portal-home__copy{
@@ -179,7 +179,7 @@ body.is-landing .brandmark__sub{
 .portal-home__title{
   max-width: 13ch;
   margin: 0;
-  font-size: clamp(42px, 5.5vw, 74px);
+  font-size: clamp(38px, 5vw, 64px);
   line-height: .96;
   font-weight: 900;
   letter-spacing: -.06em;
@@ -190,8 +190,8 @@ body.is-landing .brandmark__sub{
 .portal-home__text{
   max-width: 60ch;
   margin: 0;
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 14px;
+  line-height: 1.65;
   color: rgba(237,244,251,.72);
 }
 
@@ -262,8 +262,8 @@ body.is-landing .brandmark__sub{
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 280px;
-  padding: 26px 24px;
+  min-height: 238px;
+  padding: 22px 20px;
   overflow: hidden;
 }
 
@@ -279,9 +279,9 @@ body.is-landing .brandmark__sub{
 
 .portal-home__bannerLogo{
   width: 100%;
-  max-width: 560px;
+  max-width: 500px;
   object-fit: contain;
-  filter: drop-shadow(0 30px 54px rgba(0,0,0,.42));
+  filter: drop-shadow(0 24px 42px rgba(0,0,0,.4));
 }
 
 .portal-home__bannerFallback{
@@ -296,17 +296,17 @@ body.is-landing .brandmark__sub{
 
 .portal-home__badgeCard{
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
-  padding: 18px;
+  padding: 16px;
 }
 
 .portal-home__badgeWrap{
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 132px;
+  min-height: 116px;
   border-radius: 20px;
   background:
     radial-gradient(circle at 20% 20%, rgba(78,136,255,.14), transparent 30%),
@@ -315,9 +315,9 @@ body.is-landing .brandmark__sub{
 }
 
 .portal-home__badgeLogo{
-  width: min(100%, 124px);
+  width: min(100%, 104px);
   object-fit: contain;
-  filter: drop-shadow(0 18px 30px rgba(0,0,0,.34));
+  filter: drop-shadow(0 14px 24px rgba(0,0,0,.32));
 }
 
 .portal-home__badgeFallback{
@@ -333,29 +333,29 @@ body.is-landing .brandmark__sub{
 }
 
 .portal-home__badgeTitle{
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1.06;
   color: rgba(245,249,255,.97);
 }
 
 .portal-home__badgeText{
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.55;
   color: rgba(237,244,251,.68);
 }
 
 .portal-home__navGrid{
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
 .portal-home__navCard{
   display: grid;
-  gap: 10px;
-  min-height: 172px;
-  padding: 18px;
+  gap: 8px;
+  min-height: 138px;
+  padding: 16px;
   text-decoration: none;
   color: inherit;
   transition: transform .18s ease, border-color .18s ease, background .18s ease;
@@ -373,16 +373,17 @@ body.is-landing .brandmark__sub{
 }
 
 .portal-home__navTitle{
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 800;
   line-height: 1.04;
   color: rgba(245,249,255,.97);
 }
 
 .portal-home__navText{
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.5;
   color: rgba(237,244,251,.68);
+  word-break: break-word;
 }
 
 .portal-home__lower{
@@ -392,7 +393,11 @@ body.is-landing .brandmark__sub{
 }
 
 .portal-home__panel{
-  padding: 22px;
+  padding: 18px;
+}
+
+.portal-home__panel--compact{
+  padding: 16px;
 }
 
 .portal-home__panelTitle{
@@ -465,12 +470,68 @@ body.is-landing .brandmark__sub{
   color: rgba(237,244,251,.62);
 }
 
+.portal-home__buttonGrid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.portal-home__button{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(120,147,182,.14);
+  background: rgba(255,255,255,.04);
+  color: rgba(245,249,255,.94);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.portal-home__button:hover{
+  transform: translateY(-1px);
+  border-color: rgba(120,147,182,.26);
+  background: rgba(255,255,255,.06);
+}
+
+.portal-home__miniStats{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.portal-home__miniStat{
+  display: grid;
+  gap: 5px;
+  min-height: 70px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(120,147,182,.12);
+  background: rgba(255,255,255,.035);
+}
+
+.portal-home__miniLabel{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(237,244,251,.48);
+}
+
+.portal-home__miniValue{
+  font-size: 15px;
+  font-weight: 800;
+  color: rgba(245,249,255,.96);
+}
+
 @media (max-width: 1180px){
   .portal-home__hero{
-    grid-template-columns: 1fr;
-  }
-
-  .portal-home__brand{
     grid-template-columns: 1fr;
   }
 
@@ -545,10 +606,15 @@ body.is-landing .brandmark__sub{
   }
 
   .portal-home__navCard{
-    min-height: 150px;
+    min-height: 126px;
   }
 
   .portal-home__bulletGrid{
+    grid-template-columns: 1fr;
+  }
+
+  .portal-home__buttonGrid,
+  .portal-home__miniStats{
     grid-template-columns: 1fr;
   }
 }

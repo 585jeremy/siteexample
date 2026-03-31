@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260331h";
+const SITE_ASSET_VERSION = "20260331i";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -811,8 +811,8 @@ function renderLandingHome() {
             <span class="portal-home__chip portal-home__chip--red">Cops &amp; Robbers</span>
             <span class="portal-home__chip">Rules + Status + Map</span>
           </div>
-          <h1 class="portal-home__title">Clean access to the server, live tools, and everything players actually need.</h1>
-          <p class="portal-home__text">A darker, sharper homepage built around quick joining, fast server info, cleaner rules access, and service-map navigation without the old clutter.</p>
+          <h1 class="portal-home__title">Join fast. Find what you need.</h1>
+          <p class="portal-home__text">Rules, map, status, and Discord in one clean hub.</p>
           <div class="portal-home__actions">
             <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
             <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
@@ -861,7 +861,7 @@ function renderLandingHome() {
             </div>
             <div class="portal-home__badgeMeta">
               <div class="portal-home__badgeTitle">Los Santos Hub</div>
-              <div class="portal-home__badgeText">Quick server access, rules, live tools, and service navigation in one branded entry point.</div>
+              <div class="portal-home__badgeText">Fast access to the main pages.</div>
             </div>
           </div>
         </aside>
@@ -871,57 +871,65 @@ function renderLandingHome() {
         <a class="portal-home__navCard portal-home__navCard--primary" href="#/start">
           <div class="portal-home__navLabel">Start Here</div>
           <div class="portal-home__navTitle">Get in fast</div>
-          <div class="portal-home__navText">Join details, starter info, and first-stop guidance for new players.</div>
+          <div class="portal-home__navText">Setup and join info.</div>
         </a>
         <a class="portal-home__navCard" href="#/rules">
           <div class="portal-home__navLabel">Rules</div>
           <div class="portal-home__navTitle">Know the basics</div>
-          <div class="portal-home__navText">Server rules, conduct, gameplay expectations, and quick navigation.</div>
+          <div class="portal-home__navText">Server rules and conduct.</div>
         </a>
         <a class="portal-home__navCard" href="#/map">
           <div class="portal-home__navLabel">Map</div>
           <div class="portal-home__navTitle">Find service locations</div>
-          <div class="portal-home__navText">Police departments, hospitals, fire stations, car washes, and Lester's House.</div>
+          <div class="portal-home__navText">Police, hospitals, fire, Lester.</div>
         </a>
         <a class="portal-home__navCard" href="#/status">
           <div class="portal-home__navLabel">Live Status</div>
           <div class="portal-home__navTitle">Check the server</div>
-          <div class="portal-home__navText">Status, quick join access, and live server information in one place.</div>
+          <div class="portal-home__navText">Players and server info.</div>
+        </a>
+        <a class="portal-home__navCard" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">
+          <div class="portal-home__navLabel">Discord</div>
+          <div class="portal-home__navTitle">Open support</div>
+          <div class="portal-home__navText">Tickets and announcements.</div>
+        </a>
+        <a class="portal-home__navCard" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">
+          <div class="portal-home__navLabel">Direct Join</div>
+          <div class="portal-home__navTitle">Launch now</div>
+          <div class="portal-home__navText">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</div>
         </a>
       </section>
 
       <section class="portal-home__lower">
-        <div class="portal-home__panel">
-          <div class="portal-home__panelEyebrow">Why this portal</div>
-          <div class="portal-home__panelTitle">Built to cut the clutter</div>
-          <div class="portal-home__panelText">The homepage is now focused on what matters most: getting players into the server fast, surfacing important pages immediately, and keeping the brand visible without making the layout messy.</div>
-          <div class="portal-home__bulletGrid">
-            <div class="portal-home__bullet">Direct join path and Discord access</div>
-            <div class="portal-home__bullet">Live status and service map tools</div>
-            <div class="portal-home__bullet">Cleaner branding with the actual server logos</div>
-            <div class="portal-home__bullet">Sharper dark theme with less empty space</div>
+        <div class="portal-home__panel portal-home__panel--compact">
+          <div class="portal-home__panelEyebrow">Quick Access</div>
+          <div class="portal-home__buttonGrid">
+            <a class="portal-home__button" href="#/rules">Rules</a>
+            <a class="portal-home__button" href="#/map">Map</a>
+            <a class="portal-home__button" href="#/status">Status</a>
+            <a class="portal-home__button" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
           </div>
         </div>
 
-        <div class="portal-home__panel portal-home__panel--rail">
-          <div class="portal-home__panelEyebrow">Essential links</div>
-          <div class="portal-home__rail">
-            <a class="portal-home__railItem" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">
-              <span class="portal-home__railTitle">Direct Join</span>
-              <span class="portal-home__railMeta">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</span>
-            </a>
-            <a class="portal-home__railItem" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">
-              <span class="portal-home__railTitle">Discord</span>
-              <span class="portal-home__railMeta">Support, tickets, announcements</span>
-            </a>
-            <a class="portal-home__railItem" href="#/map">
-              <span class="portal-home__railTitle">Service Map</span>
-              <span class="portal-home__railMeta">Hospitals, police, fire, Lester</span>
-            </a>
-            <a class="portal-home__railItem" href="#/status">
-              <span class="portal-home__railTitle">Server Status</span>
-              <span class="portal-home__railMeta">Live server and player information</span>
-            </a>
+        <div class="portal-home__panel portal-home__panel--compact">
+          <div class="portal-home__panelEyebrow">Server Info</div>
+          <div class="portal-home__miniStats">
+            <div class="portal-home__miniStat">
+              <span class="portal-home__miniLabel">Join Code</span>
+              <span class="portal-home__miniValue">${escapeHtml(SERVER_JOIN_CODE)}</span>
+            </div>
+            <div class="portal-home__miniStat">
+              <span class="portal-home__miniLabel">Region</span>
+              <span class="portal-home__miniValue">${escapeHtml(SERVER_CONFIG.region || "EU")}</span>
+            </div>
+            <div class="portal-home__miniStat">
+              <span class="portal-home__miniLabel">Support</span>
+              <span class="portal-home__miniValue">Discord</span>
+            </div>
+            <div class="portal-home__miniStat">
+              <span class="portal-home__miniLabel">Map</span>
+              <span class="portal-home__miniValue">Services</span>
+            </div>
           </div>
         </div>
       </section>
