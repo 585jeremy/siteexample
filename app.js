@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401a";
+const SITE_ASSET_VERSION = "20260401b";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -801,6 +801,7 @@ function renderLandingHome() {
   const joinCodeLabel = escapeHtml(SERVER_JOIN_CODE || "Not set");
   const joinLinkLabel = escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE || "not-set"}`);
   const discordLabel = escapeHtml(DISCORD_INVITE_URL.replace(/^https?:\/\//, ""));
+  const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
 
   setView(`
     <div class="portal-home portal-home--cnr">
@@ -814,28 +815,30 @@ function renderLandingHome() {
           <div class="portal-home__chips">
             <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
             <span class="portal-home__chip portal-home__chip--red">Los Santos</span>
-            <span class="portal-home__chip">EU</span>
+            <span class="portal-home__chip">${regionLabel}</span>
           </div>
         </div>
 
+        <div class="portal-home__heroBanner">
+          <div class="portal-home__heroBannerGlow" aria-hidden="true"></div>
+          <img
+            class="portal-home__bannerLogo"
+            src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
+            alt="SG Cops and Robbers logo"
+            loading="eager"
+            onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+            onerror="this.remove();"
+          />
+          <div class="portal-home__bannerFallback">SG Cops &amp; Robbers</div>
+        </div>
+
         <div class="portal-home__heroBody">
-          <div class="portal-home__copy">
+          <div class="portal-home__mainPanel">
+            <div class="portal-home__copy">
             <div class="portal-home__copyTop">
               <div class="portal-home__signal">SGCNR Network</div>
-              <h1 class="portal-home__title">Fast access to the city.</h1>
-              <p class="portal-home__text">Join, copy the connect link, or jump straight into the live server tools.</p>
-            </div>
-
-            <div class="portal-home__bannerCard">
-              <img
-                class="portal-home__bannerLogo"
-                src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
-                alt="SG Cops and Robbers logo"
-                loading="eager"
-                onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
-                onerror="this.remove();"
-              />
-              <div class="portal-home__bannerFallback">SG Cops &amp; Robbers</div>
+              <h1 class="portal-home__title">Los Santos Cops &amp; Robbers.</h1>
+              <p class="portal-home__text">Fast access to the server, the city map, and the live status page without turning the front page into a wall of text.</p>
             </div>
 
             <div class="portal-home__actions portal-home__actions--hero">
@@ -858,10 +861,10 @@ function renderLandingHome() {
                 <div class="portal-home__joinValue portal-home__joinValue--small">${discordLabel}</div>
               </div>
             </div>
+            </div>
           </div>
 
-          <aside class="portal-home__brand">
-            <div class="portal-home__brandGlow" aria-hidden="true"></div>
+          <aside class="portal-home__sidePanel">
             <div class="portal-home__badgeCard">
               <div class="portal-home__badgeWrap">
                 <img
@@ -897,7 +900,7 @@ function renderLandingHome() {
                 <span class="portal-home__quickText">Server rules, FAQ, and quick references.</span>
               </a>
             </div>
-          </div>
+          </aside>
         </div>
       </section>
     </div>
