@@ -1,0 +1,30 @@
+name: Deploy Website to ZAP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy files to ZAP Webspace
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.ZAP_FTP_HOST }}
+          username: ${{ secrets.ZAP_FTP_USER }}
+          password: ${{ secrets.ZAP_FTP_PASS }}
+          port: ${{ secrets.ZAP_FTP_PORT }}
+          protocol: ftp
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            README.md
+            sgcnr-site.zip
