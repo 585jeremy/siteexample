@@ -28,3 +28,4 @@ jobs:
             **/node_modules/**
             README.md
             sgcnr-site.zip
+            
