@@ -1006,8 +1006,8 @@ body.is-landing .landing{
 .map-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 18px;
   position: sticky;
   top: 8px;
   height: calc(100svh - 132px);
@@ -1046,9 +1046,56 @@ body.is-landing .landing{
   color: rgba(230,237,246,.64);
 }
 
+.map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.map-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  color: rgba(230,237,246,.78);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, color .18s ease;
+}
+
+.map-filter:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+}
+
+.map-filter.is-active {
+  border-color: var(--map-accent, rgba(201,255,90,.36));
+  background: linear-gradient(180deg, var(--map-glow, rgba(201,255,90,.14)), rgba(255,255,255,.05));
+  color: var(--map-accent, rgba(230,237,246,.94));
+}
+
+.map-filter__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  color: rgba(230,237,246,.86);
+  font-size: 11px;
+}
+
 .map-quick {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-height: 0;
   overflow: auto;
   padding-right: 2px;
@@ -1058,7 +1105,7 @@ body.is-landing .landing{
 
 .map-quick__group {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .map-quick__heading {
@@ -1072,10 +1119,10 @@ body.is-landing .landing{
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 5px;
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
+  padding: 11px 13px;
+  border-radius: 16px;
   border: 1px solid rgba(255,255,255,.08);
   background: rgba(255,255,255,.03);
   color: rgba(230,237,246,.92);
@@ -1120,10 +1167,15 @@ body.is-landing .landing{
   font-weight: 700;
 }
 
+.map-quick__item.is-hidden,
+.map-quick__group.is-hidden {
+  display: none;
+}
+
 .map-stage {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   min-height: inherit;
 }
@@ -1235,12 +1287,13 @@ body.is-landing .landing{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.12);
   background:
-    radial-gradient(circle at top, rgba(255,255,255,.05), transparent 42%),
-    rgba(5,10,14,.85);
+    radial-gradient(circle at top, rgba(255,255,255,.04), transparent 42%),
+    linear-gradient(180deg, rgba(11,16,20,.96), rgba(7,11,15,.98));
   cursor: grab;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,.18) transparent;
   overscroll-behavior: contain;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
 
 .custom-map-viewport.is-dragging {
@@ -1275,6 +1328,10 @@ body.is-landing .landing{
   cursor: pointer;
 }
 
+.custom-map__marker.is-hidden {
+  display: none;
+}
+
 .custom-map__marker--underground {
   width: 36px;
   height: 36px;
@@ -1285,7 +1342,7 @@ body.is-landing .landing{
   inset: 0;
   border-radius: 999px;
   background: var(--map-glow, rgba(201,255,90,.26));
-  animation: mapPulse 2s ease-out infinite;
+  opacity: 0;
 }
 
 .custom-map__dot {
@@ -1297,9 +1354,22 @@ body.is-landing .landing{
   box-shadow: 0 0 0 3px rgba(255,255,255,.10);
 }
 
+.custom-map__marker:hover .custom-map__pulse,
+.custom-map__marker:focus-visible .custom-map__pulse,
+.custom-map__marker.is-active .custom-map__pulse {
+  animation: mapPulse 1.8s ease-out infinite;
+  opacity: 1;
+}
+
+.custom-map__marker:hover .custom-map__dot,
+.custom-map__marker:focus-visible .custom-map__dot,
 .custom-map__marker.is-active .custom-map__dot {
   background: #ffffff;
   box-shadow: 0 0 0 4px var(--map-glow, rgba(201,255,90,.18));
+}
+
+.custom-map__marker:focus-visible {
+  outline: none;
 }
 
 .custom-map__glyph {

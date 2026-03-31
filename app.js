@@ -42,8 +42,8 @@ const MAP_TYPE_META = {
     glow: "rgba(99, 167, 255, .22)"
   },
   underground: {
-    label: "Hacking Device",
-    groupLabel: "Hacking",
+    label: "Lester's House",
+    groupLabel: "Lester",
     color: "#ff9b54",
     glow: "rgba(255, 155, 84, .24)"
   }
@@ -61,9 +61,11 @@ function mapWorldToPercent(gameX, gameY) {
 }
 
 function mapLocation({ gameX, gameY, ...location }) {
+  const projected = mapWorldToPercent(gameX, gameY);
   return {
     ...location,
-    ...mapWorldToPercent(gameX, gameY)
+    x: location.x ?? projected.x,
+    y: location.y ?? projected.y
   };
 }
 
@@ -261,12 +263,14 @@ const MAP_LOCATIONS = [
   mapLocation({
     id: "hacking-device-store",
     type: "underground",
-    name: "Hacking Device Store",
-    region: "Lester's House",
+    name: "Lester's House",
+    region: "El Burro Heights",
     address: "Amarillo Vista, El Burro Heights",
-    gameX: 1285,
-    gameY: -1732,
-    description: "Custom hacking-device pickup point placed on Amarillo Vista at Lester's house in El Burro Heights."
+    gameX: 1273.9,
+    gameY: -1719.305,
+    x: 56.8,
+    y: 87.8,
+    description: "Lester's house in El Burro Heights, used here as the hacking contact location."
   })
 ];
 
@@ -489,7 +493,6 @@ function updateAuthUi() {
   if (registerBtn) registerBtn.style.display = isIn ? "none" : "inline-flex";
   if (logoutBtn) logoutBtn.style.display = isIn ? "inline-flex" : "none";
   if (authArea) authArea.title = isIn ? `Signed in as ${session.username}` : "Account";
-  bindStoreHandlersOnce();
 }
 
 function initAuth() {
@@ -544,7 +547,7 @@ function renderLanding() {
               <div class="landing__logoTop">SGCNR</div>
               <div class="landing__logoBottom">SGCNR</div>
             </div>
-            <div class="landing-hero__title">Rules, support, map tools, and store access in one place.</div>
+            <div class="landing-hero__title">Rules, support, and map tools in one place.</div>
             <div class="landing-hero__text">A cleaner way for players to navigate the server, find answers fast, and jump straight into the essentials.</div>
             <div class="landing-hero__actions">
               <a class="auth__btn auth__btn--primary" href="https://cfx.re/join/pbe6gy" target="_blank" rel="noopener noreferrer">Join Server</a>
@@ -581,8 +584,8 @@ function renderLanding() {
                 <div class="landing-stat__value">Discord</div>
               </div>
               <div class="landing-stat">
-                <div class="landing-stat__label">Store</div>
-                <div class="landing-stat__value">Integrated</div>
+                <div class="landing-stat__label">Maps</div>
+                <div class="landing-stat__value">Interactive</div>
               </div>
             </div>
           </div>
@@ -794,6 +797,7 @@ function renderMapQuickLinks() {
         class="map-quick__item"
         type="button"
         data-map-quick="${escapeHtml(location.id)}"
+        data-map-type="${escapeHtml(location.type)}"
         style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
       >
         <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
@@ -803,7 +807,7 @@ function renderMapQuickLinks() {
     `).join("");
 
     return `
-      <div class="map-quick__group">
+      <div class="map-quick__group" data-map-group="${escapeHtml(type)}">
         <div class="map-quick__heading">${escapeHtml(meta.groupLabel)}</div>
         ${items}
       </div>
@@ -820,9 +824,36 @@ function renderMapLegend() {
   `).join("");
 }
 
+function renderMapFilters() {
+  const filters = [
+    { key: "all", label: "All", count: MAP_LOCATIONS.length }
+  ].concat(
+    Object.entries(MAP_TYPE_META).map(([type, meta]) => ({
+      key: type,
+      label: meta.groupLabel,
+      count: MAP_LOCATIONS.filter((location) => location.type === type).length,
+      color: meta.color,
+      glow: meta.glow
+    }))
+  );
+
+  return filters.map((filter) => `
+    <button
+      class="map-filter ${filter.key === "all" ? "is-active" : ""}"
+      type="button"
+      data-map-filter="${escapeHtml(filter.key)}"
+      style="${filter.color ? `--map-accent:${filter.color}; --map-glow:${filter.glow};` : ""}"
+    >
+      <span>${escapeHtml(filter.label)}</span>
+      <span class="map-filter__count">${escapeHtml(String(filter.count))}</span>
+    </button>
+  `).join("");
+}
+
 function renderMap() {
   const quickLinks = renderMapQuickLinks();
   const legend = renderMapLegend();
+  const filters = renderMapFilters();
 
   const markers = MAP_LOCATIONS.map((location) => {
     const meta = getMapTypeMeta(location.type);
@@ -833,6 +864,7 @@ function renderMap() {
         type="button"
         style="left:${location.x}%; top:${location.y}%; --map-accent:${meta.color}; --map-glow:${meta.glow};"
         data-map-location="${escapeHtml(location.id)}"
+        data-map-type="${escapeHtml(location.type)}"
         aria-label="Focus ${escapeHtml(location.name)}"
         title="${escapeHtml(location.name)}"
       >
@@ -855,13 +887,17 @@ function renderMap() {
           <div class="map-layout">
             <aside class="map-panel">
               <div class="section__eyebrow">Los Santos map</div>
-              <div class="map-panel__headline">Operations map for hospitals, police stations, and Lester's contact point.</div>
-              <div class="map-panel__intro">Jump by category or click directly on the map. The right side stays focused on the map so the view uses the screen properly.</div>
+              <div class="map-panel__headline">Los Santos operations map</div>
+              <div class="map-panel__intro">Filter the map first, then jump from the location list or click directly on a marker for details.</div>
               <div class="map-legend map-legend--panel">
                 ${legend}
               </div>
+              <div class="map-panel__title">Filter locations</div>
+              <div class="map-filters">
+                ${filters}
+              </div>
               <div class="map-detail map-detail--panel" id="customMapInfo">${renderMapDetail()}</div>
-              <div class="map-panel__title map-panel__title--spaced">Quick locations</div>
+              <div class="map-panel__title map-panel__title--spaced">Location list</div>
               <div class="map-quick">
                 ${quickLinks}
               </div>
@@ -874,7 +910,7 @@ function renderMap() {
                   <button class="map-tool" id="mapZoomIn" type="button" aria-label="Zoom in">+</button>
                   <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Reset View</button>
                 </div>
-                <div class="map-toolbar__hint">Drag to pan. Scroll to zoom. Click any marker for details.</div>
+                <div class="map-toolbar__hint">Drag to pan, scroll to zoom, and click a marker or list item to focus it.</div>
               </div>
               <div class="custom-map-viewport" id="customMapViewport" aria-label="Los Santos map viewer">
                 <div class="custom-map-surface" id="customMapSurface">
@@ -904,8 +940,8 @@ function renderMapDetail(location) {
     return `
       <div class="map-detail__eyebrow">Overview</div>
       <div class="map-detail__title">Los Santos Operations Map</div>
-      <div class="map-detail__meta">Hospitals, police stations, and your custom underground marker</div>
-      <div class="map-detail__body">Use the grouped quick list on the left or click a marker to jump around the map. Drag anywhere on the map to pan, and use the zoom controls when you want a closer read on a district.</div>
+      <div class="map-detail__meta">Hospitals, police stations, and Lester's house</div>
+      <div class="map-detail__body">Use the filters to show one category at a time, then click a marker or a location card to focus it on the map.</div>
     `;
   }
 
@@ -941,6 +977,42 @@ function updateMapSelection(locationId) {
   customMapState.quickButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.mapQuick === customMapState.activeId);
   });
+}
+
+function applyMapFilter(filterKey) {
+  if (!customMapState) return;
+
+  const nextFilter = filterKey && MAP_TYPE_META[filterKey] ? filterKey : "all";
+  customMapState.filter = nextFilter;
+
+  customMapState.filterButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.mapFilter === nextFilter);
+  });
+
+  customMapState.markerButtons.forEach((button) => {
+    const isVisible = nextFilter === "all" || button.dataset.mapType === nextFilter;
+    button.classList.toggle("is-hidden", !isVisible);
+    button.disabled = !isVisible;
+  });
+
+  customMapState.quickButtons.forEach((button) => {
+    const isVisible = nextFilter === "all" || button.dataset.mapType === nextFilter;
+    button.classList.toggle("is-hidden", !isVisible);
+  });
+
+  customMapState.quickGroups.forEach((group) => {
+    const hasVisibleItems = Array.from(group.querySelectorAll("[data-map-quick]")).some((button) => !button.classList.contains("is-hidden"));
+    group.classList.toggle("is-hidden", !hasVisibleItems);
+  });
+
+  if (customMapState.activeId) {
+    const activeLocation = findMapLocation(customMapState.activeId);
+    if (activeLocation && nextFilter !== "all" && activeLocation.type !== nextFilter) {
+      updateMapSelection(null);
+    } else {
+      updateMapSelection(customMapState.activeId);
+    }
+  }
 }
 
 function centerMapOn(xRatio, yRatio) {
@@ -1073,8 +1145,11 @@ function initCustomMap() {
 
   customMapState = {
     activeId: null,
+    filter: "all",
+    filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),
     infoEl,
     markerButtons: Array.from(document.querySelectorAll("[data-map-location]")),
+    quickGroups: Array.from(document.querySelectorAll("[data-map-group]")),
     quickButtons: Array.from(document.querySelectorAll("[data-map-quick]")),
     resetBtn,
     scale: 1,
@@ -1099,6 +1174,12 @@ function initCustomMap() {
     });
   });
 
+  customMapState.filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      applyMapFilter(button.dataset.mapFilter);
+    });
+  });
+
   if (zoomInBtn) {
     zoomInBtn.addEventListener("click", () => {
       setCustomMapScale(customMapState.scale + 0.2);
@@ -1118,6 +1199,7 @@ function initCustomMap() {
   bindMapDragging(viewport);
   refreshMapZoomUi();
   updateMapSelection(null);
+  applyMapFilter("all");
 
   const setInitialView = () => {
     resetCustomMapView();
@@ -2125,7 +2207,6 @@ function parseRoute() {
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
   if (parts[0] === "status") return { name: "status" };
-  if (parts[0] === "store") return { name: "store", storePage: parts[1] || "server" };
   if (parts[0] === "info") return { name: "info" };
   if (parts[0] === "definitions") return { name: "definitions" };
   if (parts[0] === "section" && parts[1]) return { name: "section", sectionId: parts[1] };
@@ -2188,11 +2269,6 @@ function route() {
   }
   if (r.name === "map") {
     renderMap();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
-    return;
-  }
-  if (r.name === "store") {
-    renderStore(r.storePage);
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
