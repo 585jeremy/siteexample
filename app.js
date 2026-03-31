@@ -35,6 +35,8 @@ const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
+const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png`;
+const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
 const MAP_TILE_URL = "https://tiles.mapgenie.io/games/gta5/los-santos/satellite/{z}/{x}/{y}.png";
 const MAP_INITIAL_VIEW = {
@@ -661,38 +663,45 @@ function brandAccentIconSvg(kind) {
 }
 
 function renderLandingBranding() {
-  const skylineHeights = [34, 56, 30, 70, 42, 78, 36, 62, 46, 58, 32, 74, 40, 52];
-  const skyline = skylineHeights.map((height, index) => `
-    <span
-      class="landing-brand__building"
-      style="height:${height}px; width:${index % 3 === 0 ? 18 : index % 2 === 0 ? 12 : 14}px; opacity:${0.58 + (index % 4) * 0.08};"
-    ></span>
-  `).join("");
-
   return `
     <div class="landing-brand" aria-label="SGCNR brand showcase">
-      <div class="landing-brand__banner">
-        <div class="landing-brand__light landing-brand__light--blue" aria-hidden="true"></div>
-        <div class="landing-brand__light landing-brand__light--red" aria-hidden="true"></div>
-        <div class="landing-brand__skyline" aria-hidden="true">${skyline}</div>
-        <div class="landing-brand__chips">
-          <div class="landing-brand__chip landing-brand__chip--police">
-            <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("police")}</span>
-            <span>Cops</span>
-          </div>
-          <div class="landing-brand__chip landing-brand__chip--crime">
-            <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("mask")}</span>
-            <span>Robbers</span>
-          </div>
+      <div class="landing-brand__main">
+        <div class="landing-brand__banner">
+          <img
+            class="landing-brand__bannerLogo"
+            src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
+            alt="SG Cops and Robbers logo"
+            loading="eager"
+            onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+            onerror="this.remove();"
+          />
+          <div class="landing-brand__bannerFallback">SG Cops &amp; Robbers</div>
         </div>
-        <div class="landing-brand__title landing-brand__title--wide">SG Cops &amp; Robbers</div>
-        <div class="landing-brand__road" aria-hidden="true"></div>
-        <div class="landing-brand__cash" aria-hidden="true">${brandAccentIconSvg("cash")}</div>
+        <div class="landing-brand__support">
+          <div class="landing-brand__chips">
+            <div class="landing-brand__chip landing-brand__chip--police">
+              <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("police")}</span>
+              <span>Police</span>
+            </div>
+            <div class="landing-brand__chip landing-brand__chip--crime">
+              <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("mask")}</span>
+              <span>Robbers</span>
+            </div>
+          </div>
+          <div class="landing-brand__title landing-brand__title--wide">Los Santos Cops &amp; Robbers</div>
+          <div class="landing-brand__tag">One place for rules, live status, service locations, and quick access to the server.</div>
+        </div>
       </div>
-      <div class="landing-brand__badge" aria-hidden="true">
-        <div class="landing-brand__badgeIcon landing-brand__badgeIcon--left">${brandAccentIconSvg("police")}</div>
-        <div class="landing-brand__badgeIcon landing-brand__badgeIcon--right">${brandAccentIconSvg("mask")}</div>
-        <div class="landing-brand__badgeTitle">SGCNR</div>
+      <div class="landing-brand__badge" aria-label="SGCNR logo">
+        <img
+          class="landing-brand__badgeLogo"
+          src="${escapeHtml(BRAND_LOGO_BADGE_URL)}"
+          alt="SGCNR badge"
+          loading="eager"
+          onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+          onerror="this.remove();"
+        />
+        <div class="landing-brand__badgeFallback">SGCNR</div>
       </div>
     </div>
   `;
@@ -993,7 +1002,7 @@ function renderMapQuickLinks() {
 
     const items = locations.map((location) => {
       const quickMeta = location.region
-        ? `${meta.label} / ${location.region}`
+        ? location.region
         : meta.label;
 
       return `
@@ -1004,9 +1013,13 @@ function renderMapQuickLinks() {
           data-map-type="${escapeHtml(location.type)}"
           style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
         >
-          <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
-          <span class="map-quick__meta">${escapeHtml(quickMeta)}</span>
-          <span class="map-quick__name">${escapeHtml(location.name)}</span>
+          <span class="map-quick__row">
+            <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
+            <span class="map-quick__copy">
+              <span class="map-quick__name">${escapeHtml(location.name)}</span>
+              <span class="map-quick__meta">${escapeHtml(quickMeta)}</span>
+            </span>
+          </span>
         </button>
       `;
     }).join("");
@@ -1057,12 +1070,23 @@ function renderMapFilters() {
 
 function renderMap() {
   const quickLinks = renderMapQuickLinks();
-  const legend = renderMapLegend();
   const filters = renderMapFilters();
   const policeCount = MAP_LOCATIONS.filter((location) => location.type === "police").length;
   const hospitalCount = MAP_LOCATIONS.filter((location) => location.type === "hospital").length;
   const fireCount = MAP_LOCATIONS.filter((location) => location.type === "fire").length;
   const carWashCount = MAP_LOCATIONS.filter((location) => location.type === "carwash").length;
+  const stats = [
+    { label: "Police", value: policeCount },
+    { label: "Hospitals", value: hospitalCount },
+    { label: "Fire", value: fireCount },
+    { label: "Car Wash", value: carWashCount },
+    { label: "Lester", value: 1 }
+  ].map((item) => `
+    <div class="map-stat">
+      <span class="map-stat__label">${escapeHtml(item.label)}</span>
+      <span class="map-stat__value">${escapeHtml(String(item.value))}</span>
+    </div>
+  `).join("");
 
   destroyCustomMap();
 
@@ -1072,35 +1096,37 @@ function renderMap() {
         <div class="map-embed-container map-embed-container--custom">
           <div class="map-layout">
             <aside class="map-panel">
-              <div class="section__eyebrow">Los Santos services</div>
-              <div class="map-panel__headline">Satellite service map</div>
-              <div class="map-panel__intro">${escapeHtml(`${policeCount} police, ${hospitalCount} hospitals, ${fireCount} fire stations, ${carWashCount} car washes, and Lester's House on a satellite-only Los Santos map.`)}</div>
-              <div class="map-panel__source">
-                <span class="map-panel__sourceLabel">Source</span>
-                <a href="${MAP_SOURCE_URL}" target="_blank" rel="noopener noreferrer">gta-5-map.com services</a>
+              <div class="map-panel__top">
+                <div class="section__eyebrow">Los Santos services</div>
+                <div class="map-panel__headline">Service map</div>
+                <div class="map-panel__intro">Satellite-only access to police departments, hospitals, fire stations, car washes, and Lester's House.</div>
               </div>
-              <div class="map-legend map-legend--panel">
-                ${legend}
+              <div class="map-panel__stats">
+                ${stats}
               </div>
-              <div class="map-panel__title">Filter locations</div>
+              <div class="map-panel__title">Filter</div>
               <div class="map-filters">
                 ${filters}
               </div>
               <div class="map-detail map-detail--panel" id="customMapInfo">${renderMapDetail()}</div>
-              <div class="map-panel__title map-panel__title--spaced">Location list</div>
+              <div class="map-panel__title map-panel__title--spaced">Locations</div>
               <div class="map-quick">
                 ${quickLinks}
               </div>
+              <div class="map-panel__foot">
+                <span class="map-panel__sourceLabel">Source</span>
+                <a href="${MAP_SOURCE_URL}" target="_blank" rel="noopener noreferrer">gta-5-map.com services</a>
+              </div>
             </aside>
             <div class="map-stage">
-              <div class="map-toolbar">
-                <div class="map-toolbar__group">
-                  <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Fit Visible Markers</button>
-                  <span class="map-toolbar__badge">Satellite only</span>
-                </div>
-                <div class="map-toolbar__hint">Scroll to zoom, drag to pan, and click a marker or list item to focus it.</div>
-              </div>
               <div class="service-map-shell">
+                <div class="map-toolbar map-toolbar--overlay">
+                  <div class="map-toolbar__group">
+                    <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Fit markers</button>
+                    <span class="map-toolbar__badge">Satellite only</span>
+                  </div>
+                  <div class="map-toolbar__hint">Scroll to zoom or click a marker.</div>
+                </div>
                 <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map"></div>
               </div>
             </div>
@@ -1350,7 +1376,7 @@ function initCustomMap() {
     noWrap: true
   }).addTo(map);
 
-  window.L.control.zoom({ position: "bottomright" }).addTo(map);
+  window.L.control.zoom({ position: "topright" }).addTo(map);
 
   customMapState = {
     activeId: null,

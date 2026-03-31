@@ -19,6 +19,14 @@
         <div class="brandmark__badge">
           <span class="brandmark__light brandmark__light--blue" aria-hidden="true"></span>
           <span class="brandmark__light brandmark__light--red" aria-hidden="true"></span>
+          <img
+            class="brandmark__logo brandmark__logo--badge"
+            src="./branding/sgcnr-badge.png"
+            alt="SGCNR logo"
+            loading="eager"
+            onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+            onerror="this.remove();"
+          />
           <span class="brandmark__title">SGCNR</span>
         </div>
         <div class="brandmark__sub">Cops &amp; Robbers</div>
