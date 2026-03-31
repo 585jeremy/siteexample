@@ -15,7 +15,10 @@ const DISCORD_INVITE_URL = "https://discord.gg/Y8HNFPtxkE";
 
 const SERVER_JOIN_CODE = "pbe6gy";
 const SERVER_SINGLE_API_URL = `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`;
-const MAP_IMAGE_URL = "map.jpg";
+const APP_ASSET_BASE_URL = document.currentScript?.src
+  ? new URL(".", document.currentScript.src).href
+  : "./";
+const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map.jpg`;
 const MAP_BASE_SIZE = 980;
 const MAP_MIN_SCALE = 1;
 const MAP_MAX_SCALE = 2.8;
