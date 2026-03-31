@@ -36,8 +36,8 @@ const MAP_TYPE_META = {
     glow: "rgba(99, 167, 255, .22)"
   },
   underground: {
-    label: "Hacking Device Store",
-    groupLabel: "Underground",
+    label: "Hacking Device",
+    groupLabel: "Hacking",
     color: "#ff9b54",
     glow: "rgba(255, 155, 84, .24)"
   }
@@ -49,8 +49,8 @@ const MAP_LOCATIONS = [
     name: "Bay Care Center",
     region: "Paleto Bay",
     address: "Duluoz Avenue",
-    x: 45.8,
-    y: 11.6,
+    x: 47.1,
+    y: 11.4,
     description: "Paleto Bay's hospital and one of the main northern medical respawn points in GTA Online."
   },
   {
@@ -59,8 +59,8 @@ const MAP_LOCATIONS = [
     name: "Mount Zonah Medical Center",
     region: "Rockford Hills",
     address: "Dorset Drive & Dorset Place",
-    x: 40.5,
-    y: 72,
+    x: 40.9,
+    y: 73,
     description: "Major west-side hospital in Rockford Hills, useful for fast access to Burton, Vinewood, and Del Perro."
   },
   {
@@ -69,8 +69,8 @@ const MAP_LOCATIONS = [
     name: "Pillbox Hill Medical Center",
     region: "Pillbox Hill",
     address: "Elgin Avenue, Strawberry Avenue & Swiss Street",
-    x: 48.4,
-    y: 79.1,
+    x: 49.2,
+    y: 80.4,
     description: "The central downtown hospital and one of the easiest medical landmarks to call out inside Los Santos."
   },
   {
@@ -79,8 +79,8 @@ const MAP_LOCATIONS = [
     name: "Central Los Santos Medical Center",
     region: "South Los Santos",
     address: "Crusade Road & Innocence Boulevard",
-    x: 57,
-    y: 85.5,
+    x: 56.8,
+    y: 86.4,
     description: "Large south-east city hospital near the river and industrial roads, good for East LS and Port callouts."
   },
   {
@@ -89,8 +89,8 @@ const MAP_LOCATIONS = [
     name: "St. Fiacre Hospital",
     region: "East Vinewood",
     address: "Capital Boulevard",
-    x: 60.8,
-    y: 71.2,
+    x: 59.6,
+    y: 72,
     description: "Smaller north-east city medical site sitting above central Los Santos on the East Vinewood side."
   },
   {
@@ -99,8 +99,8 @@ const MAP_LOCATIONS = [
     name: "Eclipse Medical Tower",
     region: "West Vinewood",
     address: "Eclipse Boulevard",
-    x: 42.2,
-    y: 68.8,
+    x: 41.9,
+    y: 69.3,
     description: "A west-side medical tower above central Los Santos, close to the Vinewood and Burton routes."
   },
   {
@@ -109,8 +109,8 @@ const MAP_LOCATIONS = [
     name: "Portola Trinity Medical Center",
     region: "Rockford Hills",
     address: "Dorset Drive & Marathon Avenue",
-    x: 43.3,
-    y: 73.4,
+    x: 43.6,
+    y: 73.9,
     description: "Medical facility between Rockford Hills and Burton, just east of Mount Zonah."
   },
   {
@@ -119,8 +119,8 @@ const MAP_LOCATIONS = [
     name: "Sandy Shores Medical Center",
     region: "Sandy Shores",
     address: "Mountain View Drive",
-    x: 63.8,
-    y: 42.8,
+    x: 64.5,
+    y: 42.9,
     description: "Main Blaine County desert hospital, sharing the Sandy Shores building with the local sheriff station."
   },
   {
@@ -129,8 +129,8 @@ const MAP_LOCATIONS = [
     name: "Mission Row Police Station",
     region: "Mission Row",
     address: "Vespucci Boulevard, Little Bighorn Avenue, Atlee Street & Sinner Street",
-    x: 52,
-    y: 80.6,
+    x: 52.3,
+    y: 81,
     description: "The main Los Santos police station and the best known central LSPD location in GTA Online."
   },
   {
@@ -139,8 +139,8 @@ const MAP_LOCATIONS = [
     name: "La Mesa Police Station",
     region: "La Mesa",
     address: "Popular Street",
-    x: 60.3,
-    y: 81,
+    x: 59.1,
+    y: 81.9,
     description: "East-side LSPD station close to La Mesa, the river roads, and the industrial part of the city."
   },
   {
@@ -149,8 +149,8 @@ const MAP_LOCATIONS = [
     name: "Vinewood Police Station",
     region: "Downtown Vinewood",
     address: "Vinewood Boulevard & Elgin Avenue",
-    x: 51.8,
-    y: 74.1,
+    x: 53,
+    y: 74.6,
     description: "North-central city station covering the Vinewood strip and upper urban blocks."
   },
   {
@@ -159,8 +159,8 @@ const MAP_LOCATIONS = [
     name: "Vespucci Police Station",
     region: "Vespucci",
     address: "South Rockford Drive, Vespucci Boulevard & San Andreas Avenue",
-    x: 36,
-    y: 79,
+    x: 37.1,
+    y: 80.5,
     description: "Large west-city LSPD station serving the Vespucci side of Los Santos."
   },
   {
@@ -169,8 +169,8 @@ const MAP_LOCATIONS = [
     name: "Vespucci Beach Police Station",
     region: "Vespucci Beach",
     address: "Vespucci Beach",
-    x: 29.5,
-    y: 81.5,
+    x: 31,
+    y: 82.5,
     description: "Small beachside police station along the Vespucci coastline."
   },
   {
@@ -179,8 +179,8 @@ const MAP_LOCATIONS = [
     name: "Beaver Bush Ranger Station",
     region: "Vinewood Hills",
     address: "Baytree Canyon Road & Marlow Drive",
-    x: 49.5,
-    y: 65.6,
+    x: 47,
+    y: 69,
     description: "Ranger outpost in the hills above the city, useful for the park and canyon roads."
   },
   {
@@ -189,8 +189,8 @@ const MAP_LOCATIONS = [
     name: "Del Perro Police Station",
     region: "Del Perro",
     address: "Del Perro Pier",
-    x: 31.5,
-    y: 75.5,
+    x: 34,
+    y: 77.5,
     description: "Pier-side police station on the west coast, just off the Del Perro beachfront."
   },
   {
@@ -199,8 +199,8 @@ const MAP_LOCATIONS = [
     name: "Davis Sheriff's Station",
     region: "Davis",
     address: "Innocence Boulevard",
-    x: 44.8,
-    y: 85,
+    x: 51.1,
+    y: 84.3,
     description: "South-city sheriff station in Davis, close to Grove Street, Strawberry, and the industrial lanes."
   },
   {
@@ -209,8 +209,8 @@ const MAP_LOCATIONS = [
     name: "Rockford Hills Police Station",
     region: "Rockford Hills",
     address: "Eastbourne Way & Abe Milton Parkway",
-    x: 39.4,
-    y: 74.2,
+    x: 41.4,
+    y: 75.3,
     description: "Upscale west-city police station linked to Rockford Hills City Hall."
   },
   {
@@ -219,8 +219,8 @@ const MAP_LOCATIONS = [
     name: "Sandy Shores Sheriff's Station",
     region: "Sandy Shores",
     address: "Alhambra Drive",
-    x: 63,
-    y: 42.4,
+    x: 63.6,
+    y: 42.2,
     description: "Blaine County sheriff station in Sandy Shores, sharing its building with the local medical center."
   },
   {
@@ -229,19 +229,19 @@ const MAP_LOCATIONS = [
     name: "Paleto Bay Sheriff's Office",
     region: "Paleto Bay",
     address: "Route 1 & Paleto Boulevard",
-    x: 48.7,
-    y: 13.3,
+    x: 45.9,
+    y: 12.3,
     description: "Northern sheriff office at the main Paleto Bay junction."
   },
   {
     id: "hacking-device-store",
     type: "underground",
     name: "Hacking Device Store",
-    region: "East Los Santos",
-    address: "Custom marker from your East Los Santos screenshot",
-    x: 60.1,
-    y: 79.3,
-    description: "Custom underground pickup point positioned from the East Los Santos spot you marked."
+    region: "Lester's House",
+    address: "Amarillo Vista, El Burro Heights",
+    x: 62.6,
+    y: 85.7,
+    description: "Custom hacking-device pickup point placed at Lester's house in El Burro Heights, East Los Santos."
   }
 ];
 
@@ -760,6 +760,9 @@ function renderMap() {
 
   const markers = MAP_LOCATIONS.map((location) => {
     const meta = getMapTypeMeta(location.type);
+    const glyph = location.type === "underground"
+      ? `<span class="custom-map__glyph">&lt;/&gt;</span>`
+      : "";
     return `
       <button
         class="custom-map__marker custom-map__marker--${escapeHtml(location.type)}"
@@ -771,6 +774,7 @@ function renderMap() {
       >
         <span class="custom-map__pulse"></span>
         <span class="custom-map__dot"></span>
+        ${glyph}
       </button>
     `;
   }).join("");
