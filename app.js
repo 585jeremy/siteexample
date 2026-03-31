@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260331e";
+const SITE_ASSET_VERSION = "20260331f";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1401,11 +1401,35 @@ function updateMapSelection(locationId) {
 
   if (customMapState.infoEl) {
     customMapState.infoEl.innerHTML = renderMapDetail(location);
+    customMapState.infoEl.classList.remove("is-updated");
+    if (customMapState.detailFlashTimer) {
+      window.clearTimeout(customMapState.detailFlashTimer);
+    }
+    if (location) {
+      window.requestAnimationFrame(() => {
+        customMapState?.infoEl?.classList.add("is-updated");
+      });
+      customMapState.detailFlashTimer = window.setTimeout(() => {
+        customMapState?.infoEl?.classList.remove("is-updated");
+      }, 900);
+    }
   }
 
+  let activeQuickButton = null;
   customMapState.quickButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.mapQuick === customMapState.activeId);
+    const isActive = button.dataset.mapQuick === customMapState.activeId;
+    button.classList.toggle("is-active", isActive);
+    if (isActive) {
+      activeQuickButton = button;
+    }
   });
+
+  if (activeQuickButton) {
+    activeQuickButton.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+  }
 
   window.requestAnimationFrame(syncMapMarkerStates);
 }
@@ -1525,6 +1549,7 @@ function initCustomMap() {
 
   customMapState = {
     activeId: null,
+    detailFlashTimer: null,
     dragPointerId: null,
     filter: "all",
     filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),

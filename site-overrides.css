@@ -396,7 +396,7 @@ body.is-map .footer{
   display: block;
   width: 24px;
   height: 28px;
-  background-image: url("./map-assets/mapgenie-markers.png?v=20260331e");
+  background-image: url("./map-assets/mapgenie-markers.png?v=20260331f");
   background-repeat: no-repeat;
   background-size: 24px 1887px;
   filter: drop-shadow(0 8px 14px rgba(0,0,0,.28));
@@ -509,6 +509,18 @@ body.is-map .footer{
 
 .service-map__marker:focus-visible{
   outline: none;
+}
+
+.map-detail--panel{
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.map-detail--panel.is-updated{
+  border-color: rgba(120, 182, 255, .34) !important;
+  background: linear-gradient(180deg, rgba(82,142,255,.12), rgba(255,255,255,.04)) !important;
+  box-shadow:
+    0 0 0 1px rgba(120,182,255,.14),
+    0 18px 30px rgba(0,0,0,.22);
 }
 
 .map-toolbar--overlay{
