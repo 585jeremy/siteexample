@@ -1177,10 +1177,10 @@ function renderMap() {
               <div class="service-map-shell">
                 <div class="map-toolbar map-toolbar--overlay">
                   <div class="map-toolbar__group">
-                    <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Fit markers</button>
+                    <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Show all</button>
                     <span class="map-toolbar__badge">Satellite only</span>
                   </div>
-                  <div class="map-toolbar__hint">Scroll to zoom or click a marker.</div>
+                  <div class="map-toolbar__hint">Click a marker or use the location list.</div>
                 </div>
                 <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
               </div>
@@ -1225,26 +1225,34 @@ function findMapLocation(locationId) {
   return MAP_LOCATIONS.find((location) => location.id === locationId) ?? null;
 }
 
+function getMapPositionPercent(location) {
+  const minLat = MAP_MAX_BOUNDS[0][0];
+  const minLng = MAP_MAX_BOUNDS[0][1];
+  const maxLat = MAP_MAX_BOUNDS[1][0];
+  const maxLng = MAP_MAX_BOUNDS[1][1];
+
+  const x = ((location.lng - minLng) / (maxLng - minLng)) * 100;
+  const y = 100 - ((location.lat - minLat) / (maxLat - minLat)) * 100;
+
+  return {
+    x: Math.max(1.6, Math.min(98.4, x)),
+    y: Math.max(1.6, Math.min(98.4, y))
+  };
+}
+
 function destroyCustomMap() {
   if (customMapState?.resizeHandler) {
     window.removeEventListener("resize", customMapState.resizeHandler);
   }
 
-  if (customMapState?.map) {
-    customMapState.map.off();
-    customMapState.map.remove();
-  }
-
   customMapState = null;
 }
 
-function syncLeafletMarkerStates() {
+function syncMapMarkerStates() {
   if (!customMapState) return;
 
-  customMapState.markersById.forEach((marker, markerId) => {
-    const element = marker.getElement();
-    if (!element) return;
-    element.classList.toggle("is-active", markerId === customMapState.activeId);
+  customMapState.markerButtons.forEach((button, markerId) => {
+    button.classList.toggle("is-active", markerId === customMapState.activeId);
   });
 }
 
@@ -1262,7 +1270,7 @@ function updateMapSelection(locationId) {
     button.classList.toggle("is-active", button.dataset.mapQuick === customMapState.activeId);
   });
 
-  window.requestAnimationFrame(syncLeafletMarkerStates);
+  window.requestAnimationFrame(syncMapMarkerStates);
 }
 
 function getVisibleMapLocations() {
@@ -1273,21 +1281,8 @@ function getVisibleMapLocations() {
   return MAP_LOCATIONS.filter((location) => location.type === customMapState.filter);
 }
 
-function fitMapToLocations(locations, animate = true) {
-  if (!customMapState?.map || !window.L || !locations.length) return;
-
-  if (locations.length === 1) {
-    const [location] = locations;
-    customMapState.map.setView([location.lat, location.lng], Math.min(6.1, MAP_MAX_ZOOM), { animate });
-    return;
-  }
-
-  const bounds = window.L.latLngBounds(locations.map((location) => [location.lat, location.lng]));
-  customMapState.map.fitBounds(bounds, {
-    padding: [34, 34],
-    maxZoom: 5.35,
-    animate
-  });
+function fitMapToLocations() {
+  return;
 }
 
 function applyMapFilter(filterKey) {
@@ -1311,16 +1306,10 @@ function applyMapFilter(filterKey) {
     group.classList.toggle("is-hidden", !hasVisibleItems);
   });
 
-  customMapState.markersById.forEach((marker, markerId) => {
+  customMapState.markerButtons.forEach((button, markerId) => {
     const location = findMapLocation(markerId);
     const isVisible = !!location && (nextFilter === "all" || location.type === nextFilter);
-    const hasLayer = customMapState.markerLayer.hasLayer(marker);
-
-    if (isVisible && !hasLayer) {
-      customMapState.markerLayer.addLayer(marker);
-    } else if (!isVisible && hasLayer) {
-      customMapState.markerLayer.removeLayer(marker);
-    }
+    button.classList.toggle("is-hidden", !isVisible);
   });
 
   if (customMapState.activeId) {
@@ -1330,71 +1319,24 @@ function applyMapFilter(filterKey) {
     }
   }
 
-  window.requestAnimationFrame(syncLeafletMarkerStates);
-
-  if (!customMapState.activeId) {
-    fitMapToLocations(getVisibleMapLocations());
-  }
+  window.requestAnimationFrame(syncMapMarkerStates);
 }
 
 function focusMapLocation(locationId) {
   const location = findMapLocation(locationId);
-  if (!location || !customMapState?.map) return;
+  if (!location || !customMapState) return;
 
   updateMapSelection(location.id);
-  customMapState.map.flyTo(
-    [location.lat, location.lng],
-    Math.min(Math.max(customMapState.map.getZoom(), location.type === "underground" ? 6.1 : 5.7), MAP_MAX_ZOOM),
-    { duration: 0.35 }
-  );
+
+  const markerButton = customMapState.markerButtons.get(location.id);
+  if (markerButton) {
+    markerButton.classList.add("is-jumped");
+    window.setTimeout(() => markerButton.classList.remove("is-jumped"), 420);
+  }
 }
 
 function resetCustomMapView() {
   updateMapSelection(null);
-  fitMapToLocations(getVisibleMapLocations(), false);
-}
-
-function createMapMarkerIcon(type) {
-  if (!window.L) return null;
-
-  const meta = getMapTypeMeta(type);
-  return window.L.divIcon({
-    className: "service-marker",
-    html: `
-      <span class="service-marker__pin service-marker__pin--${escapeHtml(type)}" style="--map-accent:${meta.color}; --map-glow:${meta.glow};">
-        <span class="service-marker__halo"></span>
-        <span class="service-marker__core"></span>
-        <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
-      </span>
-    `,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
-    tooltipAnchor: [0, -18]
-  });
-}
-
-function buildMapMarker(location) {
-  const marker = window.L.marker([location.lat, location.lng], {
-    icon: createMapMarkerIcon(location.type),
-    keyboard: true,
-    title: location.name
-  });
-
-  marker.on("click", () => {
-    focusMapLocation(location.id);
-  });
-
-  marker.on("add", () => {
-    syncLeafletMarkerStates();
-  });
-
-  marker.bindTooltip(location.name, {
-    direction: "top",
-    offset: [0, -18],
-    className: "service-map__tooltip"
-  });
-
-  return marker;
 }
 
 function initCustomMap() {
@@ -1403,52 +1345,57 @@ function initCustomMap() {
   const resetBtn = document.getElementById("mapResetBtn");
 
   if (!mapEl || !infoEl) return;
-  if (!window.L) {
-    infoEl.innerHTML = `
-      <div class="map-detail__eyebrow">Map unavailable</div>
-      <div class="map-detail__title">Satellite map failed to load</div>
-      <div class="map-detail__meta">Leaflet did not initialize</div>
-      <div class="map-detail__body">Refresh the page once and the map should retry with the satellite tiles.</div>
+
+  const markersMarkup = MAP_LOCATIONS.map((location) => {
+    const meta = getMapTypeMeta(location.type);
+    const position = getMapPositionPercent(location);
+
+    return `
+      <button
+        class="service-map__marker"
+        type="button"
+        title="${escapeHtml(location.name)}"
+        data-map-marker="${escapeHtml(location.id)}"
+        data-map-type="${escapeHtml(location.type)}"
+        style="left:${position.x}%; top:${position.y}%; --map-accent:${meta.color}; --map-glow:${meta.glow};"
+      >
+        <span class="service-marker__pin service-marker__pin--${escapeHtml(location.type)}">
+          <span class="service-marker__halo"></span>
+          <span class="service-marker__core"></span>
+          <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
+        </span>
+      </button>
     `;
-    return;
-  }
+  }).join("");
 
-  const map = window.L.map(mapEl, {
-    zoomControl: false,
-    attributionControl: false,
-    minZoom: MAP_MIN_ZOOM,
-    maxZoom: MAP_MAX_ZOOM,
-    zoomSnap: 0.25,
-    zoomDelta: 0.25,
-    worldCopyJump: false,
-    maxBounds: MAP_MAX_BOUNDS,
-    maxBoundsViscosity: 1
-  });
-
-  window.L.imageOverlay(MAP_IMAGE_URL, MAP_MAX_BOUNDS, {
-    interactive: false,
-    opacity: 1
-  }).addTo(map);
-
-  window.L.control.zoom({ position: "topright" }).addTo(map);
+  mapEl.innerHTML = `
+    <div class="service-map__canvas">
+      <div class="service-map__stage">
+        <img class="service-map__image" src="${escapeHtml(MAP_IMAGE_URL)}" alt="Los Santos satellite map" loading="eager" />
+        <div class="service-map__layer">
+          ${markersMarkup}
+        </div>
+      </div>
+    </div>
+  `;
 
   customMapState = {
     activeId: null,
     filter: "all",
     filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),
     infoEl,
-    map,
-    markerLayer: window.L.layerGroup().addTo(map),
-    markersById: new Map(),
+    markerButtons: new Map(),
     quickGroups: Array.from(document.querySelectorAll("[data-map-group]")),
     quickButtons: Array.from(document.querySelectorAll("[data-map-quick]")),
     resetBtn,
     resizeHandler: null
   };
 
-  MAP_LOCATIONS.forEach((location) => {
-    const marker = buildMapMarker(location);
-    customMapState.markersById.set(location.id, marker);
+  Array.from(mapEl.querySelectorAll("[data-map-marker]")).forEach((button) => {
+    customMapState.markerButtons.set(button.dataset.mapMarker, button);
+    button.addEventListener("click", () => {
+      focusMapLocation(button.dataset.mapMarker);
+    });
   });
 
   customMapState.quickButtons.forEach((button) => {
@@ -1467,30 +1414,8 @@ function initCustomMap() {
     resetBtn.addEventListener("click", resetCustomMapView);
   }
 
-  const resizeHandler = () => {
-    if (!customMapState?.map) return;
-    customMapState.map.invalidateSize();
-    if (!customMapState.activeId) {
-      fitMapToLocations(getVisibleMapLocations(), false);
-    }
-  };
-
-  customMapState.resizeHandler = resizeHandler;
-  window.addEventListener("resize", resizeHandler);
-
   updateMapSelection(null);
   applyMapFilter("all");
-
-  window.requestAnimationFrame(() => {
-    if (!customMapState?.map) return;
-    customMapState.map.setView([MAP_INITIAL_VIEW.lat, MAP_INITIAL_VIEW.lng], MAP_INITIAL_VIEW.zoom, { animate: false });
-    customMapState.map.invalidateSize();
-    window.setTimeout(() => {
-      if (!customMapState?.map) return;
-      customMapState.map.invalidateSize();
-      resetCustomMapView();
-    }, 90);
-  });
 }
 
 function readCart() {
