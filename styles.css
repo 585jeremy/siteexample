@@ -62,10 +62,91 @@ a:hover{ color: var(--accent); }
   display:flex;
   justify-content:center;
   align-items: flex-start;
+  gap: 14px;
   padding: 18px 16px 10px 16px;
   background: rgba(7,7,7,.86);
   border-bottom: 1px solid rgba(255,255,255,.05);
   backdrop-filter: blur(16px);
+}
+
+.brandmark{
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 170px;
+  margin-top: -2px;
+}
+
+.brandmark__badge{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 172px;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(22,27,33,.96), rgba(7,10,14,.98)),
+    linear-gradient(90deg, rgba(77,142,255,.12), rgba(255,255,255,0) 35%, rgba(255,82,82,.14));
+  box-shadow:
+    0 16px 32px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  overflow: hidden;
+}
+
+.brandmark__badge::before{
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.05);
+  pointer-events: none;
+}
+
+.brandmark__light{
+  position: absolute;
+  top: -4px;
+  width: 72px;
+  height: 28px;
+  border-radius: 999px;
+  filter: blur(16px);
+  opacity: .58;
+  pointer-events: none;
+}
+
+.brandmark__light--blue{
+  left: -10px;
+  background: radial-gradient(circle, rgba(73,146,255,.95), rgba(73,146,255,0) 68%);
+}
+
+.brandmark__light--red{
+  right: -10px;
+  background: radial-gradient(circle, rgba(255,84,84,.94), rgba(255,84,84,0) 68%);
+}
+
+.brandmark__title{
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -.05em;
+  color: #f7fbff;
+  text-transform: uppercase;
+  text-shadow:
+    0 3px 0 rgba(10,14,19,.95),
+    0 10px 22px rgba(0,0,0,.40);
+}
+
+.brandmark__sub{
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(230,237,246,.62);
+  white-space: nowrap;
 }
 
 .auth{
@@ -210,6 +291,26 @@ body.is-landing #rules{
 body:not(.is-landing) .meta{ margin-left: 0; margin-right: 0; }
 
 @media (max-width: 520px){
+  .topbar{
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .brandmark{
+    min-width: auto;
+  }
+  .brandmark__badge{
+    min-width: 132px;
+    min-height: 36px;
+    padding: 0 14px;
+  }
+  .brandmark__title{
+    font-size: 20px;
+  }
+  .brandmark__sub{
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
   .meta{ left: 10px; top: 12px; }
   .auth{ right: 10px; top: 12px; }
 }
@@ -561,7 +662,7 @@ body.is-landing .landing{
 .landing-brand__banner{
   position: relative;
   overflow: hidden;
-  padding: 20px 24px 30px;
+  padding: 18px 22px 28px;
   border-radius: 28px;
   border: 1px solid rgba(255,255,255,.10);
   background:
@@ -692,9 +793,9 @@ body.is-landing .landing{
 }
 
 .landing-brand__title--wide{
-  font-size: clamp(30px, 4.5vw, 60px);
+  font-size: clamp(28px, 4.2vw, 56px);
   font-weight: 900;
-  letter-spacing: -.06em;
+  letter-spacing: -.05em;
   white-space: nowrap;
   color: #f7fbff;
   text-shadow:
@@ -748,7 +849,7 @@ body.is-landing .landing{
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 190px;
+  width: 176px;
   aspect-ratio: 1 / 1;
   border-radius: 36% 36% 42% 42%;
   border: 1px solid rgba(255,255,255,.10);
@@ -759,7 +860,7 @@ body.is-landing .landing{
     0 26px 60px rgba(0,0,0,.52),
     inset 0 1px 0 rgba(255,255,255,.05);
   overflow: hidden;
-  transform: rotate(-5deg);
+  transform: rotate(-3deg);
 }
 
 .landing-brand__badge::before{
@@ -784,7 +885,7 @@ body.is-landing .landing{
   left: 50%;
   top: 50%;
   transform: translate(-50%, -34%);
-  font-size: clamp(34px, 4.6vw, 58px);
+  font-size: clamp(32px, 4.2vw, 52px);
   font-weight: 900;
   letter-spacing: -.08em;
   color: #f7fbff;
@@ -1610,12 +1711,13 @@ body.is-landing .landing{
 .custom-map__marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
+  transition: transform .18s ease, opacity .18s ease;
 }
 
 .custom-map__marker.is-hidden {
@@ -1629,7 +1731,7 @@ body.is-landing .landing{
 
 .custom-map__pulse {
   position: absolute;
-  inset: 0;
+  inset: 1px;
   border-radius: 999px;
   background: var(--map-glow, rgba(201,255,90,.26));
   opacity: 0;
@@ -1637,11 +1739,13 @@ body.is-landing .landing{
 
 .custom-map__dot {
   position: absolute;
-  inset: 4px;
+  inset: 2px;
   border-radius: 999px;
-  background: var(--map-accent, #c9ff5a);
-  border: 2px solid rgba(11,15,20,.95);
-  box-shadow: 0 0 0 3px rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(249,252,255,.98), rgba(219,229,239,.94));
+  border: 2px solid rgba(9,13,18,.92);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.24),
+    0 0 0 1px rgba(255,255,255,.12) inset;
 }
 
 .custom-map__marker:hover .custom-map__pulse,
@@ -1654,8 +1758,10 @@ body.is-landing .landing{
 .custom-map__marker:hover .custom-map__dot,
 .custom-map__marker:focus-visible .custom-map__dot,
 .custom-map__marker.is-active .custom-map__dot {
-  background: #ffffff;
-  box-shadow: 0 0 0 4px var(--map-glow, rgba(201,255,90,.18));
+  transform: scale(1.04);
+  box-shadow:
+    0 12px 22px rgba(0,0,0,.28),
+    0 0 0 4px var(--map-glow, rgba(201,255,90,.18));
 }
 
 .custom-map__marker:focus-visible {
@@ -1668,19 +1774,28 @@ body.is-landing .landing{
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(11,15,20,.96);
+  color: var(--map-accent, #c9ff5a);
   z-index: 2;
 }
 
 .custom-map__glyph svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   display: block;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.12));
 }
 
 .custom-map__marker--underground .custom-map__glyph svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
+}
+
+.custom-map__marker--underground .custom-map__dot {
+  background: linear-gradient(180deg, rgba(255,245,236,.98), rgba(250,223,198,.94));
+}
+
+.custom-map__marker--underground .custom-map__glyph {
+  color: #b75b24;
 }
 
 .map-detail {

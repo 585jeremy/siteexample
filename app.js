@@ -88,6 +88,8 @@ const MAP_LOCATIONS = [
     address: "Dorset Drive & Dorset Place",
     gameX: -449.7836,
     gameY: -341.3995,
+    x: 44.1,
+    y: 74.2,
     description: "Major west-side hospital in Rockford Hills, useful for fast access to Burton, Vinewood, and Del Perro."
   }),
   mapLocation({
@@ -98,6 +100,8 @@ const MAP_LOCATIONS = [
     address: "Elgin Avenue, Strawberry Avenue & Swiss Street",
     gameX: 360.7675,
     gameY: -583.4315,
+    x: 51.5,
+    y: 76.5,
     description: "The central downtown hospital and one of the easiest medical landmarks to call out inside Los Santos."
   }),
   mapLocation({
@@ -108,6 +112,8 @@ const MAP_LOCATIONS = [
     address: "Crusade Road & Innocence Boulevard",
     gameX: 341.4144,
     gameY: -1396.291,
+    x: 51.6,
+    y: 83.9,
     description: "Large south-east city hospital near the river and industrial roads, good for East LS and Port callouts."
   }),
   mapLocation({
@@ -118,6 +124,8 @@ const MAP_LOCATIONS = [
     address: "Capital Boulevard",
     gameX: 1176.8209,
     gameY: -1522.9105,
+    x: 59.7,
+    y: 84.4,
     description: "East-side medical site in El Burro Heights, sitting above the industrial lanes and the port routes."
   }),
   mapLocation({
@@ -128,6 +136,8 @@ const MAP_LOCATIONS = [
     address: "Eclipse Boulevard",
     gameX: -656.6413,
     gameY: 309.4868,
+    x: 42.6,
+    y: 68.5,
     description: "A west-side medical tower above central Los Santos, close to the Vinewood and Burton routes."
   }),
   mapLocation({
@@ -138,6 +148,8 @@ const MAP_LOCATIONS = [
     address: "Dorset Drive & Marathon Avenue",
     gameX: -875.4126,
     gameY: -308.313,
+    x: 40.8,
+    y: 74.1,
     description: "Medical facility between Rockford Hills and Burton, just east of Mount Zonah."
   }),
   mapLocation({
@@ -158,6 +170,8 @@ const MAP_LOCATIONS = [
     address: "Vespucci Boulevard, Little Bighorn Avenue, Atlee Street & Sinner Street",
     gameX: 479.6391,
     gameY: -976.6794,
+    x: 52.2,
+    y: 79.6,
     description: "The main Los Santos police station and the best known central LSPD location in GTA Online."
   }),
   mapLocation({
@@ -168,6 +182,8 @@ const MAP_LOCATIONS = [
     address: "Popular Street",
     gameX: 824.992004,
     gameY: -1289.266846,
+    x: 55.7,
+    y: 82.0,
     description: "East-side LSPD station close to La Mesa, the river roads, and the industrial part of the city."
   }),
   mapLocation({
@@ -178,6 +194,8 @@ const MAP_LOCATIONS = [
     address: "Vinewood Boulevard & Elgin Avenue",
     gameX: 639.1819,
     gameY: 1.765,
+    x: 54.0,
+    y: 70.9,
     description: "North-central city station covering the Vinewood strip and upper urban blocks."
   }),
   mapLocation({
@@ -188,6 +206,8 @@ const MAP_LOCATIONS = [
     address: "South Rockford Drive, Vespucci Boulevard & San Andreas Avenue",
     gameX: -1093.89,
     gameY: -807.0834,
+    x: 38.5,
+    y: 78.5,
     description: "Large west-city LSPD station serving the Vespucci side of Los Santos."
   }),
   mapLocation({
@@ -198,6 +218,8 @@ const MAP_LOCATIONS = [
     address: "Vespucci Beach",
     gameX: -1326.0114,
     gameY: -1502.1876,
+    x: 36.5,
+    y: 84.5,
     description: "Small beachside police station along the Vespucci coastline."
   }),
   mapLocation({
@@ -208,6 +230,8 @@ const MAP_LOCATIONS = [
     address: "Baytree Canyon Road & Marlow Drive",
     gameX: 382.2473,
     gameY: 796.637,
+    x: 51.8,
+    y: 64.0,
     description: "Ranger outpost in the hills above the city, useful for the park and canyon roads."
   }),
   mapLocation({
@@ -218,6 +242,8 @@ const MAP_LOCATIONS = [
     address: "Del Perro Pier",
     gameX: -1634.0186,
     gameY: -1021.051,
+    x: 33.8,
+    y: 80.4,
     description: "Pier-side police station on the west coast, just off the Del Perro beachfront."
   }),
   mapLocation({
@@ -228,6 +254,8 @@ const MAP_LOCATIONS = [
     address: "Innocence Boulevard",
     gameX: 360.8818,
     gameY: -1581.6075,
+    x: 51.3,
+    y: 84.8,
     description: "South-city sheriff station in Davis, close to Grove Street, Strawberry, and the industrial lanes."
   }),
   mapLocation({
@@ -238,6 +266,8 @@ const MAP_LOCATIONS = [
     address: "Eastbourne Way & Abe Milton Parkway",
     gameX: -560.755,
     gameY: -133.9789,
+    x: 43.1,
+    y: 72.6,
     description: "Upscale west-city police station linked to Rockford Hills City Hall."
   }),
   mapLocation({
@@ -268,8 +298,8 @@ const MAP_LOCATIONS = [
     address: "Amarillo Vista, El Burro Heights",
     gameX: 1273.9,
     gameY: -1719.305,
-    x: 56.8,
-    y: 87.8,
+    x: 57.4,
+    y: 78.0,
     description: "Lester's house in El Burro Heights, used here as the hacking contact location."
   })
 ];
@@ -583,14 +613,14 @@ function renderLandingBranding() {
         <div class="landing-brand__chips">
           <div class="landing-brand__chip landing-brand__chip--police">
             <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("police")}</span>
-            <span>Police</span>
+            <span>Cops</span>
           </div>
           <div class="landing-brand__chip landing-brand__chip--crime">
             <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("mask")}</span>
-            <span>Crime</span>
+            <span>Robbers</span>
           </div>
         </div>
-        <div class="landing-brand__title landing-brand__title--wide">SG Cops and Robbers</div>
+        <div class="landing-brand__title landing-brand__title--wide">SG Cops &amp; Robbers</div>
         <div class="landing-brand__road" aria-hidden="true"></div>
         <div class="landing-brand__cash" aria-hidden="true">${brandAccentIconSvg("cash")}</div>
       </div>
@@ -825,7 +855,7 @@ function getMapTypeIcon(type) {
   if (type === "hospital") {
     return `
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z" fill="currentColor"></path>
+        <path d="M9 3h6a1 1 0 0 1 1 1v4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h4V4a1 1 0 0 1 1-1Z" fill="currentColor"></path>
       </svg>
     `;
   }
@@ -841,12 +871,9 @@ function getMapTypeIcon(type) {
 
   return `
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="4" y="5" width="16" height="14" rx="3" fill="currentColor"></rect>
-      <rect x="8" y="3" width="2" height="4" rx="1" fill="currentColor"></rect>
-      <rect x="14" y="3" width="2" height="4" rx="1" fill="currentColor"></rect>
-      <rect x="7" y="9" width="10" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
-      <rect x="7" y="13" width="5" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
-      <rect x="14" y="13" width="3" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
+      <path d="M4 10.8 12 4l8 6.8v8.7a.5.5 0 0 1-.5.5h-4.9a.6.6 0 0 1-.6-.6v-4.1h-4v4.1a.6.6 0 0 1-.6.6H4.5a.5.5 0 0 1-.5-.5v-8.7Z" fill="currentColor"></path>
+      <path d="M9.2 11.2h5.6v1.8H9.2z" fill="rgba(11,15,20,.92)"></path>
+      <path d="M11.1 9.3h1.8v5.6h-1.8z" fill="rgba(11,15,20,.92)"></path>
     </svg>
   `;
 }
