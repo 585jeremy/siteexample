@@ -239,8 +239,8 @@ const MAP_LOCATIONS = [
     name: "Hacking Device Store",
     region: "Lester's House",
     address: "Amarillo Vista, El Burro Heights",
-    x: 62.6,
-    y: 85.7,
+    x: 60.7,
+    y: 84.7,
     description: "Custom hacking-device pickup point placed at Lester's house in El Burro Heights, East Los Santos."
   }
 ];
@@ -729,6 +729,36 @@ function getMapTypeMeta(type) {
   return MAP_TYPE_META[type] ?? MAP_TYPE_META.underground;
 }
 
+function getMapTypeIcon(type) {
+  if (type === "hospital") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z" fill="currentColor"></path>
+      </svg>
+    `;
+  }
+
+  if (type === "police") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l7 3v5c0 5.2-2.7 9.2-7 12-4.3-2.8-7-6.8-7-12V5l7-3z" fill="currentColor"></path>
+        <path d="M12 7.1l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" fill="rgba(11,15,20,.92)"></path>
+      </svg>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="14" rx="3" fill="currentColor"></rect>
+      <rect x="8" y="3" width="2" height="4" rx="1" fill="currentColor"></rect>
+      <rect x="14" y="3" width="2" height="4" rx="1" fill="currentColor"></rect>
+      <rect x="7" y="9" width="10" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
+      <rect x="7" y="13" width="5" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
+      <rect x="14" y="13" width="3" height="2" rx="1" fill="rgba(11,15,20,.92)"></rect>
+    </svg>
+  `;
+}
+
 function renderMapQuickLinks() {
   return Object.entries(MAP_TYPE_META).map(([type, meta]) => {
     const locations = MAP_LOCATIONS.filter((location) => location.type === type);
@@ -741,6 +771,7 @@ function renderMapQuickLinks() {
         data-map-quick="${escapeHtml(location.id)}"
         style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
       >
+        <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
         <span class="map-quick__meta">${escapeHtml(meta.label)} / ${escapeHtml(location.region)}</span>
         <span class="map-quick__name">${escapeHtml(location.name)}</span>
       </button>
@@ -760,9 +791,7 @@ function renderMap() {
 
   const markers = MAP_LOCATIONS.map((location) => {
     const meta = getMapTypeMeta(location.type);
-    const glyph = location.type === "underground"
-      ? `<span class="custom-map__glyph">&lt;/&gt;</span>`
-      : "";
+    const glyph = `<span class="custom-map__glyph" aria-hidden="true">${getMapTypeIcon(location.type)}</span>`;
     return `
       <button
         class="custom-map__marker custom-map__marker--${escapeHtml(location.type)}"
