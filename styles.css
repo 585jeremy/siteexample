@@ -985,10 +985,14 @@ body.is-landing .landing{
 
 .map-panel {
   padding: 16px;
+  max-height: min(72vh, 760px);
+  overflow: auto;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,.08);
   background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.18));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.18) transparent;
 }
 
 .map-panel__title {
@@ -1001,7 +1005,19 @@ body.is-landing .landing{
 
 .map-quick {
   display: grid;
+  gap: 16px;
+}
+
+.map-quick__group {
+  display: grid;
   gap: 10px;
+}
+
+.map-quick__heading {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(230,237,246,.52);
 }
 
 .map-quick__item {
@@ -1022,11 +1038,11 @@ body.is-landing .landing{
 .map-quick__item:hover,
 .map-quick__item.is-active {
   transform: translateY(-1px);
-  border-color: rgba(201,255,90,.36);
-  background: linear-gradient(180deg, rgba(201,255,90,.14), rgba(255,255,255,.04));
+  border-color: var(--map-accent, rgba(201,255,90,.36));
+  background: linear-gradient(180deg, var(--map-glow, rgba(201,255,90,.14)), rgba(255,255,255,.04));
 }
 
-.map-quick__region {
+.map-quick__meta {
   font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -1136,7 +1152,7 @@ body.is-landing .landing{
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  background: rgba(201,255,90,.26);
+  background: var(--map-glow, rgba(201,255,90,.26));
   animation: mapPulse 2s ease-out infinite;
 }
 
@@ -1144,14 +1160,14 @@ body.is-landing .landing{
   position: absolute;
   inset: 5px;
   border-radius: 999px;
-  background: #c9ff5a;
+  background: var(--map-accent, #c9ff5a);
   border: 2px solid rgba(11,15,20,.95);
   box-shadow: 0 0 0 3px rgba(255,255,255,.10);
 }
 
 .custom-map__marker.is-active .custom-map__dot {
   background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(201,255,90,.18);
+  box-shadow: 0 0 0 4px var(--map-glow, rgba(201,255,90,.18));
 }
 
 .map-detail {
@@ -1175,8 +1191,14 @@ body.is-landing .landing{
   color: rgba(230,237,246,.95);
 }
 
-.map-detail__body {
+.map-detail__meta {
   margin-top: 8px;
+  font-size: 13px;
+  color: rgba(230,237,246,.62);
+}
+
+.map-detail__body {
+  margin-top: 10px;
   color: rgba(230,237,246,.72);
   line-height: 1.6;
 }

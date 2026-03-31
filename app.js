@@ -22,94 +22,226 @@ const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map.jpg`;
 const MAP_BASE_SIZE = 980;
 const MAP_MIN_SCALE = 1;
 const MAP_MAX_SCALE = 2.8;
+const MAP_TYPE_META = {
+  hospital: {
+    label: "Hospital",
+    groupLabel: "Hospitals",
+    color: "#54e0a6",
+    glow: "rgba(84, 224, 166, .22)"
+  },
+  police: {
+    label: "Police Station",
+    groupLabel: "Police",
+    color: "#63a7ff",
+    glow: "rgba(99, 167, 255, .22)"
+  },
+  underground: {
+    label: "Hacking Device Store",
+    groupLabel: "Underground",
+    color: "#ff9b54",
+    glow: "rgba(255, 155, 84, .24)"
+  }
+};
 const MAP_LOCATIONS = [
   {
-    id: "paleto-bay",
-    name: "Paleto Bay",
-    region: "North Coast",
-    x: 47,
-    y: 9,
-    description: "A quiet northern town with forest roads, highway access, and quick links into Blaine County."
+    id: "bay-care-center",
+    type: "hospital",
+    name: "Bay Care Center",
+    region: "Paleto Bay",
+    address: "Duluoz Avenue",
+    x: 45.8,
+    y: 11.6,
+    description: "Paleto Bay's hospital and one of the main northern medical respawn points in GTA Online."
   },
   {
-    id: "mount-chiliad",
-    name: "Mount Chiliad",
-    region: "Wilderness",
-    x: 47,
-    y: 24,
-    description: "The highest landmark on the map. Great for orientation, helicopter routes, and long-distance callouts."
-  },
-  {
-    id: "grapeseed",
-    name: "Grapeseed",
-    region: "Farmland",
-    x: 74,
-    y: 29,
-    description: "Rural roads, open fields, and a useful eastern anchor point for northern movement."
-  },
-  {
-    id: "alamo-sea",
-    name: "Alamo Sea",
-    region: "Blaine County",
-    x: 57,
-    y: 39,
-    description: "A central northern landmark that helps you orient around Sandy Shores, Harmony, and the desert."
-  },
-  {
-    id: "sandy-shores",
-    name: "Sandy Shores",
-    region: "Desert",
-    x: 67,
-    y: 42,
-    description: "A high-conflict desert zone with quick access to Route 68, airfield routes, and nearby open terrain."
-  },
-  {
-    id: "fort-zancudo",
-    name: "Fort Zancudo",
-    region: "West Blaine",
-    x: 18,
-    y: 47,
-    description: "A major western landmark useful for identifying military-side movement and coastal rotations."
-  },
-  {
-    id: "chumash",
-    name: "Chumash",
-    region: "West Coast",
-    x: 21,
-    y: 66,
-    description: "A strong coastal travel point between the north and Los Santos through the western highway."
-  },
-  {
-    id: "vinewood",
-    name: "Vinewood",
-    region: "North Los Santos",
-    x: 49,
+    id: "mount-zonah-medical-center",
+    type: "hospital",
+    name: "Mount Zonah Medical Center",
+    region: "Rockford Hills",
+    address: "Dorset Drive & Dorset Place",
+    x: 40.5,
     y: 72,
-    description: "A key central city area that connects the hills, highway routes, and downtown access."
+    description: "Major west-side hospital in Rockford Hills, useful for fast access to Burton, Vinewood, and Del Perro."
   },
   {
-    id: "downtown-los-santos",
-    name: "Downtown Los Santos",
-    region: "Central City",
-    x: 51,
+    id: "pillbox-hill-medical-center",
+    type: "hospital",
+    name: "Pillbox Hill Medical Center",
+    region: "Pillbox Hill",
+    address: "Elgin Avenue, Strawberry Avenue & Swiss Street",
+    x: 48.4,
+    y: 79.1,
+    description: "The central downtown hospital and one of the easiest medical landmarks to call out inside Los Santos."
+  },
+  {
+    id: "central-los-santos-medical-center",
+    type: "hospital",
+    name: "Central Los Santos Medical Center",
+    region: "South Los Santos",
+    address: "Crusade Road & Innocence Boulevard",
+    x: 57,
+    y: 85.5,
+    description: "Large south-east city hospital near the river and industrial roads, good for East LS and Port callouts."
+  },
+  {
+    id: "st-fiacre-hospital",
+    type: "hospital",
+    name: "St. Fiacre Hospital",
+    region: "East Vinewood",
+    address: "Capital Boulevard",
+    x: 60.8,
+    y: 71.2,
+    description: "Smaller north-east city medical site sitting above central Los Santos on the East Vinewood side."
+  },
+  {
+    id: "eclipse-medical-tower",
+    type: "hospital",
+    name: "Eclipse Medical Tower",
+    region: "West Vinewood",
+    address: "Eclipse Boulevard",
+    x: 42.2,
+    y: 68.8,
+    description: "A west-side medical tower above central Los Santos, close to the Vinewood and Burton routes."
+  },
+  {
+    id: "portola-trinity-medical-center",
+    type: "hospital",
+    name: "Portola Trinity Medical Center",
+    region: "Rockford Hills",
+    address: "Dorset Drive & Marathon Avenue",
+    x: 43.3,
+    y: 73.4,
+    description: "Medical facility between Rockford Hills and Burton, just east of Mount Zonah."
+  },
+  {
+    id: "sandy-shores-medical-center",
+    type: "hospital",
+    name: "Sandy Shores Medical Center",
+    region: "Sandy Shores",
+    address: "Mountain View Drive",
+    x: 63.8,
+    y: 42.8,
+    description: "Main Blaine County desert hospital, sharing the Sandy Shores building with the local sheriff station."
+  },
+  {
+    id: "mission-row-police-station",
+    type: "police",
+    name: "Mission Row Police Station",
+    region: "Mission Row",
+    address: "Vespucci Boulevard, Little Bighorn Avenue, Atlee Street & Sinner Street",
+    x: 52,
+    y: 80.6,
+    description: "The main Los Santos police station and the best known central LSPD location in GTA Online."
+  },
+  {
+    id: "la-mesa-police-station",
+    type: "police",
+    name: "La Mesa Police Station",
+    region: "La Mesa",
+    address: "Popular Street",
+    x: 60.3,
     y: 81,
-    description: "The urban center of the map with dense roads, major intersections, and fast access to surrounding districts."
+    description: "East-side LSPD station close to La Mesa, the river roads, and the industrial part of the city."
   },
   {
-    id: "port-of-los-santos",
-    name: "Port of Los Santos",
-    region: "South East",
-    x: 53,
-    y: 90,
-    description: "Industrial docks and cargo routes in the south east, useful for exports, pursuits, and heavy vehicle movement."
+    id: "vinewood-police-station",
+    type: "police",
+    name: "Vinewood Police Station",
+    region: "Downtown Vinewood",
+    address: "Vinewood Boulevard & Elgin Avenue",
+    x: 51.8,
+    y: 74.1,
+    description: "North-central city station covering the Vinewood strip and upper urban blocks."
   },
   {
-    id: "lsia",
-    name: "Los Santos International Airport",
-    region: "South West",
-    x: 40,
-    y: 92,
-    description: "The airport district with open lanes, runways, and quick access to southern city routes."
+    id: "vespucci-police-station",
+    type: "police",
+    name: "Vespucci Police Station",
+    region: "Vespucci",
+    address: "South Rockford Drive, Vespucci Boulevard & San Andreas Avenue",
+    x: 36,
+    y: 79,
+    description: "Large west-city LSPD station serving the Vespucci side of Los Santos."
+  },
+  {
+    id: "vespucci-beach-police-station",
+    type: "police",
+    name: "Vespucci Beach Police Station",
+    region: "Vespucci Beach",
+    address: "Vespucci Beach",
+    x: 29.5,
+    y: 81.5,
+    description: "Small beachside police station along the Vespucci coastline."
+  },
+  {
+    id: "beaver-bush-ranger-station",
+    type: "police",
+    name: "Beaver Bush Ranger Station",
+    region: "Vinewood Hills",
+    address: "Baytree Canyon Road & Marlow Drive",
+    x: 49.5,
+    y: 65.6,
+    description: "Ranger outpost in the hills above the city, useful for the park and canyon roads."
+  },
+  {
+    id: "del-perro-police-station",
+    type: "police",
+    name: "Del Perro Police Station",
+    region: "Del Perro",
+    address: "Del Perro Pier",
+    x: 31.5,
+    y: 75.5,
+    description: "Pier-side police station on the west coast, just off the Del Perro beachfront."
+  },
+  {
+    id: "davis-sheriffs-station",
+    type: "police",
+    name: "Davis Sheriff's Station",
+    region: "Davis",
+    address: "Innocence Boulevard",
+    x: 44.8,
+    y: 85,
+    description: "South-city sheriff station in Davis, close to Grove Street, Strawberry, and the industrial lanes."
+  },
+  {
+    id: "rockford-hills-police-station",
+    type: "police",
+    name: "Rockford Hills Police Station",
+    region: "Rockford Hills",
+    address: "Eastbourne Way & Abe Milton Parkway",
+    x: 39.4,
+    y: 74.2,
+    description: "Upscale west-city police station linked to Rockford Hills City Hall."
+  },
+  {
+    id: "sandy-shores-sheriffs-station",
+    type: "police",
+    name: "Sandy Shores Sheriff's Station",
+    region: "Sandy Shores",
+    address: "Alhambra Drive",
+    x: 63,
+    y: 42.4,
+    description: "Blaine County sheriff station in Sandy Shores, sharing its building with the local medical center."
+  },
+  {
+    id: "paleto-bay-sheriffs-office",
+    type: "police",
+    name: "Paleto Bay Sheriff's Office",
+    region: "Paleto Bay",
+    address: "Route 1 & Paleto Boulevard",
+    x: 48.7,
+    y: 13.3,
+    description: "Northern sheriff office at the main Paleto Bay junction."
+  },
+  {
+    id: "hacking-device-store",
+    type: "underground",
+    name: "Hacking Device Store",
+    region: "East Los Santos",
+    address: "Custom marker from your East Los Santos screenshot",
+    x: 60.1,
+    y: 79.3,
+    description: "Custom underground pickup point positioned from the East Los Santos spot you marked."
   }
 ];
 
@@ -593,27 +725,55 @@ function renderFaq() {
   `);
 }
 
-function renderMap() {
-  const quickLinks = MAP_LOCATIONS.map((location) => `
-    <button class="map-quick__item" type="button" data-map-quick="${escapeHtml(location.id)}">
-      <span class="map-quick__region">${escapeHtml(location.region)}</span>
-      <span class="map-quick__name">${escapeHtml(location.name)}</span>
-    </button>
-  `).join("");
+function getMapTypeMeta(type) {
+  return MAP_TYPE_META[type] ?? MAP_TYPE_META.underground;
+}
 
-  const markers = MAP_LOCATIONS.map((location) => `
-    <button
-      class="custom-map__marker"
-      type="button"
-      style="left:${location.x}%; top:${location.y}%;"
-      data-map-location="${escapeHtml(location.id)}"
-      aria-label="Focus ${escapeHtml(location.name)}"
-      title="${escapeHtml(location.name)}"
-    >
-      <span class="custom-map__pulse"></span>
-      <span class="custom-map__dot"></span>
-    </button>
-  `).join("");
+function renderMapQuickLinks() {
+  return Object.entries(MAP_TYPE_META).map(([type, meta]) => {
+    const locations = MAP_LOCATIONS.filter((location) => location.type === type);
+    if (!locations.length) return "";
+
+    const items = locations.map((location) => `
+      <button
+        class="map-quick__item"
+        type="button"
+        data-map-quick="${escapeHtml(location.id)}"
+        style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
+      >
+        <span class="map-quick__meta">${escapeHtml(meta.label)} / ${escapeHtml(location.region)}</span>
+        <span class="map-quick__name">${escapeHtml(location.name)}</span>
+      </button>
+    `).join("");
+
+    return `
+      <div class="map-quick__group">
+        <div class="map-quick__heading">${escapeHtml(meta.groupLabel)}</div>
+        ${items}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderMap() {
+  const quickLinks = renderMapQuickLinks();
+
+  const markers = MAP_LOCATIONS.map((location) => {
+    const meta = getMapTypeMeta(location.type);
+    return `
+      <button
+        class="custom-map__marker custom-map__marker--${escapeHtml(location.type)}"
+        type="button"
+        style="left:${location.x}%; top:${location.y}%; --map-accent:${meta.color}; --map-glow:${meta.glow};"
+        data-map-location="${escapeHtml(location.id)}"
+        aria-label="Focus ${escapeHtml(location.name)}"
+        title="${escapeHtml(location.name)}"
+      >
+        <span class="custom-map__pulse"></span>
+        <span class="custom-map__dot"></span>
+      </button>
+    `;
+  }).join("");
 
   customMapState = null;
 
@@ -625,7 +785,7 @@ function renderMap() {
           <div class="map-embed-header">
             <div class="section__eyebrow">Los Santos navigation</div>
             <div class="map-embed-title">Explore San Andreas without the clutter</div>
-            <div class="map-embed-subtitle">Jump to major zones, drag the map to move around, and use the controls to zoom in when you want city-level detail.</div>
+            <div class="map-embed-subtitle">Jump between major hospitals, police stations, and your custom East Los Santos hacking-device spot. Drag to move around and zoom when you need a tighter read.</div>
           </div>
           <div class="map-layout">
             <aside class="map-panel">
@@ -670,13 +830,18 @@ function renderMapDetail(location) {
     return `
       <div class="map-detail__eyebrow">Overview</div>
       <div class="map-detail__title">San Andreas Overview</div>
-      <div class="map-detail__body">Use the quick list on the left or click a marker to jump around the map. Drag anywhere on the map to pan, and use the zoom controls when you want a closer read on the city or the north.</div>
+      <div class="map-detail__meta">Hospitals, police stations, and your custom underground marker</div>
+      <div class="map-detail__body">Use the grouped quick list on the left or click a marker to jump around the map. Drag anywhere on the map to pan, and use the zoom controls when you want a closer read on a district.</div>
     `;
   }
 
+  const meta = getMapTypeMeta(location.type);
+  const detailMeta = [location.region, location.address].filter(Boolean).join(" · ");
+
   return `
-    <div class="map-detail__eyebrow">${escapeHtml(location.region)}</div>
+    <div class="map-detail__eyebrow">${escapeHtml(meta.label)}</div>
     <div class="map-detail__title">${escapeHtml(location.name)}</div>
+    <div class="map-detail__meta">${escapeHtml(detailMeta)}</div>
     <div class="map-detail__body">${escapeHtml(location.description)}</div>
   `;
 }
