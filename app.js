@@ -20,8 +20,8 @@ const APP_ASSET_BASE_URL = document.currentScript?.src
   : "./";
 const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map.jpg`;
 const MAP_BASE_SIZE = 980;
-const MAP_MIN_SCALE = 1;
-const MAP_MAX_SCALE = 2.8;
+const MAP_MIN_SCALE = 0.58;
+const MAP_MAX_SCALE = 2.6;
 const MAP_TYPE_META = {
   hospital: {
     label: "Hospital",
@@ -786,8 +786,18 @@ function renderMapQuickLinks() {
   }).join("");
 }
 
+function renderMapLegend() {
+  return Object.entries(MAP_TYPE_META).map(([type, meta]) => `
+    <div class="map-legend__item" style="--map-accent:${meta.color}; --map-glow:${meta.glow};">
+      <span class="map-legend__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
+      <span>${escapeHtml(meta.label)}</span>
+    </div>
+  `).join("");
+}
+
 function renderMap() {
   const quickLinks = renderMapQuickLinks();
+  const legend = renderMapLegend();
 
   const markers = MAP_LOCATIONS.map((location) => {
     const meta = getMapTypeMeta(location.type);
@@ -808,31 +818,47 @@ function renderMap() {
     `;
   }).join("");
 
+  if (customMapState?.resizeHandler) {
+    window.removeEventListener("resize", customMapState.resizeHandler);
+  }
   customMapState = null;
 
   setView(`
-    <div>
+    <div class="map-page">
       ${renderHeader("Interactive Map", [{ label: "Map" }])}
       <section class="section section--map">
         <div class="map-embed-container map-embed-container--custom">
           <div class="map-embed-header">
             <div class="section__eyebrow">Los Santos navigation</div>
-            <div class="map-embed-title">Explore San Andreas without the clutter</div>
-            <div class="map-embed-subtitle">Jump between major hospitals, police stations, and your custom East Los Santos hacking-device spot. Drag to move around and zoom when you need a tighter read.</div>
+            <div class="map-embed-title">Explore San Andreas with a cleaner ops map</div>
+            <div class="map-embed-subtitle">This view is tuned to fit the screen better, keep the controls compact, and make hospitals, police stations, and Lester's hacking contact easier to find.</div>
           </div>
           <div class="map-layout">
             <aside class="map-panel">
               <div class="map-panel__title">Quick locations</div>
+              <div class="map-panel__intro">Jump by category or click directly on the map. The panel stays compact so the map itself gets more room.</div>
               <div class="map-quick">
                 ${quickLinks}
               </div>
             </aside>
             <div class="map-stage">
+              <div class="map-stage__top">
+                <div>
+                  <div class="map-stage__eyebrow">Field view</div>
+                  <div class="map-stage__title">Service points and key contacts</div>
+                </div>
+                <div class="map-legend">
+                  ${legend}
+                </div>
+              </div>
               <div class="map-toolbar">
-                <button class="map-tool" id="mapZoomOut" type="button" aria-label="Zoom out">-</button>
-                <div class="map-zoom-label" id="mapZoomLabel">100%</div>
-                <button class="map-tool" id="mapZoomIn" type="button" aria-label="Zoom in">+</button>
-                <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Reset View</button>
+                <div class="map-toolbar__group">
+                  <button class="map-tool" id="mapZoomOut" type="button" aria-label="Zoom out">-</button>
+                  <div class="map-zoom-label" id="mapZoomLabel">100%</div>
+                  <button class="map-tool" id="mapZoomIn" type="button" aria-label="Zoom in">+</button>
+                  <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Reset View</button>
+                </div>
+                <div class="map-toolbar__hint">Drag to pan. Scroll to zoom. Click any marker for details.</div>
               </div>
               <div class="custom-map-viewport" id="customMapViewport" aria-label="San Andreas map viewer">
                 <div class="custom-map-surface" id="customMapSurface">
@@ -869,7 +895,7 @@ function renderMapDetail(location) {
   }
 
   const meta = getMapTypeMeta(location.type);
-  const detailMeta = [location.region, location.address].filter(Boolean).join(" · ");
+  const detailMeta = [location.region, location.address].filter(Boolean).join(" / ");
 
   return `
     <div class="map-detail__eyebrow">${escapeHtml(meta.label)}</div>
@@ -914,6 +940,12 @@ function centerMapOn(xRatio, yRatio) {
   viewport.scrollTop = clamp(surface.offsetHeight * yRatio - viewport.clientHeight / 2, 0, maxTop);
 }
 
+function getMapFitScale(viewport = customMapState?.viewport) {
+  if (!viewport) return 1;
+  const safeWidth = Math.max(320, viewport.clientWidth - 24);
+  return clamp(safeWidth / MAP_BASE_SIZE, MAP_MIN_SCALE, 1);
+}
+
 function refreshMapZoomUi() {
   if (!customMapState) return;
 
@@ -925,7 +957,7 @@ function refreshMapZoomUi() {
     zoomInBtn.disabled = scale >= MAP_MAX_SCALE;
   }
   if (zoomOutBtn) {
-    zoomOutBtn.disabled = scale <= MAP_MIN_SCALE;
+    zoomOutBtn.disabled = scale <= MAP_MIN_SCALE + 0.001;
   }
 }
 
@@ -956,13 +988,13 @@ function focusMapLocation(locationId) {
   updateMapSelection(location.id);
   const focusX = location.x / 100;
   const focusY = location.y / 100;
-  const targetScale = customMapState ? Math.max(customMapState.scale, 1.35) : 1.35;
+  const targetScale = customMapState ? Math.max(customMapState.scale, 1.08) : 1.08;
   setCustomMapScale(targetScale, { focusX, focusY });
 }
 
 function resetCustomMapView() {
   updateMapSelection(null);
-  setCustomMapScale(MAP_MIN_SCALE, { focusX: 0.5, focusY: 0.5 });
+  setCustomMapScale(getMapFitScale(), { focusX: 0.5, focusY: 0.5 });
 }
 
 function bindMapDragging(viewport) {
@@ -1030,7 +1062,7 @@ function initCustomMap() {
     markerButtons: Array.from(document.querySelectorAll("[data-map-location]")),
     quickButtons: Array.from(document.querySelectorAll("[data-map-quick]")),
     resetBtn,
-    scale: MAP_MIN_SCALE,
+    scale: 1,
     surface,
     viewport,
     zoomInBtn,
@@ -1073,8 +1105,17 @@ function initCustomMap() {
   updateMapSelection(null);
 
   const setInitialView = () => {
-    centerMapOn(0.5, 0.5);
+    resetCustomMapView();
   };
+
+  const resizeHandler = () => {
+    if (!customMapState) return;
+    if (customMapState.activeId) return;
+    resetCustomMapView();
+  };
+
+  customMapState.resizeHandler = resizeHandler;
+  window.addEventListener("resize", resizeHandler);
 
   if (image && !image.complete) {
     image.addEventListener("load", setInitialView, { once: true });
@@ -2100,6 +2141,7 @@ function route() {
   updateDockActive(r.name);
 
   document.body.classList.toggle("is-landing", r.name === "home");
+  document.body.classList.toggle("is-map", r.name === "map");
 
   const inRulesFlow = r.name === "rules" || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);
