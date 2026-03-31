@@ -322,6 +322,14 @@ body.is-map .footer{
   width: 100%;
   height: 100%;
   padding: 16px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.service-map__canvas.is-dragging{
+  cursor: grabbing;
 }
 
 .service-map__stage{
@@ -330,6 +338,13 @@ body.is-map .footer{
   max-width: 100%;
   max-height: 100%;
   aspect-ratio: 1 / 1;
+  transform-origin: center center;
+  transition: transform .18s ease;
+  will-change: transform;
+}
+
+.service-map__canvas.is-dragging .service-map__stage{
+  transition: none;
 }
 
 .service-map__image{
@@ -380,7 +395,7 @@ body.is-map .footer{
   display: block;
   width: 32px;
   height: 37px;
-  background-image: url("./map-assets/mapgenie-markers.png");
+  background-image: url("./map-assets/mapgenie-markers.png?v=20260331d");
   background-repeat: no-repeat;
   background-size: 32px 2516px;
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.34));

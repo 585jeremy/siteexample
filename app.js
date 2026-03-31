@@ -32,13 +32,14 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
+const SITE_ASSET_VERSION = "20260331d";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
-const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png`;
-const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png`;
+const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png?v=${SITE_ASSET_VERSION}`;
+const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png?v=${SITE_ASSET_VERSION}`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
-const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map-assets/los-santos-satellite-z6.jpg`;
+const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map-assets/los-santos-satellite-z6.jpg?v=${SITE_ASSET_VERSION}`;
 const MAP_TILE_GRID = {
   zoom: 6,
   tileSize: 256,
@@ -54,6 +55,9 @@ const MAP_INITIAL_VIEW = {
 };
 const MAP_MIN_ZOOM = 3;
 const MAP_MAX_ZOOM = 7;
+const MAP_VIEW_MIN_SCALE = 1;
+const MAP_VIEW_MAX_SCALE = 3;
+const MAP_VIEW_ZOOM_STEP = 0.35;
 const MAP_MAX_BOUNDS = [
   [55.25, -151.5],
   [84.25, -98.5]
@@ -1222,10 +1226,13 @@ function renderMap() {
               <div class="service-map-shell">
                 <div class="map-toolbar map-toolbar--overlay">
                   <div class="map-toolbar__group">
+                    <button class="map-tool" id="mapZoomOutBtn" type="button" aria-label="Zoom out">-</button>
+                    <span class="map-zoom-label" id="mapZoomLabel">100%</span>
+                    <button class="map-tool" id="mapZoomInBtn" type="button" aria-label="Zoom in">+</button>
                     <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Show all</button>
                     <span class="map-toolbar__badge">Satellite only</span>
                   </div>
-                  <div class="map-toolbar__hint">Click a marker or use the location list.</div>
+                  <div class="map-toolbar__hint">Scroll or use +/- to zoom. Drag to move.</div>
                 </div>
                 <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
               </div>
@@ -1297,6 +1304,85 @@ function destroyCustomMap() {
   }
 
   customMapState = null;
+}
+
+function clampMapScale(scale) {
+  return Math.max(MAP_VIEW_MIN_SCALE, Math.min(MAP_VIEW_MAX_SCALE, scale));
+}
+
+function clampMapOffset(offsetX, offsetY, scale = customMapState?.scale ?? MAP_VIEW_MIN_SCALE) {
+  if (!customMapState?.viewportEl || !customMapState?.stageEl) {
+    return { x: offsetX, y: offsetY };
+  }
+
+  const viewportWidth = customMapState.viewportEl.clientWidth;
+  const viewportHeight = customMapState.viewportEl.clientHeight;
+  const stageWidth = customMapState.stageEl.offsetWidth * scale;
+  const stageHeight = customMapState.stageEl.offsetHeight * scale;
+  const maxOffsetX = Math.max(0, (stageWidth - viewportWidth) / 2);
+  const maxOffsetY = Math.max(0, (stageHeight - viewportHeight) / 2);
+
+  return {
+    x: Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX)),
+    y: Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
+  };
+}
+
+function updateMapViewport() {
+  if (!customMapState?.stageEl) return;
+
+  const clamped = clampMapOffset(customMapState.offsetX, customMapState.offsetY, customMapState.scale);
+  customMapState.offsetX = clamped.x;
+  customMapState.offsetY = clamped.y;
+
+  customMapState.stageEl.style.transform = `translate(${customMapState.offsetX}px, ${customMapState.offsetY}px) scale(${customMapState.scale})`;
+
+  if (customMapState.zoomLabelEl) {
+    customMapState.zoomLabelEl.textContent = `${Math.round(customMapState.scale * 100)}%`;
+  }
+
+  if (customMapState.zoomInBtn) {
+    customMapState.zoomInBtn.disabled = customMapState.scale >= MAP_VIEW_MAX_SCALE;
+  }
+
+  if (customMapState.zoomOutBtn) {
+    customMapState.zoomOutBtn.disabled = customMapState.scale <= MAP_VIEW_MIN_SCALE;
+  }
+}
+
+function setMapZoom(nextScale, options = {}) {
+  if (!customMapState?.viewportEl || !customMapState?.stageEl) return;
+
+  const previousScale = customMapState.scale;
+  const targetScale = clampMapScale(nextScale);
+  if (Math.abs(targetScale - previousScale) < 0.001) return;
+
+  const viewportRect = customMapState.viewportEl.getBoundingClientRect();
+  const anchorX = typeof options.anchorX === "number" ? options.anchorX : viewportRect.width / 2;
+  const anchorY = typeof options.anchorY === "number" ? options.anchorY : viewportRect.height / 2;
+
+  const stagePointX = (anchorX - viewportRect.width / 2 - customMapState.offsetX) / previousScale;
+  const stagePointY = (anchorY - viewportRect.height / 2 - customMapState.offsetY) / previousScale;
+
+  customMapState.scale = targetScale;
+  customMapState.offsetX = anchorX - viewportRect.width / 2 - (stagePointX * targetScale);
+  customMapState.offsetY = anchorY - viewportRect.height / 2 - (stagePointY * targetScale);
+
+  updateMapViewport();
+}
+
+function centerMapOnLocation(location) {
+  if (!location || !customMapState?.stageEl) return;
+
+  const position = getMapPositionPercent(location);
+  const stageWidth = customMapState.stageEl.offsetWidth;
+  const stageHeight = customMapState.stageEl.offsetHeight;
+  const markerX = (position.x / 100) * stageWidth;
+  const markerY = (position.y / 100) * stageHeight;
+
+  customMapState.offsetX = (stageWidth / 2 - markerX) * customMapState.scale;
+  customMapState.offsetY = (stageHeight / 2 - markerY) * customMapState.scale;
+  updateMapViewport();
 }
 
 function syncMapMarkerStates() {
@@ -1378,6 +1464,7 @@ function focusMapLocation(locationId) {
   if (!location || !customMapState) return;
 
   updateMapSelection(location.id);
+  centerMapOnLocation(location);
 
   const markerButton = customMapState.markerButtons.get(location.id);
   if (markerButton) {
@@ -1387,6 +1474,13 @@ function focusMapLocation(locationId) {
 }
 
 function resetCustomMapView() {
+  if (customMapState) {
+    customMapState.scale = MAP_VIEW_MIN_SCALE;
+    customMapState.offsetX = 0;
+    customMapState.offsetY = 0;
+    updateMapViewport();
+  }
+
   updateMapSelection(null);
 }
 
@@ -1394,6 +1488,9 @@ function initCustomMap() {
   const mapEl = document.getElementById("serviceMap");
   const infoEl = document.getElementById("customMapInfo");
   const resetBtn = document.getElementById("mapResetBtn");
+  const zoomInBtn = document.getElementById("mapZoomInBtn");
+  const zoomOutBtn = document.getElementById("mapZoomOutBtn");
+  const zoomLabelEl = document.getElementById("mapZoomLabel");
 
   if (!mapEl || !infoEl) return;
 
@@ -1428,14 +1525,23 @@ function initCustomMap() {
 
   customMapState = {
     activeId: null,
+    dragPointerId: null,
     filter: "all",
     filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),
     infoEl,
     markerButtons: new Map(),
+    offsetX: 0,
+    offsetY: 0,
     quickGroups: Array.from(document.querySelectorAll("[data-map-group]")),
     quickButtons: Array.from(document.querySelectorAll("[data-map-quick]")),
     resetBtn,
-    resizeHandler: null
+    resizeHandler: null,
+    scale: MAP_VIEW_MIN_SCALE,
+    stageEl: mapEl.querySelector(".service-map__stage"),
+    viewportEl: mapEl.querySelector(".service-map__canvas"),
+    zoomInBtn,
+    zoomLabelEl,
+    zoomOutBtn
   };
 
   Array.from(mapEl.querySelectorAll("[data-map-marker]")).forEach((button) => {
@@ -1461,8 +1567,78 @@ function initCustomMap() {
     resetBtn.addEventListener("click", resetCustomMapView);
   }
 
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener("click", () => {
+      const rect = customMapState.viewportEl?.getBoundingClientRect();
+      setMapZoom(customMapState.scale + MAP_VIEW_ZOOM_STEP, {
+        anchorX: rect ? rect.width / 2 : undefined,
+        anchorY: rect ? rect.height / 2 : undefined
+      });
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener("click", () => {
+      const rect = customMapState.viewportEl?.getBoundingClientRect();
+      setMapZoom(customMapState.scale - MAP_VIEW_ZOOM_STEP, {
+        anchorX: rect ? rect.width / 2 : undefined,
+        anchorY: rect ? rect.height / 2 : undefined
+      });
+    });
+  }
+
+  if (customMapState.viewportEl) {
+    customMapState.viewportEl.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const rect = customMapState.viewportEl.getBoundingClientRect();
+      setMapZoom(
+        customMapState.scale + (event.deltaY < 0 ? MAP_VIEW_ZOOM_STEP : -MAP_VIEW_ZOOM_STEP),
+        {
+          anchorX: event.clientX - rect.left,
+          anchorY: event.clientY - rect.top
+        }
+      );
+    }, { passive: false });
+
+    customMapState.viewportEl.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || event.target.closest("[data-map-marker]")) return;
+      customMapState.dragPointerId = event.pointerId;
+      customMapState.dragStartX = event.clientX;
+      customMapState.dragStartY = event.clientY;
+      customMapState.dragOriginX = customMapState.offsetX;
+      customMapState.dragOriginY = customMapState.offsetY;
+      customMapState.viewportEl.classList.add("is-dragging");
+      customMapState.viewportEl.setPointerCapture(event.pointerId);
+    });
+
+    customMapState.viewportEl.addEventListener("pointermove", (event) => {
+      if (customMapState.dragPointerId !== event.pointerId) return;
+      customMapState.offsetX = customMapState.dragOriginX + (event.clientX - customMapState.dragStartX);
+      customMapState.offsetY = customMapState.dragOriginY + (event.clientY - customMapState.dragStartY);
+      updateMapViewport();
+    });
+
+    const endDrag = (event) => {
+      if (customMapState?.dragPointerId !== event.pointerId) return;
+      customMapState.dragPointerId = null;
+      customMapState.viewportEl.classList.remove("is-dragging");
+      if (customMapState.viewportEl.hasPointerCapture(event.pointerId)) {
+        customMapState.viewportEl.releasePointerCapture(event.pointerId);
+      }
+    };
+
+    customMapState.viewportEl.addEventListener("pointerup", endDrag);
+    customMapState.viewportEl.addEventListener("pointercancel", endDrag);
+  }
+
+  customMapState.resizeHandler = () => {
+    updateMapViewport();
+  };
+  window.addEventListener("resize", customMapState.resizeHandler);
+
   updateMapSelection(null);
   applyMapFilter("all");
+  updateMapViewport();
 }
 
 function readCart() {
