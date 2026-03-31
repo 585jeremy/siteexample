@@ -38,7 +38,7 @@ const APP_ASSET_BASE_URL = document.currentScript?.src
 const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png`;
 const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
-const MAP_IMAGE_URL = "https://www.gtabase.com/igallery/maps/gta-5-map-satellite-labels-1920.jpg";
+const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}satellite-map.jpg`;
 const MAP_INITIAL_VIEW = {
   lat: 66.722541,
   lng: -140.625,
