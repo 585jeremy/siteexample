@@ -38,7 +38,7 @@ const APP_ASSET_BASE_URL = document.currentScript?.src
 const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png`;
 const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
-const MAP_TILE_URL = "https://tiles.mapgenie.io/games/gta5/los-santos/satellite/{z}/{x}/{y}.png";
+const MAP_IMAGE_URL = "https://www.gtabase.com/igallery/maps/gta-5-map-satellite-labels-1920.jpg";
 const MAP_INITIAL_VIEW = {
   lat: 66.722541,
   lng: -140.625,
@@ -763,6 +763,61 @@ function renderLanding() {
   `);
 }
 
+function renderLandingHome() {
+  setView(`
+    <div class="home-shell">
+      <section class="home-hero" aria-label="Welcome">
+        <div class="home-main">
+          <div class="home-kicker">Los Santos hub</div>
+          <div class="home-banner">
+            <img
+              class="home-banner__image"
+              src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
+              alt="SG Cops and Robbers logo"
+              loading="eager"
+              onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+              onerror="this.remove();"
+            />
+            <div class="home-banner__fallback">SG Cops &amp; Robbers</div>
+          </div>
+          <div class="home-copy">
+            <div class="home-title">Rules, live status, and service locations in one clean portal.</div>
+            <div class="home-text">A darker, faster hub for players to join the server, open the map, check live status, and get straight to the important pages.</div>
+            <div class="home-actions">
+              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+            </div>
+          </div>
+        </div>
+        <aside class="home-side">
+          <div class="home-side__logo">
+            <img
+              class="home-side__image"
+              src="${escapeHtml(BRAND_LOGO_BADGE_URL)}"
+              alt="SGCNR badge"
+              loading="eager"
+              onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
+              onerror="this.remove();"
+            />
+            <div class="home-side__fallback">SGCNR</div>
+          </div>
+          <div class="home-links">
+            <a class="home-link" href="#/start"><span class="home-link__label">Start Here</span><span class="home-link__meta">Setup and join info</span></a>
+            <a class="home-link" href="#/rules"><span class="home-link__label">Rules</span><span class="home-link__meta">Server rules and conduct</span></a>
+            <a class="home-link" href="#/map"><span class="home-link__label">Map</span><span class="home-link__meta">Police, hospitals, fire, Lester</span></a>
+            <a class="home-link" href="#/status"><span class="home-link__label">Live Status</span><span class="home-link__meta">Server and player overview</span></a>
+          </div>
+          <div class="home-stats">
+            <div class="home-stat"><span class="home-stat__label">Access</span><span class="home-stat__value">Fast</span></div>
+            <div class="home-stat"><span class="home-stat__label">Support</span><span class="home-stat__value">Discord</span></div>
+            <div class="home-stat"><span class="home-stat__label">Server</span><span class="home-stat__value">Live Ready</span></div>
+          </div>
+        </aside>
+      </section>
+    </div>
+  `);
+}
+
 function renderStart() {
   setView(`
     <div>
@@ -1127,7 +1182,7 @@ function renderMap() {
                   </div>
                   <div class="map-toolbar__hint">Scroll to zoom or click a marker.</div>
                 </div>
-                <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map"></div>
+                <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
               </div>
             </div>
           </div>
@@ -1370,10 +1425,9 @@ function initCustomMap() {
     maxBoundsViscosity: 1
   });
 
-  window.L.tileLayer(MAP_TILE_URL, {
-    minZoom: MAP_MIN_ZOOM,
-    maxZoom: MAP_MAX_ZOOM,
-    noWrap: true
+  window.L.imageOverlay(MAP_IMAGE_URL, MAP_MAX_BOUNDS, {
+    interactive: false,
+    opacity: 1
   }).addTo(map);
 
   window.L.control.zoom({ position: "topright" }).addTo(map);
@@ -2896,7 +2950,7 @@ function route() {
     return;
   }
 
-  renderLanding();
+  renderLandingHome();
   meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
 }
 
