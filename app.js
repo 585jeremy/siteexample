@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260331i";
+const SITE_ASSET_VERSION = "20260331j";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -799,37 +799,31 @@ function renderLanding() {
 
 function renderLandingHome() {
   setView(`
-    <div class="portal-home">
+    <div class="portal-home portal-home--minimal">
       <div class="portal-home__grain" aria-hidden="true"></div>
       <div class="portal-home__wash" aria-hidden="true"></div>
 
       <section class="portal-home__hero" aria-label="Welcome">
         <div class="portal-home__copy">
-          <div class="portal-home__eyebrow">SGCNR Los Santos Portal</div>
+          <div class="portal-home__eyebrow">SGCNR Join Portal</div>
           <div class="portal-home__chips">
             <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
-            <span class="portal-home__chip portal-home__chip--red">Cops &amp; Robbers</span>
-            <span class="portal-home__chip">Rules + Status + Map</span>
+            <span class="portal-home__chip portal-home__chip--red">Los Santos</span>
           </div>
-          <h1 class="portal-home__title">Join fast. Find what you need.</h1>
-          <p class="portal-home__text">Rules, map, status, and Discord in one clean hub.</p>
+          <h1 class="portal-home__title">Join the server.</h1>
+          <p class="portal-home__text">Everything else already has its own page. Home just gets you in fast.</p>
           <div class="portal-home__actions">
             <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-            <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
-            <a class="auth__btn" href="#/status">Live Status</a>
+            <button class="auth__btn" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
           </div>
-          <div class="portal-home__stats">
-            <div class="portal-home__stat">
-              <div class="portal-home__statLabel">Server Type</div>
-              <div class="portal-home__statValue">FiveM CnR</div>
+          <div class="portal-home__joinPanel">
+            <div class="portal-home__joinItem">
+              <div class="portal-home__joinLabel">Join Code</div>
+              <div class="portal-home__joinValue">${escapeHtml(SERVER_JOIN_CODE || "Not set")}</div>
             </div>
-            <div class="portal-home__stat">
-              <div class="portal-home__statLabel">Region</div>
-              <div class="portal-home__statValue">${escapeHtml(SERVER_CONFIG.region || "EU")}</div>
-            </div>
-            <div class="portal-home__stat">
-              <div class="portal-home__statLabel">Access</div>
-              <div class="portal-home__statValue">Fast Join</div>
+            <div class="portal-home__joinItem">
+              <div class="portal-home__joinLabel">Direct Link</div>
+              <div class="portal-home__joinValue portal-home__joinValue--small">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</div>
             </div>
           </div>
         </div>
@@ -860,81 +854,16 @@ function renderLandingHome() {
               <div class="portal-home__badgeFallback">SGCNR</div>
             </div>
             <div class="portal-home__badgeMeta">
-              <div class="portal-home__badgeTitle">Los Santos Hub</div>
-              <div class="portal-home__badgeText">Fast access to the main pages.</div>
+              <div class="portal-home__badgeTitle">SGCNR</div>
+              <div class="portal-home__badgeText">Cops &amp; Robbers server access.</div>
             </div>
           </div>
         </aside>
       </section>
-
-      <section class="portal-home__navGrid" aria-label="Quick access">
-        <a class="portal-home__navCard portal-home__navCard--primary" href="#/start">
-          <div class="portal-home__navLabel">Start Here</div>
-          <div class="portal-home__navTitle">Get in fast</div>
-          <div class="portal-home__navText">Setup and join info.</div>
-        </a>
-        <a class="portal-home__navCard" href="#/rules">
-          <div class="portal-home__navLabel">Rules</div>
-          <div class="portal-home__navTitle">Know the basics</div>
-          <div class="portal-home__navText">Server rules and conduct.</div>
-        </a>
-        <a class="portal-home__navCard" href="#/map">
-          <div class="portal-home__navLabel">Map</div>
-          <div class="portal-home__navTitle">Find service locations</div>
-          <div class="portal-home__navText">Police, hospitals, fire, Lester.</div>
-        </a>
-        <a class="portal-home__navCard" href="#/status">
-          <div class="portal-home__navLabel">Live Status</div>
-          <div class="portal-home__navTitle">Check the server</div>
-          <div class="portal-home__navText">Players and server info.</div>
-        </a>
-        <a class="portal-home__navCard" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">
-          <div class="portal-home__navLabel">Discord</div>
-          <div class="portal-home__navTitle">Open support</div>
-          <div class="portal-home__navText">Tickets and announcements.</div>
-        </a>
-        <a class="portal-home__navCard" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">
-          <div class="portal-home__navLabel">Direct Join</div>
-          <div class="portal-home__navTitle">Launch now</div>
-          <div class="portal-home__navText">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</div>
-        </a>
-      </section>
-
-      <section class="portal-home__lower">
-        <div class="portal-home__panel portal-home__panel--compact">
-          <div class="portal-home__panelEyebrow">Quick Access</div>
-          <div class="portal-home__buttonGrid">
-            <a class="portal-home__button" href="#/rules">Rules</a>
-            <a class="portal-home__button" href="#/map">Map</a>
-            <a class="portal-home__button" href="#/status">Status</a>
-            <a class="portal-home__button" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
-          </div>
-        </div>
-
-        <div class="portal-home__panel portal-home__panel--compact">
-          <div class="portal-home__panelEyebrow">Server Info</div>
-          <div class="portal-home__miniStats">
-            <div class="portal-home__miniStat">
-              <span class="portal-home__miniLabel">Join Code</span>
-              <span class="portal-home__miniValue">${escapeHtml(SERVER_JOIN_CODE)}</span>
-            </div>
-            <div class="portal-home__miniStat">
-              <span class="portal-home__miniLabel">Region</span>
-              <span class="portal-home__miniValue">${escapeHtml(SERVER_CONFIG.region || "EU")}</span>
-            </div>
-            <div class="portal-home__miniStat">
-              <span class="portal-home__miniLabel">Support</span>
-              <span class="portal-home__miniValue">Discord</span>
-            </div>
-            <div class="portal-home__miniStat">
-              <span class="portal-home__miniLabel">Map</span>
-              <span class="portal-home__miniValue">Services</span>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   `);
+
+  bindLandingHomeControls();
 }
 
 function renderStart() {
@@ -2864,6 +2793,13 @@ function copyServerJoinLink() {
   }
 
   window.prompt("Copy the join link:", value);
+}
+
+function bindLandingHomeControls() {
+  const copyBtn = document.getElementById("homeCopyJoinBtn");
+  if (copyBtn) {
+    copyBtn.onclick = () => copyServerJoinLink();
+  }
 }
 
 function bindStatusPageControls() {
