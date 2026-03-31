@@ -399,7 +399,7 @@ body.is-landing .landing{
 
 .landing-hero__copy{
   text-align: left;
-  max-width: 620px;
+  max-width: 680px;
 }
 
 .landing-hero__title{
@@ -552,6 +552,277 @@ body.is-landing .landing{
   color: rgba(230,237,246,.60);
 }
 
+.landing-brand{
+  position: relative;
+  margin-top: 18px;
+  padding: 0 182px 26px 0;
+}
+
+.landing-brand__banner{
+  position: relative;
+  overflow: hidden;
+  padding: 20px 24px 30px;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(20,24,31,.96), rgba(8,11,15,.98)),
+    linear-gradient(90deg, rgba(83,140,255,.10), rgba(255,255,255,0) 28%, rgba(255,96,96,.12));
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.50),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.landing-brand__banner::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(71,142,255,.22), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(255,82,82,.20), transparent 28%),
+    radial-gradient(circle at 50% 52%, rgba(255,193,87,.14), transparent 34%);
+}
+
+.landing-brand__banner::after{
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.06);
+  pointer-events: none;
+}
+
+.landing-brand__light{
+  position: absolute;
+  top: 10px;
+  width: 148px;
+  height: 64px;
+  filter: blur(22px);
+  opacity: .55;
+  pointer-events: none;
+}
+
+.landing-brand__light--blue{
+  left: -12px;
+  background: radial-gradient(circle at 50% 50%, rgba(67,143,255,.92), rgba(67,143,255,0) 68%);
+}
+
+.landing-brand__light--red{
+  right: -12px;
+  background: radial-gradient(circle at 50% 50%, rgba(255,85,85,.90), rgba(255,85,85,0) 68%);
+}
+
+.landing-brand__skyline{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  height: 84px;
+  margin-bottom: 14px;
+  opacity: .92;
+}
+
+.landing-brand__building{
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(71,84,98,.88));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.landing-brand__chips{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.landing-brand__chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(7,11,15,.64);
+  color: rgba(230,237,246,.88);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.landing-brand__chip--police{
+  border-color: rgba(90,149,255,.24);
+  box-shadow: inset 0 0 0 1px rgba(90,149,255,.08);
+}
+
+.landing-brand__chip--crime{
+  border-color: rgba(255,125,72,.24);
+  box-shadow: inset 0 0 0 1px rgba(255,125,72,.08);
+}
+
+.landing-brand__chipIcon,
+.landing-brand__cash,
+.landing-brand__badgeIcon{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-brand__chipIcon{
+  width: 20px;
+  height: 20px;
+}
+
+.landing-brand__chipIcon svg{
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.landing-brand__title{
+  position: relative;
+  z-index: 1;
+  text-transform: uppercase;
+  line-height: .88;
+}
+
+.landing-brand__title--wide{
+  font-size: clamp(30px, 4.5vw, 60px);
+  font-weight: 900;
+  letter-spacing: -.06em;
+  white-space: nowrap;
+  color: #f7fbff;
+  text-shadow:
+    0 4px 0 rgba(10,14,19,.92),
+    0 16px 34px rgba(0,0,0,.42);
+}
+
+.landing-brand__road{
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(121,130,142,.34), rgba(56,63,72,.86));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  overflow: hidden;
+}
+
+.landing-brand__road::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56%;
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.92) 0 18px, transparent 18px 30px);
+  opacity: .88;
+}
+
+.landing-brand__cash{
+  position: absolute;
+  right: 20px;
+  bottom: 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(140,224,150,.20);
+  background: linear-gradient(180deg, rgba(98,177,104,.26), rgba(31,67,38,.86));
+  color: rgba(217,255,224,.96);
+  box-shadow: 0 12px 24px rgba(0,0,0,.24);
+}
+
+.landing-brand__cash svg{
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.landing-brand__badge{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 190px;
+  aspect-ratio: 1 / 1;
+  border-radius: 36% 36% 42% 42%;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(circle at 50% 26%, rgba(255,255,255,.14), rgba(255,255,255,0) 36%),
+    linear-gradient(180deg, rgba(19,24,30,.98), rgba(8,11,15,.98));
+  box-shadow:
+    0 26px 60px rgba(0,0,0,.52),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  overflow: hidden;
+  transform: rotate(-5deg);
+}
+
+.landing-brand__badge::before{
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 34% 34% 40% 40%;
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.landing-brand__badge::after{
+  content: "";
+  position: absolute;
+  inset: auto 16px 14px 16px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(66,140,255,.26), rgba(255,255,255,.12) 45%, rgba(255,92,92,.26));
+}
+
+.landing-brand__badgeTitle{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -34%);
+  font-size: clamp(34px, 4.6vw, 58px);
+  font-weight: 900;
+  letter-spacing: -.08em;
+  color: #f7fbff;
+  text-transform: uppercase;
+  text-shadow:
+    0 4px 0 rgba(10,14,19,.94),
+    0 16px 34px rgba(0,0,0,.46);
+  z-index: 1;
+}
+
+.landing-brand__badgeIcon{
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(7,11,15,.68);
+  box-shadow: 0 10px 24px rgba(0,0,0,.30);
+}
+
+.landing-brand__badgeIcon svg{
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.landing-brand__badgeIcon--left{
+  left: 18px;
+  top: 18px;
+  color: #ffc759;
+}
+
+.landing-brand__badgeIcon--right{
+  right: 18px;
+  top: 18px;
+  color: #ff9f7b;
+}
+
 .quickstart{
   position: relative;
   z-index: 1;
@@ -650,6 +921,25 @@ body.is-landing .landing{
   .quickstart__grid{ grid-template-columns: 1fr; }
   .players{ grid-template-columns: 1fr; }
   .status-grid{ grid-template-columns: 1fr; }
+  .landing-brand{
+    padding-right: 0;
+    padding-bottom: 0;
+  }
+  .landing-brand__banner{
+    padding: 18px 18px 24px;
+  }
+  .landing-brand__title--wide{
+    font-size: clamp(28px, 10vw, 42px);
+    white-space: normal;
+  }
+  .landing-brand__badge{
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(72vw, 220px);
+    margin: -18px auto 0;
+    transform: none;
+  }
 }
 
 .breadcrumb{
@@ -1603,6 +1893,8 @@ body.is-landing .landing{
   .landing-hero{ grid-template-columns: 1fr; }
   .landing-panel__grid,
   .landing-stats{ grid-template-columns: 1fr; }
+  .landing-brand{ padding-right: 154px; }
+  .landing-brand__badge{ width: 170px; }
   .dock{ bottom: 18px; }
 }
 

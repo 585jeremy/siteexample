@@ -536,6 +536,73 @@ function initAuth() {
   }
 }
 
+function brandAccentIconSvg(kind) {
+  if (kind === "police") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l7 3v5c0 5.2-2.7 9.2-7 12-4.3-2.8-7-6.8-7-12V5l7-3z" fill="currentColor"></path>
+        <path d="M12 7.1l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" fill="rgba(11,15,20,.94)"></path>
+      </svg>
+    `;
+  }
+
+  if (kind === "mask") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3c4.8 0 8.5 3.7 8.5 8.7 0 6.1-4.1 9.4-8.5 9.4S3.5 17.8 3.5 11.7C3.5 6.7 7.2 3 12 3Z" fill="currentColor"></path>
+        <path d="M8.1 10.2c1.5-1.4 2.9-1.9 3.9-1.9s2.4.5 3.9 1.9l-1.6 2.1c-.8-.8-1.6-1.2-2.3-1.2s-1.5.4-2.3 1.2l-1.6-2.1Z" fill="rgba(11,15,20,.94)"></path>
+        <path d="M9.4 15.4h5.2l-.8 1.8h-3.6z" fill="rgba(11,15,20,.94)"></path>
+      </svg>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8.5 4.5h7l3 3v2.5c0 3.2-1 5.5-2.8 7.5L12 21l-3.7-3.5C6.5 15.5 5.5 13.2 5.5 10V7.5l3-3Z" fill="currentColor"></path>
+      <path d="M10.3 4.5c0-1 .8-1.8 1.7-1.8s1.7.8 1.7 1.8-.8 1.7-1.7 1.7-1.7-.7-1.7-1.7Z" fill="rgba(11,15,20,.94)"></path>
+      <path d="M12 8.3c-1.5 0-2.7 1.2-2.7 2.7S10.5 13.7 12 13.7s2.7-1.2 2.7-2.7S13.5 8.3 12 8.3Zm.7 4.4h-1.4v-.9h-.9v-1.3h.9V9.6h1.4v.9h.9v1.3h-.9v.9Z" fill="rgba(11,15,20,.94)"></path>
+    </svg>
+  `;
+}
+
+function renderLandingBranding() {
+  const skylineHeights = [34, 56, 30, 70, 42, 78, 36, 62, 46, 58, 32, 74, 40, 52];
+  const skyline = skylineHeights.map((height, index) => `
+    <span
+      class="landing-brand__building"
+      style="height:${height}px; width:${index % 3 === 0 ? 18 : index % 2 === 0 ? 12 : 14}px; opacity:${0.58 + (index % 4) * 0.08};"
+    ></span>
+  `).join("");
+
+  return `
+    <div class="landing-brand" aria-label="SGCNR brand showcase">
+      <div class="landing-brand__banner">
+        <div class="landing-brand__light landing-brand__light--blue" aria-hidden="true"></div>
+        <div class="landing-brand__light landing-brand__light--red" aria-hidden="true"></div>
+        <div class="landing-brand__skyline" aria-hidden="true">${skyline}</div>
+        <div class="landing-brand__chips">
+          <div class="landing-brand__chip landing-brand__chip--police">
+            <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("police")}</span>
+            <span>Police</span>
+          </div>
+          <div class="landing-brand__chip landing-brand__chip--crime">
+            <span class="landing-brand__chipIcon" aria-hidden="true">${brandAccentIconSvg("mask")}</span>
+            <span>Crime</span>
+          </div>
+        </div>
+        <div class="landing-brand__title landing-brand__title--wide">SG Cops and Robbers</div>
+        <div class="landing-brand__road" aria-hidden="true"></div>
+        <div class="landing-brand__cash" aria-hidden="true">${brandAccentIconSvg("cash")}</div>
+      </div>
+      <div class="landing-brand__badge" aria-hidden="true">
+        <div class="landing-brand__badgeIcon landing-brand__badgeIcon--left">${brandAccentIconSvg("police")}</div>
+        <div class="landing-brand__badgeIcon landing-brand__badgeIcon--right">${brandAccentIconSvg("mask")}</div>
+        <div class="landing-brand__badgeTitle">SGCNR</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderLanding() {
   setView(`
     <div class="landing landing--cloud">
@@ -543,10 +610,7 @@ function renderLanding() {
         <section class="landing-hero" aria-label="Welcome">
           <div class="landing-hero__copy">
             <div class="landing__coming">Los Santos hub</div>
-            <div class="landing__logo" aria-label="SGCNR">
-              <div class="landing__logoTop">SGCNR</div>
-              <div class="landing__logoBottom">SGCNR</div>
-            </div>
+            ${renderLandingBranding()}
             <div class="landing-hero__title">Rules, support, and map tools in one place.</div>
             <div class="landing-hero__text">A cleaner way for players to navigate the server, find answers fast, and jump straight into the essentials.</div>
             <div class="landing-hero__actions">
