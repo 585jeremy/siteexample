@@ -1286,8 +1286,8 @@ function createMapMarkerIcon(type) {
         <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
       </span>
     `,
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
     tooltipAnchor: [0, -18]
   });
 }
