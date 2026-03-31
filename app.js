@@ -35,28 +35,43 @@ const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
-const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map.jpg`;
-const MAP_BASE_SIZE = 980;
-const MAP_MIN_SCALE = 0.58;
-const MAP_MAX_SCALE = 2.6;
-const MAP_WORLD_TRANSFORM = {
-  xScale: 0.00904271438150494,
-  xOffset: 48.4322996315255,
-  yScale: -0.00900772430620384,
-  yOffset: 71.3195480253975
+const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
+const MAP_TILE_URL = "https://tiles.mapgenie.io/games/gta5/los-santos/satellite/{z}/{x}/{y}.png";
+const MAP_INITIAL_VIEW = {
+  lat: 66.722541,
+  lng: -140.625,
+  zoom: 4.25
 };
+const MAP_MIN_ZOOM = 3;
+const MAP_MAX_ZOOM = 7;
+const MAP_MAX_BOUNDS = [
+  [55.25, -151.5],
+  [84.25, -98.5]
+];
 const MAP_TYPE_META = {
+  police: {
+    label: "Police Station",
+    groupLabel: "Police",
+    color: "#63a7ff",
+    glow: "rgba(99, 167, 255, .22)"
+  },
   hospital: {
     label: "Hospital",
     groupLabel: "Hospitals",
     color: "#54e0a6",
     glow: "rgba(84, 224, 166, .22)"
   },
-  police: {
-    label: "Police Station",
-    groupLabel: "Police",
-    color: "#63a7ff",
-    glow: "rgba(99, 167, 255, .22)"
+  fire: {
+    label: "Fire Station",
+    groupLabel: "Fire",
+    color: "#ff7b63",
+    glow: "rgba(255, 123, 99, .24)"
+  },
+  carwash: {
+    label: "Car Wash",
+    groupLabel: "Car Washes",
+    color: "#f7c85f",
+    glow: "rgba(247, 200, 95, .24)"
   },
   underground: {
     label: "Lester's House",
@@ -65,260 +80,288 @@ const MAP_TYPE_META = {
     glow: "rgba(255, 155, 84, .24)"
   }
 };
-function roundMapPercent(value) {
-  return Math.round(value * 100) / 100;
-}
-
-// GTALens exposes GTA world coordinates; this projects them onto the site's square map asset.
-function mapWorldToPercent(gameX, gameY) {
-  return {
-    x: roundMapPercent(MAP_WORLD_TRANSFORM.xScale * gameX + MAP_WORLD_TRANSFORM.xOffset),
-    y: roundMapPercent(MAP_WORLD_TRANSFORM.yScale * gameY + MAP_WORLD_TRANSFORM.yOffset)
-  };
-}
-
-function mapLocation({ gameX, gameY, ...location }) {
-  const projected = mapWorldToPercent(gameX, gameY);
-  return {
-    ...location,
-    x: location.x ?? projected.x,
-    y: location.y ?? projected.y
-  };
-}
-
 const MAP_LOCATIONS = [
-  mapLocation({
-    id: "bay-care-center",
-    type: "hospital",
-    name: "The Bay Care Center",
-    region: "Paleto Bay",
-    address: "Duluoz Avenue",
-    gameX: -242.2981,
-    gameY: 6325.2334,
-    description: "Paleto Bay's hospital and one of the main northern medical respawn points in GTA Online."
-  }),
-  mapLocation({
-    id: "mount-zonah-medical-center",
-    type: "hospital",
-    name: "Mount Zonah Medical Center",
-    region: "Rockford Hills",
-    address: "Dorset Drive & Dorset Place",
-    gameX: -449.7836,
-    gameY: -341.3995,
-    x: 44.1,
-    y: 74.2,
-    description: "Major west-side hospital in Rockford Hills, useful for fast access to Burton, Vinewood, and Del Perro."
-  }),
-  mapLocation({
-    id: "pillbox-hill-medical-center",
-    type: "hospital",
-    name: "Pillbox Hill Medical Center",
-    region: "Pillbox Hill",
-    address: "Elgin Avenue, Strawberry Avenue & Swiss Street",
-    gameX: 360.7675,
-    gameY: -583.4315,
-    x: 51.5,
-    y: 76.5,
-    description: "The central downtown hospital and one of the easiest medical landmarks to call out inside Los Santos."
-  }),
-  mapLocation({
-    id: "central-los-santos-medical-center",
-    type: "hospital",
-    name: "Central Los Santos Medical Center",
-    region: "South Los Santos",
-    address: "Crusade Road & Innocence Boulevard",
-    gameX: 341.4144,
-    gameY: -1396.291,
-    x: 51.6,
-    y: 83.9,
-    description: "Large south-east city hospital near the river and industrial roads, good for East LS and Port callouts."
-  }),
-  mapLocation({
-    id: "st-fiacre-hospital",
-    type: "hospital",
-    name: "St. Fiacre Hospital",
-    region: "El Burro Heights",
-    address: "Capital Boulevard",
-    gameX: 1176.8209,
-    gameY: -1522.9105,
-    x: 59.7,
-    y: 84.4,
-    description: "East-side medical site in El Burro Heights, sitting above the industrial lanes and the port routes."
-  }),
-  mapLocation({
-    id: "eclipse-medical-tower",
-    type: "hospital",
-    name: "Eclipse Medical Tower",
-    region: "West Vinewood",
-    address: "Eclipse Boulevard",
-    gameX: -656.6413,
-    gameY: 309.4868,
-    x: 42.6,
-    y: 68.5,
-    description: "A west-side medical tower above central Los Santos, close to the Vinewood and Burton routes."
-  }),
-  mapLocation({
-    id: "portola-trinity-medical-center",
-    type: "hospital",
-    name: "Portola Trinity Medical Center",
-    region: "Rockford Hills",
-    address: "Dorset Drive & Marathon Avenue",
-    gameX: -875.4126,
-    gameY: -308.313,
-    x: 40.8,
-    y: 74.1,
-    description: "Medical facility between Rockford Hills and Burton, just east of Mount Zonah."
-  }),
-  mapLocation({
-    id: "sandy-shores-medical-center",
-    type: "hospital",
-    name: "Sandy Shores Medical Center",
-    region: "Sandy Shores",
-    address: "Mountain View Drive",
-    gameX: 1838.4948,
-    gameY: 3672.2222,
-    description: "Main Blaine County desert hospital, sharing the Sandy Shores building with the local sheriff station."
-  }),
-  mapLocation({
-    id: "mission-row-police-station",
-    type: "police",
-    name: "Mission Row Police Station",
-    region: "Mission Row",
-    address: "Vespucci Boulevard, Little Bighorn Avenue, Atlee Street & Sinner Street",
-    gameX: 479.6391,
-    gameY: -976.6794,
-    x: 52.2,
-    y: 79.6,
-    description: "The main Los Santos police station and the best known central LSPD location in GTA Online."
-  }),
-  mapLocation({
-    id: "la-mesa-police-station",
-    type: "police",
-    name: "La Mesa Police Station",
-    region: "La Mesa",
-    address: "Popular Street",
-    gameX: 824.992004,
-    gameY: -1289.266846,
-    x: 55.7,
-    y: 82.0,
-    description: "East-side LSPD station close to La Mesa, the river roads, and the industrial part of the city."
-  }),
-  mapLocation({
-    id: "vinewood-police-station",
-    type: "police",
-    name: "Vinewood Police Station",
-    region: "Downtown Vinewood",
-    address: "Vinewood Boulevard & Elgin Avenue",
-    gameX: 639.1819,
-    gameY: 1.765,
-    x: 54.0,
-    y: 70.9,
-    description: "North-central city station covering the Vinewood strip and upper urban blocks."
-  }),
-  mapLocation({
-    id: "vespucci-police-station",
-    type: "police",
-    name: "Vespucci Police Station",
-    region: "Vespucci",
-    address: "South Rockford Drive, Vespucci Boulevard & San Andreas Avenue",
-    gameX: -1093.89,
-    gameY: -807.0834,
-    x: 38.5,
-    y: 78.5,
-    description: "Large west-city LSPD station serving the Vespucci side of Los Santos."
-  }),
-  mapLocation({
-    id: "vespucci-beach-police-station",
-    type: "police",
-    name: "Vespucci Beach Police Station",
-    region: "Vespucci Beach",
-    address: "Vespucci Beach",
-    gameX: -1326.0114,
-    gameY: -1502.1876,
-    x: 36.5,
-    y: 84.5,
-    description: "Small beachside police station along the Vespucci coastline."
-  }),
-  mapLocation({
-    id: "beaver-bush-ranger-station",
+  {
+    id: "beaver-bush-ranger-station-13325",
     type: "police",
     name: "Beaver Bush Ranger Station",
     region: "Vinewood Hills",
-    address: "Baytree Canyon Road & Marlow Drive",
-    gameX: 382.2473,
-    gameY: 796.637,
-    x: 51.8,
-    y: 64.0,
-    description: "Ranger outpost in the hills above the city, useful for the park and canyon roads."
-  }),
-  mapLocation({
-    id: "del-perro-police-station",
-    type: "police",
-    name: "Del Perro Police Station",
-    region: "Del Perro",
-    address: "Del Perro Pier",
-    gameX: -1634.0186,
-    gameY: -1021.051,
-    x: 33.8,
-    y: 80.4,
-    description: "Pier-side police station on the west coast, just off the Del Perro beachfront."
-  }),
-  mapLocation({
-    id: "davis-sheriffs-station",
+    lat: 72.147523448012,
+    lng: -120.92376708984,
+    sourceId: 13325
+  },
+  {
+    id: "davis-sheriff-s-station-12666",
     type: "police",
     name: "Davis Sheriff's Station",
     region: "Davis",
-    address: "Innocence Boulevard",
-    gameX: 360.8818,
-    gameY: -1581.6075,
-    x: 51.3,
-    y: 84.8,
-    description: "South-city sheriff station in Davis, close to Grove Street, Strawberry, and the industrial lanes."
-  }),
-  mapLocation({
-    id: "rockford-hills-police-station",
+    lat: 63.519175,
+    lng: -120.981445,
+    sourceId: 12666
+  },
+  {
+    id: "del-perro-police-station-85422",
+    type: "police",
+    name: "Del Perro Police Station",
+    region: "Del Perro",
+    lat: 66.149950045763,
+    lng: -139.83592821285,
+    sourceId: 85422
+  },
+  {
+    id: "fib-headquarters-12836",
+    type: "police",
+    name: "FIB Headquarters",
+    region: "Downtown",
+    lat: 67.033413,
+    lng: -123.601685,
+    sourceId: 12836
+  },
+  {
+    id: "international-affairs-agency-12837",
+    type: "police",
+    name: "International Affairs Agency",
+    region: "Downtown",
+    lat: 67.411971285626,
+    lng: -123.37097167969,
+    sourceId: 12837
+  },
+  {
+    id: "la-mesa-police-station-12664",
+    type: "police",
+    name: "La Mesa Police Station",
+    region: "La Mesa",
+    lat: 64.820907,
+    lng: -116.433105,
+    sourceId: 12664
+  },
+  {
+    id: "mission-row-police-department-12657",
+    type: "police",
+    name: "Mission Row Police Department",
+    region: "Mission Row",
+    lat: 66.071546493516,
+    lng: -119.99267578125,
+    sourceId: 12657
+  },
+  {
+    id: "paleto-bay-police-station-12694",
+    type: "police",
+    name: "Paleto Bay Police Station",
+    region: "Paleto Bay",
+    lat: 82.587523847968,
+    lng: -128.935546875,
+    sourceId: 12694
+  },
+  {
+    id: "rockford-hills-police-station-12637",
     type: "police",
     name: "Rockford Hills Police Station",
     region: "Rockford Hills",
-    address: "Eastbourne Way & Abe Milton Parkway",
-    gameX: -560.755,
-    gameY: -133.9789,
-    x: 43.1,
-    y: 72.6,
-    description: "Upscale west-city police station linked to Rockford Hills City Hall."
-  }),
-  mapLocation({
-    id: "sandy-shores-sheriffs-station",
+    lat: 69.271708670316,
+    lng: -130.10009765625,
+    sourceId: 12637
+  },
+  {
+    id: "sandy-shores-police-station-12723",
     type: "police",
-    name: "Sandy Shores Sheriff's Station",
+    name: "Sandy Shores Police Station",
     region: "Sandy Shores",
-    address: "Alhambra Drive",
-    gameX: 1856.3516,
-    gameY: 3682.0608,
-    description: "Blaine County sheriff station in Sandy Shores, sharing its building with the local medical center."
-  }),
-  mapLocation({
-    id: "paleto-bay-sheriffs-office",
+    lat: 79.036348173338,
+    lng: -106.6552734375,
+    sourceId: 12723
+  },
+  {
+    id: "vespucci-beach-police-station-14088",
     type: "police",
-    name: "Paleto Bay Sheriff's Office",
+    name: "Vespucci Beach Police Station",
+    region: "Vespucci Beach",
+    lat: 63.868467,
+    lng: -137.416992,
+    sourceId: 14088
+  },
+  {
+    id: "vespucci-police-department-12624",
+    type: "police",
+    name: "Vespucci Police Department",
+    region: "Vespucci",
+    lat: 66.731223038576,
+    lng: -135.087890625,
+    sourceId: 12624
+  },
+  {
+    id: "vinewood-police-department-12650",
+    type: "police",
+    name: "Vinewood Police Department",
+    region: "Vinewood",
+    lat: 69.62651,
+    lng: -118.476563,
+    sourceId: 12650
+  },
+  {
+    id: "central-los-santos-medical-center-12710",
+    type: "hospital",
+    name: "Central Los Santos Medical Center",
+    region: "South Los Santos",
+    lat: 64.320871579903,
+    lng: -121.16821289062,
+    sourceId: 12710
+  },
+  {
+    id: "eclipse-medical-tower-471210",
+    type: "hospital",
+    name: "Eclipse Medical Tower",
+    region: "West Vinewood",
+    lat: 70.702482204775,
+    lng: -130.91438804994,
+    sourceId: 471210
+  },
+  {
+    id: "mount-zonah-medical-center-12709",
+    type: "hospital",
+    name: "Mount Zonah Medical Center",
+    region: "Rockford Hills",
+    lat: 68.483955367346,
+    lng: -129.21020507812,
+    sourceId: 12709
+  },
+  {
+    id: "pillbox-hill-medical-center-12711",
+    type: "hospital",
+    name: "Pillbox Hill Medical Center",
+    region: "Pillbox Hill",
+    lat: 67.579907914307,
+    lng: -121.2451171875,
+    sourceId: 12711
+  },
+  {
+    id: "portola-trinity-medical-center-471209",
+    type: "hospital",
+    name: "Portola Trinity Medical Center",
+    region: "Rockford Hills",
+    lat: 68.621039649988,
+    lng: -133.11241149902,
+    sourceId: 471209
+  },
+  {
+    id: "sandy-shores-medical-center-12722",
+    type: "hospital",
+    name: "Sandy Shores Medical Center",
+    region: "Sandy Shores",
+    lat: 79.000770658962,
+    lng: -106.875,
+    sourceId: 12722
+  },
+  {
+    id: "st-fiacre-hospital-471208",
+    type: "hospital",
+    name: "St Fiacre Hospital",
+    region: "El Burro Heights",
+    lat: 63.836808081018,
+    lng: -113.34076669157,
+    sourceId: 471208
+  },
+  {
+    id: "the-bay-care-center-12716",
+    type: "hospital",
+    name: "The Bay Care Center",
     region: "Paleto Bay",
-    address: "Route 1 & Paleto Boulevard",
-    gameX: -440.7429,
-    gameY: 6019.8892,
-    description: "Northern sheriff office at the main Paleto Bay junction."
-  }),
-  mapLocation({
-    id: "hacking-device-store",
+    lat: 82.902418825355,
+    lng: -127.51831054688,
+    sourceId: 12716
+  },
+  {
+    id: "car-wash-12628",
+    type: "carwash",
+    name: "Car Wash",
+    region: "West Los Santos",
+    lat: 66.258011,
+    lng: -131.638184,
+    sourceId: 12628
+  },
+  {
+    id: "car-wash-12729",
+    type: "carwash",
+    name: "Car Wash",
+    region: "Downtown",
+    lat: 64.415921,
+    lng: -124.398193,
+    sourceId: 12729
+  },
+  {
+    id: "davis-fire-dept-13647",
+    type: "fire",
+    name: "Davis Fire Dept.",
+    region: "Davis",
+    lat: 63.327481,
+    lng: -122.536011,
+    sourceId: 13647
+  },
+  {
+    id: "fire-department-headquarters-13309",
+    type: "fire",
+    name: "Fire Department Headquarters",
+    region: "Rockford Hills",
+    lat: 69.281427,
+    lng: -130.852661,
+    sourceId: 13309
+  },
+  {
+    id: "fire-station-7-13650",
+    type: "fire",
+    name: "Fire Station 7",
+    region: "East Los Santos",
+    lat: 64.09620743849,
+    lng: -112.96142578125,
+    sourceId: 13650
+  },
+  {
+    id: "fort-zancudo-fire-station-13609",
+    type: "fire",
+    name: "Fort Zancudo Fire Station",
+    region: "Fort Zancudo",
+    lat: 77.329399607775,
+    lng: -145.107421875,
+    sourceId: 13609
+  },
+  {
+    id: "lsia-fire-dept-469915",
+    type: "fire",
+    name: "LSIA Fire Dept.",
+    region: "Los Santos International Airport",
+    lat: 60.08539303028,
+    lng: -134.82971191406,
+    sourceId: 469915
+  },
+  {
+    id: "paleto-bay-fire-station-13799",
+    type: "fire",
+    name: "Paleto Bay Fire Station",
+    region: "Paleto Bay",
+    lat: 82.740426243033,
+    lng: -128.24340820312,
+    sourceId: 13799
+  },
+  {
+    id: "sandy-shores-fire-station-13228",
+    type: "fire",
+    name: "Sandy Shores Fire Station",
+    region: "Sandy Shores",
+    lat: 78.850945620592,
+    lng: -108.193359375,
+    sourceId: 13228
+  },
+  {
+    id: "lesters-house-13244",
     type: "underground",
     name: "Lester's House",
     region: "El Burro Heights",
-    address: "Amarillo Vista, El Burro Heights",
-    gameX: 1273.9,
-    gameY: -1719.305,
-    x: 57.4,
-    y: 78.0,
-    description: "Lester's house in El Burro Heights, used here as the hacking contact location."
-  })
+    address: "Amarillo Vista",
+    lat: 62.99687,
+    lng: -112.109474,
+    description: "Lester's house in El Burro Heights, kept as a custom contact point on top of the imported services map.",
+    sourceId: 13244
+  }
 ];
 
 const ORDER_STATUS_DEMO = {
@@ -874,6 +917,15 @@ function getMapTypeMeta(type) {
 }
 
 function getMapTypeIcon(type) {
+  if (type === "police") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l7 3v5c0 5.2-2.7 9.2-7 12-4.3-2.8-7-6.8-7-12V5l7-3z" fill="currentColor"></path>
+        <path d="M12 7.1l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" fill="rgba(11,15,20,.92)"></path>
+      </svg>
+    `;
+  }
+
   if (type === "hospital") {
     return `
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -882,11 +934,19 @@ function getMapTypeIcon(type) {
     `;
   }
 
-  if (type === "police") {
+  if (type === "fire") {
     return `
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2l7 3v5c0 5.2-2.7 9.2-7 12-4.3-2.8-7-6.8-7-12V5l7-3z" fill="currentColor"></path>
-        <path d="M12 7.1l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" fill="rgba(11,15,20,.92)"></path>
+        <path d="M13.3 2.6c.3 2-.3 3.4-1.5 4.9 1.5-.5 2.8-1.7 3.8-3.1 2.7 3.2 4.1 5.8 4.1 8.5A7.7 7.7 0 0 1 12 20.6 7.7 7.7 0 0 1 4.3 13c0-2.9 1.5-5.6 4.7-8.6.2 2 .9 3.6 2.3 4.8-.1-1.9.5-4.1 2-6.6Z" fill="currentColor"></path>
+      </svg>
+    `;
+  }
+
+  if (type === "carwash") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 5.5h10a1 1 0 0 1 .9 1.4l-1 2.1H7.1l-1-2.1A1 1 0 0 1 7 5.5Zm-.7 5H18a1 1 0 0 1 1 1v3.2a3.3 3.3 0 0 1-3.3 3.3H8.3A3.3 3.3 0 0 1 5 14.7V11.5a1 1 0 0 1 1-1Zm3.2 1.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Zm5 0a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z" fill="currentColor"></path>
+        <path d="M8.4 3.2c.8 1 .9 1.8.4 2.5-.4.5-1 .8-1.8.8.9-.8 1-1.8 1.4-3.3Zm7.1 0c.8 1 .9 1.8.4 2.5-.4.5-1 .8-1.8.8.9-.8 1-1.8 1.4-3.3Z" fill="currentColor" opacity=".7"></path>
       </svg>
     `;
   }
@@ -900,24 +960,56 @@ function getMapTypeIcon(type) {
   `;
 }
 
+function getMapLocationDescription(location) {
+  if (location.description) return location.description;
+
+  if (location.type === "police") {
+    return `${location.name} is included in the Police Station service layer on the Los Santos satellite map.`;
+  }
+
+  if (location.type === "hospital") {
+    return `${location.name} is included in the Hospital service layer on the Los Santos satellite map.`;
+  }
+
+  if (location.type === "fire") {
+    return `${location.name} is included in the Fire Station service layer on the Los Santos satellite map.`;
+  }
+
+  if (location.type === "carwash") {
+    return `${location.name} is included in the Car Wash service layer on the Los Santos satellite map.`;
+  }
+
+  return "Lester's house in El Burro Heights, kept on the map as a separate custom contact point.";
+}
+
+function getMapLocationMeta(location) {
+  return [location.region, location.address].filter(Boolean).join(" / ") || "Los Santos services layer";
+}
+
 function renderMapQuickLinks() {
   return Object.entries(MAP_TYPE_META).map(([type, meta]) => {
     const locations = MAP_LOCATIONS.filter((location) => location.type === type);
     if (!locations.length) return "";
 
-    const items = locations.map((location) => `
-      <button
-        class="map-quick__item"
-        type="button"
-        data-map-quick="${escapeHtml(location.id)}"
-        data-map-type="${escapeHtml(location.type)}"
-        style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
-      >
-        <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
-        <span class="map-quick__meta">${escapeHtml(meta.label)} / ${escapeHtml(location.region)}</span>
-        <span class="map-quick__name">${escapeHtml(location.name)}</span>
-      </button>
-    `).join("");
+    const items = locations.map((location) => {
+      const quickMeta = location.region
+        ? `${meta.label} / ${location.region}`
+        : meta.label;
+
+      return `
+        <button
+          class="map-quick__item"
+          type="button"
+          data-map-quick="${escapeHtml(location.id)}"
+          data-map-type="${escapeHtml(location.type)}"
+          style="--map-accent:${meta.color}; --map-glow:${meta.glow};"
+        >
+          <span class="map-quick__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
+          <span class="map-quick__meta">${escapeHtml(quickMeta)}</span>
+          <span class="map-quick__name">${escapeHtml(location.name)}</span>
+        </button>
+      `;
+    }).join("");
 
     return `
       <div class="map-quick__group" data-map-group="${escapeHtml(type)}">
@@ -967,31 +1059,12 @@ function renderMap() {
   const quickLinks = renderMapQuickLinks();
   const legend = renderMapLegend();
   const filters = renderMapFilters();
+  const policeCount = MAP_LOCATIONS.filter((location) => location.type === "police").length;
+  const hospitalCount = MAP_LOCATIONS.filter((location) => location.type === "hospital").length;
+  const fireCount = MAP_LOCATIONS.filter((location) => location.type === "fire").length;
+  const carWashCount = MAP_LOCATIONS.filter((location) => location.type === "carwash").length;
 
-  const markers = MAP_LOCATIONS.map((location) => {
-    const meta = getMapTypeMeta(location.type);
-    const glyph = `<span class="custom-map__glyph" aria-hidden="true">${getMapTypeIcon(location.type)}</span>`;
-    return `
-      <button
-        class="custom-map__marker custom-map__marker--${escapeHtml(location.type)}"
-        type="button"
-        style="left:${location.x}%; top:${location.y}%; --map-accent:${meta.color}; --map-glow:${meta.glow};"
-        data-map-location="${escapeHtml(location.id)}"
-        data-map-type="${escapeHtml(location.type)}"
-        aria-label="Focus ${escapeHtml(location.name)}"
-        title="${escapeHtml(location.name)}"
-      >
-        <span class="custom-map__pulse"></span>
-        <span class="custom-map__dot"></span>
-        ${glyph}
-      </button>
-    `;
-  }).join("");
-
-  if (customMapState?.resizeHandler) {
-    window.removeEventListener("resize", customMapState.resizeHandler);
-  }
-  customMapState = null;
+  destroyCustomMap();
 
   setView(`
     <div class="map-page">
@@ -999,9 +1072,13 @@ function renderMap() {
         <div class="map-embed-container map-embed-container--custom">
           <div class="map-layout">
             <aside class="map-panel">
-              <div class="section__eyebrow">Los Santos map</div>
-              <div class="map-panel__headline">Los Santos operations map</div>
-              <div class="map-panel__intro">Filter the map first, then jump from the location list or click directly on a marker for details.</div>
+              <div class="section__eyebrow">Los Santos services</div>
+              <div class="map-panel__headline">Satellite service map</div>
+              <div class="map-panel__intro">${escapeHtml(`${policeCount} police, ${hospitalCount} hospitals, ${fireCount} fire stations, ${carWashCount} car washes, and Lester's House on a satellite-only Los Santos map.`)}</div>
+              <div class="map-panel__source">
+                <span class="map-panel__sourceLabel">Source</span>
+                <a href="${MAP_SOURCE_URL}" target="_blank" rel="noopener noreferrer">gta-5-map.com services</a>
+              </div>
               <div class="map-legend map-legend--panel">
                 ${legend}
               </div>
@@ -1018,24 +1095,13 @@ function renderMap() {
             <div class="map-stage">
               <div class="map-toolbar">
                 <div class="map-toolbar__group">
-                  <button class="map-tool" id="mapZoomOut" type="button" aria-label="Zoom out">-</button>
-                  <div class="map-zoom-label" id="mapZoomLabel">100%</div>
-                  <button class="map-tool" id="mapZoomIn" type="button" aria-label="Zoom in">+</button>
-                  <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Reset View</button>
+                  <button class="map-tool map-tool--ghost" id="mapResetBtn" type="button">Fit Visible Markers</button>
+                  <span class="map-toolbar__badge">Satellite only</span>
                 </div>
-                <div class="map-toolbar__hint">Drag to pan, scroll to zoom, and click a marker or list item to focus it.</div>
+                <div class="map-toolbar__hint">Scroll to zoom, drag to pan, and click a marker or list item to focus it.</div>
               </div>
-              <div class="custom-map-viewport" id="customMapViewport" aria-label="Los Santos map viewer">
-                <div class="custom-map-surface" id="customMapSurface">
-                  <img
-                    src="${MAP_IMAGE_URL}"
-                    alt="GTA Online operations map of Los Santos"
-                    class="custom-map__image"
-                    id="customMapImage"
-                    draggable="false"
-                  >
-                  ${markers}
-                </div>
+              <div class="service-map-shell">
+                <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map"></div>
               </div>
             </div>
           </div>
@@ -1043,6 +1109,7 @@ function renderMap() {
       </section>
     </div>
   `);
+
   window.setTimeout(() => {
     initCustomMap();
   }, 260);
@@ -1050,27 +1117,54 @@ function renderMap() {
 
 function renderMapDetail(location) {
   if (!location) {
+    const policeCount = MAP_LOCATIONS.filter((entry) => entry.type === "police").length;
+    const hospitalCount = MAP_LOCATIONS.filter((entry) => entry.type === "hospital").length;
+    const fireCount = MAP_LOCATIONS.filter((entry) => entry.type === "fire").length;
+    const carWashCount = MAP_LOCATIONS.filter((entry) => entry.type === "carwash").length;
+
     return `
       <div class="map-detail__eyebrow">Overview</div>
-      <div class="map-detail__title">Los Santos Operations Map</div>
-      <div class="map-detail__meta">Hospitals, police stations, and Lester's house</div>
-      <div class="map-detail__body">Use the filters to show one category at a time, then click a marker or a location card to focus it on the map.</div>
+      <div class="map-detail__title">Los Santos Service Map</div>
+      <div class="map-detail__meta">Satellite only / ${policeCount} police / ${hospitalCount} hospitals / ${fireCount} fire stations / ${carWashCount} car washes</div>
+      <div class="map-detail__body">Markers on this page are pulled from the Services layer on gta-5-map.com, with Lester's House kept as a separate custom point.</div>
     `;
   }
 
   const meta = getMapTypeMeta(location.type);
-  const detailMeta = [location.region, location.address].filter(Boolean).join(" / ");
 
   return `
     <div class="map-detail__eyebrow">${escapeHtml(meta.label)}</div>
     <div class="map-detail__title">${escapeHtml(location.name)}</div>
-    <div class="map-detail__meta">${escapeHtml(detailMeta)}</div>
-    <div class="map-detail__body">${escapeHtml(location.description)}</div>
+    <div class="map-detail__meta">${escapeHtml(getMapLocationMeta(location))}</div>
+    <div class="map-detail__body">${escapeHtml(getMapLocationDescription(location))}</div>
   `;
 }
 
 function findMapLocation(locationId) {
   return MAP_LOCATIONS.find((location) => location.id === locationId) ?? null;
+}
+
+function destroyCustomMap() {
+  if (customMapState?.resizeHandler) {
+    window.removeEventListener("resize", customMapState.resizeHandler);
+  }
+
+  if (customMapState?.map) {
+    customMapState.map.off();
+    customMapState.map.remove();
+  }
+
+  customMapState = null;
+}
+
+function syncLeafletMarkerStates() {
+  if (!customMapState) return;
+
+  customMapState.markersById.forEach((marker, markerId) => {
+    const element = marker.getElement();
+    if (!element) return;
+    element.classList.toggle("is-active", markerId === customMapState.activeId);
+  });
 }
 
 function updateMapSelection(locationId) {
@@ -1083,12 +1177,35 @@ function updateMapSelection(locationId) {
     customMapState.infoEl.innerHTML = renderMapDetail(location);
   }
 
-  customMapState.markerButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.mapLocation === customMapState.activeId);
-  });
-
   customMapState.quickButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.mapQuick === customMapState.activeId);
+  });
+
+  window.requestAnimationFrame(syncLeafletMarkerStates);
+}
+
+function getVisibleMapLocations() {
+  if (!customMapState || customMapState.filter === "all") {
+    return MAP_LOCATIONS;
+  }
+
+  return MAP_LOCATIONS.filter((location) => location.type === customMapState.filter);
+}
+
+function fitMapToLocations(locations, animate = true) {
+  if (!customMapState?.map || !window.L || !locations.length) return;
+
+  if (locations.length === 1) {
+    const [location] = locations;
+    customMapState.map.setView([location.lat, location.lng], Math.min(6.1, MAP_MAX_ZOOM), { animate });
+    return;
+  }
+
+  const bounds = window.L.latLngBounds(locations.map((location) => [location.lat, location.lng]));
+  customMapState.map.fitBounds(bounds, {
+    padding: [34, 34],
+    maxZoom: 5.35,
+    animate
   });
 }
 
@@ -1102,14 +1219,9 @@ function applyMapFilter(filterKey) {
     button.classList.toggle("is-active", button.dataset.mapFilter === nextFilter);
   });
 
-  customMapState.markerButtons.forEach((button) => {
-    const isVisible = nextFilter === "all" || button.dataset.mapType === nextFilter;
-    button.classList.toggle("is-hidden", !isVisible);
-    button.disabled = !isVisible;
-  });
-
   customMapState.quickButtons.forEach((button) => {
-    const isVisible = nextFilter === "all" || button.dataset.mapType === nextFilter;
+    const location = findMapLocation(button.dataset.mapQuick);
+    const isVisible = !!location && (nextFilter === "all" || location.type === nextFilter);
     button.classList.toggle("is-hidden", !isVisible);
   });
 
@@ -1118,167 +1230,145 @@ function applyMapFilter(filterKey) {
     group.classList.toggle("is-hidden", !hasVisibleItems);
   });
 
+  customMapState.markersById.forEach((marker, markerId) => {
+    const location = findMapLocation(markerId);
+    const isVisible = !!location && (nextFilter === "all" || location.type === nextFilter);
+    const hasLayer = customMapState.markerLayer.hasLayer(marker);
+
+    if (isVisible && !hasLayer) {
+      customMapState.markerLayer.addLayer(marker);
+    } else if (!isVisible && hasLayer) {
+      customMapState.markerLayer.removeLayer(marker);
+    }
+  });
+
   if (customMapState.activeId) {
     const activeLocation = findMapLocation(customMapState.activeId);
-    if (activeLocation && nextFilter !== "all" && activeLocation.type !== nextFilter) {
+    if (!activeLocation || (nextFilter !== "all" && activeLocation.type !== nextFilter)) {
       updateMapSelection(null);
-    } else {
-      updateMapSelection(customMapState.activeId);
     }
   }
-}
 
-function centerMapOn(xRatio, yRatio) {
-  if (!customMapState) return;
+  window.requestAnimationFrame(syncLeafletMarkerStates);
 
-  const { viewport, surface } = customMapState;
-  if (!viewport || !surface) return;
-
-  const maxLeft = Math.max(0, surface.offsetWidth - viewport.clientWidth);
-  const maxTop = Math.max(0, surface.offsetHeight - viewport.clientHeight);
-  viewport.scrollLeft = clamp(surface.offsetWidth * xRatio - viewport.clientWidth / 2, 0, maxLeft);
-  viewport.scrollTop = clamp(surface.offsetHeight * yRatio - viewport.clientHeight / 2, 0, maxTop);
-}
-
-function getMapFitScale(viewport = customMapState?.viewport) {
-  if (!viewport) return 1;
-  const safeWidth = Math.max(320, viewport.clientWidth - 24);
-  return clamp(safeWidth / MAP_BASE_SIZE, MAP_MIN_SCALE, 1);
-}
-
-function refreshMapZoomUi() {
-  if (!customMapState) return;
-
-  const { zoomLabel, zoomInBtn, zoomOutBtn, scale } = customMapState;
-  if (zoomLabel) {
-    zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+  if (!customMapState.activeId) {
+    fitMapToLocations(getVisibleMapLocations());
   }
-  if (zoomInBtn) {
-    zoomInBtn.disabled = scale >= MAP_MAX_SCALE;
-  }
-  if (zoomOutBtn) {
-    zoomOutBtn.disabled = scale <= MAP_MIN_SCALE + 0.001;
-  }
-}
-
-function setCustomMapScale(nextScale, options = {}) {
-  if (!customMapState) return;
-
-  const { viewport, surface } = customMapState;
-  if (!viewport || !surface) return;
-
-  const currentWidth = Math.max(surface.offsetWidth, 1);
-  const currentHeight = Math.max(surface.offsetHeight, 1);
-  const focusX = clamp(options.focusX ?? ((viewport.scrollLeft + viewport.clientWidth / 2) / currentWidth), 0, 1);
-  const focusY = clamp(options.focusY ?? ((viewport.scrollTop + viewport.clientHeight / 2) / currentHeight), 0, 1);
-
-  customMapState.scale = clamp(nextScale, MAP_MIN_SCALE, MAP_MAX_SCALE);
-  surface.style.width = `${Math.round(MAP_BASE_SIZE * customMapState.scale)}px`;
-  refreshMapZoomUi();
-
-  window.requestAnimationFrame(() => {
-    centerMapOn(focusX, focusY);
-  });
 }
 
 function focusMapLocation(locationId) {
   const location = findMapLocation(locationId);
-  if (!location) return;
+  if (!location || !customMapState?.map) return;
 
   updateMapSelection(location.id);
-  const focusX = location.x / 100;
-  const focusY = location.y / 100;
-  const targetScale = customMapState ? Math.max(customMapState.scale, 1.08) : 1.08;
-  setCustomMapScale(targetScale, { focusX, focusY });
+  customMapState.map.flyTo(
+    [location.lat, location.lng],
+    Math.min(Math.max(customMapState.map.getZoom(), location.type === "underground" ? 6.1 : 5.7), MAP_MAX_ZOOM),
+    { duration: 0.35 }
+  );
 }
 
 function resetCustomMapView() {
   updateMapSelection(null);
-  setCustomMapScale(getMapFitScale(), { focusX: 0.5, focusY: 0.5 });
+  fitMapToLocations(getVisibleMapLocations(), false);
 }
 
-function bindMapDragging(viewport) {
-  let pointerId = null;
-  let startX = 0;
-  let startY = 0;
-  let startLeft = 0;
-  let startTop = 0;
+function createMapMarkerIcon(type) {
+  if (!window.L) return null;
 
-  const stopDragging = () => {
-    pointerId = null;
-    viewport.classList.remove("is-dragging");
-  };
+  const meta = getMapTypeMeta(type);
+  return window.L.divIcon({
+    className: "service-marker",
+    html: `
+      <span class="service-marker__pin service-marker__pin--${escapeHtml(type)}" style="--map-accent:${meta.color}; --map-glow:${meta.glow};">
+        <span class="service-marker__halo"></span>
+        <span class="service-marker__core"></span>
+        <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
+      </span>
+    `,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+    tooltipAnchor: [0, -18]
+  });
+}
 
-  viewport.addEventListener("pointerdown", (event) => {
-    if (event.pointerType === "touch") return;
-    if (event.button !== 0) return;
-    if (event.target.closest("button, a")) return;
-
-    pointerId = event.pointerId;
-    startX = event.clientX;
-    startY = event.clientY;
-    startLeft = viewport.scrollLeft;
-    startTop = viewport.scrollTop;
-    viewport.classList.add("is-dragging");
-    viewport.setPointerCapture(pointerId);
-    event.preventDefault();
+function buildMapMarker(location) {
+  const marker = window.L.marker([location.lat, location.lng], {
+    icon: createMapMarkerIcon(location.type),
+    keyboard: true,
+    title: location.name
   });
 
-  viewport.addEventListener("pointermove", (event) => {
-    if (event.pointerId !== pointerId) return;
-
-    viewport.scrollLeft = startLeft - (event.clientX - startX);
-    viewport.scrollTop = startTop - (event.clientY - startY);
+  marker.on("click", () => {
+    focusMapLocation(location.id);
   });
 
-  viewport.addEventListener("pointerup", (event) => {
-    if (event.pointerId !== pointerId) return;
-    stopDragging();
+  marker.on("add", () => {
+    syncLeafletMarkerStates();
   });
 
-  viewport.addEventListener("pointercancel", (event) => {
-    if (event.pointerId !== pointerId) return;
-    stopDragging();
+  marker.bindTooltip(location.name, {
+    direction: "top",
+    offset: [0, -18],
+    className: "service-map__tooltip"
   });
 
-  viewport.addEventListener("lostpointercapture", stopDragging);
+  return marker;
 }
 
 function initCustomMap() {
-  const viewport = document.getElementById("customMapViewport");
-  const surface = document.getElementById("customMapSurface");
+  const mapEl = document.getElementById("serviceMap");
   const infoEl = document.getElementById("customMapInfo");
-  const zoomOutBtn = document.getElementById("mapZoomOut");
-  const zoomInBtn = document.getElementById("mapZoomIn");
   const resetBtn = document.getElementById("mapResetBtn");
-  const zoomLabel = document.getElementById("mapZoomLabel");
-  const image = document.getElementById("customMapImage");
 
-  if (!viewport || !surface || !infoEl) return;
+  if (!mapEl || !infoEl) return;
+  if (!window.L) {
+    infoEl.innerHTML = `
+      <div class="map-detail__eyebrow">Map unavailable</div>
+      <div class="map-detail__title">Satellite map failed to load</div>
+      <div class="map-detail__meta">Leaflet did not initialize</div>
+      <div class="map-detail__body">Refresh the page once and the map should retry with the satellite tiles.</div>
+    `;
+    return;
+  }
+
+  const map = window.L.map(mapEl, {
+    zoomControl: false,
+    attributionControl: false,
+    minZoom: MAP_MIN_ZOOM,
+    maxZoom: MAP_MAX_ZOOM,
+    zoomSnap: 0.25,
+    zoomDelta: 0.25,
+    worldCopyJump: false,
+    maxBounds: MAP_MAX_BOUNDS,
+    maxBoundsViscosity: 1
+  });
+
+  window.L.tileLayer(MAP_TILE_URL, {
+    minZoom: MAP_MIN_ZOOM,
+    maxZoom: MAP_MAX_ZOOM,
+    noWrap: true
+  }).addTo(map);
+
+  window.L.control.zoom({ position: "bottomright" }).addTo(map);
 
   customMapState = {
     activeId: null,
     filter: "all",
     filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),
     infoEl,
-    markerButtons: Array.from(document.querySelectorAll("[data-map-location]")),
+    map,
+    markerLayer: window.L.layerGroup().addTo(map),
+    markersById: new Map(),
     quickGroups: Array.from(document.querySelectorAll("[data-map-group]")),
     quickButtons: Array.from(document.querySelectorAll("[data-map-quick]")),
     resetBtn,
-    scale: 1,
-    surface,
-    viewport,
-    zoomInBtn,
-    zoomLabel,
-    zoomOutBtn
+    resizeHandler: null
   };
 
-  surface.style.width = `${MAP_BASE_SIZE}px`;
-
-  customMapState.markerButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      focusMapLocation(button.dataset.mapLocation);
-    });
+  MAP_LOCATIONS.forEach((location) => {
+    const marker = buildMapMarker(location);
+    customMapState.markersById.set(location.id, marker);
   });
 
   customMapState.quickButtons.forEach((button) => {
@@ -1293,45 +1383,34 @@ function initCustomMap() {
     });
   });
 
-  if (zoomInBtn) {
-    zoomInBtn.addEventListener("click", () => {
-      setCustomMapScale(customMapState.scale + 0.2);
-    });
-  }
-
-  if (zoomOutBtn) {
-    zoomOutBtn.addEventListener("click", () => {
-      setCustomMapScale(customMapState.scale - 0.2);
-    });
-  }
-
   if (resetBtn) {
     resetBtn.addEventListener("click", resetCustomMapView);
   }
 
-  bindMapDragging(viewport);
-  refreshMapZoomUi();
-  updateMapSelection(null);
-  applyMapFilter("all");
-
-  const setInitialView = () => {
-    resetCustomMapView();
-  };
-
   const resizeHandler = () => {
-    if (!customMapState) return;
-    if (customMapState.activeId) return;
-    resetCustomMapView();
+    if (!customMapState?.map) return;
+    customMapState.map.invalidateSize();
+    if (!customMapState.activeId) {
+      fitMapToLocations(getVisibleMapLocations(), false);
+    }
   };
 
   customMapState.resizeHandler = resizeHandler;
   window.addEventListener("resize", resizeHandler);
 
-  if (image && !image.complete) {
-    image.addEventListener("load", setInitialView, { once: true });
-  } else {
-    window.requestAnimationFrame(setInitialView);
-  }
+  updateMapSelection(null);
+  applyMapFilter("all");
+
+  window.requestAnimationFrame(() => {
+    if (!customMapState?.map) return;
+    customMapState.map.setView([MAP_INITIAL_VIEW.lat, MAP_INITIAL_VIEW.lng], MAP_INITIAL_VIEW.zoom, { animate: false });
+    customMapState.map.invalidateSize();
+    window.setTimeout(() => {
+      if (!customMapState?.map) return;
+      customMapState.map.invalidateSize();
+      resetCustomMapView();
+    }, 90);
+  });
 }
 
 function readCart() {
@@ -2711,6 +2790,9 @@ function route() {
   const r = parseRoute();
   if (r.name !== "status") {
     clearServerStatusPageState();
+  }
+  if (r.name !== "map") {
+    destroyCustomMap();
   }
   updateDockActive(r.name);
 
