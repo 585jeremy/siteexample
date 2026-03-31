@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260331f";
+const SITE_ASSET_VERSION = "20260331g";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1175,6 +1175,7 @@ function renderMapFilters() {
 function renderMap() {
   const quickLinks = renderMapQuickLinks();
   const filters = renderMapFilters();
+  const stageAside = renderMapStageAside();
   const policeCount = MAP_LOCATIONS.filter((location) => location.type === "police").length;
   const hospitalCount = MAP_LOCATIONS.filter((location) => location.type === "hospital").length;
   const fireCount = MAP_LOCATIONS.filter((location) => location.type === "fire").length;
@@ -1235,6 +1236,7 @@ function renderMap() {
                   <div class="map-toolbar__hint">Scroll or use +/- to zoom. Drag to move.</div>
                 </div>
                 <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
+                <aside class="map-stage__aside" id="mapStageAside">${stageAside}</aside>
               </div>
             </div>
           </div>
@@ -1270,6 +1272,48 @@ function renderMapDetail(location) {
     <div class="map-detail__title">${escapeHtml(location.name)}</div>
     <div class="map-detail__meta">${escapeHtml(getMapLocationMeta(location))}</div>
     <div class="map-detail__body">${escapeHtml(getMapLocationDescription(location))}</div>
+  `;
+}
+
+function renderMapStageAside(location) {
+  const legend = renderMapLegend();
+
+  if (!location) {
+    return `
+      <div class="map-stage-card">
+        <div class="map-stage-card__eyebrow">Map Focus</div>
+        <div class="map-stage-card__title">Los Santos Services</div>
+        <div class="map-stage-card__body">Use the location list, click a marker, or zoom in to inspect police departments, hospitals, fire stations, car washes, and Lester's House.</div>
+      </div>
+      <div class="map-stage-card map-stage-card--legend">
+        <div class="map-stage-card__eyebrow">Legend</div>
+        <div class="map-stage-card__legend">
+          ${legend}
+        </div>
+      </div>
+    `;
+  }
+
+  const meta = getMapTypeMeta(location.type);
+
+  return `
+    <div class="map-stage-card map-stage-card--focus" style="--map-accent:${meta.color}; --map-glow:${meta.glow};">
+      <div class="map-stage-card__eyebrow">${escapeHtml(meta.label)}</div>
+      <div class="map-stage-card__row">
+        <span class="map-stage-card__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
+        <div class="map-stage-card__copy">
+          <div class="map-stage-card__title">${escapeHtml(location.name)}</div>
+          <div class="map-stage-card__meta">${escapeHtml(getMapLocationMeta(location))}</div>
+        </div>
+      </div>
+      <div class="map-stage-card__body">${escapeHtml(getMapLocationDescription(location))}</div>
+    </div>
+    <div class="map-stage-card map-stage-card--legend">
+      <div class="map-stage-card__eyebrow">Legend</div>
+      <div class="map-stage-card__legend">
+        ${legend}
+      </div>
+    </div>
   `;
 }
 
@@ -1415,6 +1459,10 @@ function updateMapSelection(locationId) {
     }
   }
 
+  if (customMapState.asideEl) {
+    customMapState.asideEl.innerHTML = renderMapStageAside(location);
+  }
+
   let activeQuickButton = null;
   customMapState.quickButtons.forEach((button) => {
     const isActive = button.dataset.mapQuick === customMapState.activeId;
@@ -1511,6 +1559,7 @@ function resetCustomMapView() {
 function initCustomMap() {
   const mapEl = document.getElementById("serviceMap");
   const infoEl = document.getElementById("customMapInfo");
+  const asideEl = document.getElementById("mapStageAside");
   const resetBtn = document.getElementById("mapResetBtn");
   const zoomInBtn = document.getElementById("mapZoomInBtn");
   const zoomOutBtn = document.getElementById("mapZoomOutBtn");
@@ -1549,6 +1598,7 @@ function initCustomMap() {
 
   customMapState = {
     activeId: null,
+    asideEl,
     detailFlashTimer: null,
     dragPointerId: null,
     filter: "all",
