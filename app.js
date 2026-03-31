@@ -38,7 +38,15 @@ const APP_ASSET_BASE_URL = document.currentScript?.src
 const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png`;
 const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
-const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}satellite-map.jpg`;
+const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map-assets/los-santos-satellite-z6.jpg`;
+const MAP_TILE_GRID = {
+  zoom: 6,
+  tileSize: 256,
+  minX: 0,
+  maxX: 21,
+  minY: 0,
+  maxY: 21
+};
 const MAP_INITIAL_VIEW = {
   lat: 66.722541,
   lng: -140.625,
@@ -50,6 +58,28 @@ const MAP_MAX_BOUNDS = [
   [55.25, -151.5],
   [84.25, -98.5]
 ];
+const MAPGENIE_MARKER_SPRITES = {
+  police: {
+    width: 32,
+    height: 37,
+    y: 1184
+  },
+  hospital: {
+    width: 32,
+    height: 37,
+    y: 814
+  },
+  fire: {
+    width: 32,
+    height: 37,
+    y: 629
+  },
+  carwash: {
+    width: 32,
+    height: 37,
+    y: 296
+  }
+};
 const MAP_TYPE_META = {
   police: {
     label: "Police Station",
@@ -1024,6 +1054,21 @@ function getMapTypeIcon(type) {
   `;
 }
 
+function renderMapMarkerVisual(type) {
+  const sprite = MAPGENIE_MARKER_SPRITES[type];
+  if (sprite) {
+    return `<span class="service-map__sprite service-map__sprite--${escapeHtml(type)}" aria-hidden="true"></span>`;
+  }
+
+  return `
+    <span class="service-marker__pin service-marker__pin--${escapeHtml(type)}">
+      <span class="service-marker__halo"></span>
+      <span class="service-marker__core"></span>
+      <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
+    </span>
+  `;
+}
+
 function getMapLocationDescription(location) {
   if (location.description) return location.description;
 
@@ -1226,13 +1271,19 @@ function findMapLocation(locationId) {
 }
 
 function getMapPositionPercent(location) {
-  const minLat = MAP_MAX_BOUNDS[0][0];
-  const minLng = MAP_MAX_BOUNDS[0][1];
-  const maxLat = MAP_MAX_BOUNDS[1][0];
-  const maxLng = MAP_MAX_BOUNDS[1][1];
+  const tileWorldSize = 2 ** MAP_TILE_GRID.zoom * MAP_TILE_GRID.tileSize;
+  const latRad = location.lat * (Math.PI / 180);
+  const mercatorY = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
+  const worldX = ((location.lng + 180) / 360) * tileWorldSize;
+  const worldY = (tileWorldSize / 2) - (tileWorldSize * mercatorY / (2 * Math.PI));
 
-  const x = ((location.lng - minLng) / (maxLng - minLng)) * 100;
-  const y = 100 - ((location.lat - minLat) / (maxLat - minLat)) * 100;
+  const minX = MAP_TILE_GRID.minX * MAP_TILE_GRID.tileSize;
+  const maxX = (MAP_TILE_GRID.maxX + 1) * MAP_TILE_GRID.tileSize;
+  const minY = MAP_TILE_GRID.minY * MAP_TILE_GRID.tileSize;
+  const maxY = (MAP_TILE_GRID.maxY + 1) * MAP_TILE_GRID.tileSize;
+
+  const x = ((worldX - minX) / (maxX - minX)) * 100;
+  const y = ((worldY - minY) / (maxY - minY)) * 100;
 
   return {
     x: Math.max(1.6, Math.min(98.4, x)),
@@ -1359,11 +1410,7 @@ function initCustomMap() {
         data-map-type="${escapeHtml(location.type)}"
         style="left:${position.x}%; top:${position.y}%; --map-accent:${meta.color}; --map-glow:${meta.glow};"
       >
-        <span class="service-marker__pin service-marker__pin--${escapeHtml(location.type)}">
-          <span class="service-marker__halo"></span>
-          <span class="service-marker__core"></span>
-          <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(location.type)}</span>
-        </span>
+        ${renderMapMarkerVisual(location.type)}
       </button>
     `;
   }).join("");
