@@ -850,32 +850,23 @@ function renderMap() {
 
   setView(`
     <div class="map-page">
-      ${renderHeader("Interactive Map", [{ label: "Map" }])}
       <section class="section section--map">
         <div class="map-embed-container map-embed-container--custom">
-          <div class="map-embed-header">
-            <div class="section__eyebrow">Los Santos navigation</div>
-            <div class="map-embed-title">Explore San Andreas with a cleaner ops map</div>
-            <div class="map-embed-subtitle">This view is tuned to fit the screen better, keep the controls compact, and make hospitals, police stations, and Lester's hacking contact easier to find.</div>
-          </div>
           <div class="map-layout">
             <aside class="map-panel">
-              <div class="map-panel__title">Quick locations</div>
-              <div class="map-panel__intro">Jump by category or click directly on the map. The panel stays compact so the map itself gets more room.</div>
+              <div class="section__eyebrow">Los Santos map</div>
+              <div class="map-panel__headline">Operations map for hospitals, police stations, and Lester's contact point.</div>
+              <div class="map-panel__intro">Jump by category or click directly on the map. The right side stays focused on the map so the view uses the screen properly.</div>
+              <div class="map-legend map-legend--panel">
+                ${legend}
+              </div>
+              <div class="map-detail map-detail--panel" id="customMapInfo">${renderMapDetail()}</div>
+              <div class="map-panel__title map-panel__title--spaced">Quick locations</div>
               <div class="map-quick">
                 ${quickLinks}
               </div>
             </aside>
             <div class="map-stage">
-              <div class="map-stage__top">
-                <div>
-                  <div class="map-stage__eyebrow">Field view</div>
-                  <div class="map-stage__title">Service points and key contacts</div>
-                </div>
-                <div class="map-legend">
-                  ${legend}
-                </div>
-              </div>
               <div class="map-toolbar">
                 <div class="map-toolbar__group">
                   <button class="map-tool" id="mapZoomOut" type="button" aria-label="Zoom out">-</button>
@@ -885,11 +876,11 @@ function renderMap() {
                 </div>
                 <div class="map-toolbar__hint">Drag to pan. Scroll to zoom. Click any marker for details.</div>
               </div>
-              <div class="custom-map-viewport" id="customMapViewport" aria-label="San Andreas map viewer">
+              <div class="custom-map-viewport" id="customMapViewport" aria-label="Los Santos map viewer">
                 <div class="custom-map-surface" id="customMapSurface">
                   <img
                     src="${MAP_IMAGE_URL}"
-                    alt="GTA Online map of San Andreas"
+                    alt="GTA Online operations map of Los Santos"
                     class="custom-map__image"
                     id="customMapImage"
                     draggable="false"
@@ -897,7 +888,6 @@ function renderMap() {
                   ${markers}
                 </div>
               </div>
-              <div class="map-detail" id="customMapInfo">${renderMapDetail()}</div>
             </div>
           </div>
         </div>
@@ -913,7 +903,7 @@ function renderMapDetail(location) {
   if (!location) {
     return `
       <div class="map-detail__eyebrow">Overview</div>
-      <div class="map-detail__title">San Andreas Overview</div>
+      <div class="map-detail__title">Los Santos Operations Map</div>
       <div class="map-detail__meta">Hospitals, police stations, and your custom underground marker</div>
       <div class="map-detail__body">Use the grouped quick list on the left or click a marker to jump around the map. Drag anywhere on the map to pan, and use the zoom controls when you want a closer read on a district.</div>
     `;
