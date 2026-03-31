@@ -11,10 +11,27 @@ const logoutBtn = document.getElementById("logoutBtn");
 const AUTH_ACCOUNTS_KEY = "sgcnr_demo_accounts_v1";
 const AUTH_SESSION_KEY = "sgcnr_demo_session_v1";
 const STORE_CART_KEY = "sgcnr_store_cart_v1";
-const DISCORD_INVITE_URL = "https://discord.gg/Y8HNFPtxkE";
-
-const SERVER_JOIN_CODE = "pbe6gy";
-const SERVER_SINGLE_API_URL = `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`;
+const DEFAULT_SERVER_CONFIG = {
+  name: "SGCNR",
+  joinCode: "pbe6gy",
+  joinUrl: "",
+  discordUrl: "https://discord.gg/Y8HNFPtxkE",
+  statusRefreshMs: 60000,
+  maxPlayerPreview: 12,
+  region: "EU",
+  txAdminStatusUrl: "",
+  txAdminPlayersUrl: ""
+};
+const SERVER_CONFIG = {
+  ...DEFAULT_SERVER_CONFIG,
+  ...(window.SGCNR_SERVER_CONFIG || {})
+};
+const DISCORD_INVITE_URL = SERVER_CONFIG.discordUrl;
+const SERVER_JOIN_CODE = SERVER_CONFIG.joinCode;
+const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_JOIN_CODE}`;
+const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
+  ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
+  : "";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -331,6 +348,11 @@ const ORDER_STATUS_DEMO = {
 let currentQuery = "";
 let storeHandlersBound = false;
 let customMapState = null;
+let serverStatusPageState = {
+  timer: null,
+  controller: null,
+  lastSnapshot: null
+};
 
 function normalize(s) {
   return (s ?? "").toString().toLowerCase().trim();
@@ -644,8 +666,8 @@ function renderLanding() {
             <div class="landing-hero__title">Rules, support, and map tools in one place.</div>
             <div class="landing-hero__text">A cleaner way for players to navigate the server, find answers fast, and jump straight into the essentials.</div>
             <div class="landing-hero__actions">
-              <a class="auth__btn auth__btn--primary" href="https://cfx.re/join/pbe6gy" target="_blank" rel="noopener noreferrer">Join Server</a>
-              <a class="auth__btn" href="https://discord.gg/Y8HNFPtxkE" target="_blank" rel="noopener noreferrer">Open Discord</a>
+              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
             </div>
           </div>
           <div class="landing-panel">
@@ -659,13 +681,13 @@ function renderLanding() {
                 <span class="quickstart__icon" aria-hidden="true">📖</span>
                 <span class="quickstart__label">Rules</span>
               </a>
-              <a class="quickstart__btn" href="#/faq">
-                <span class="quickstart__icon" aria-hidden="true">?</span>
-                <span class="quickstart__label">FAQ</span>
-              </a>
               <a class="quickstart__btn" href="#/map">
                 <span class="quickstart__icon" aria-hidden="true">🗺️</span>
                 <span class="quickstart__label">Map</span>
+              </a>
+              <a class="quickstart__btn" href="#/status">
+                <span class="quickstart__icon" aria-hidden="true">📡</span>
+                <span class="quickstart__label">Live Status</span>
               </a>
             </div>
             <div class="landing-stats">
@@ -678,8 +700,8 @@ function renderLanding() {
                 <div class="landing-stat__value">Discord</div>
               </div>
               <div class="landing-stat">
-                <div class="landing-stat__label">Maps</div>
-                <div class="landing-stat__value">Interactive</div>
+                <div class="landing-stat__label">Server</div>
+                <div class="landing-stat__value">Live Ready</div>
               </div>
             </div>
           </div>
@@ -700,7 +722,7 @@ function renderStart() {
           <div class="doc-p">
             Open FiveM, search for <strong>SGCNR</strong> and connect.
             You can also use the direct join link:
-            <a class="info-link" href="https://cfx.re/join/pbe6gy" target="_blank" rel="noopener noreferrer">cfx.re/join/pbe6gy</a>
+            <a class="info-link" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</a>
           </div>
           <div class="feature-grid">
             <div class="feature-card">
@@ -726,7 +748,7 @@ function renderStart() {
             <a class="info-link" href="#/commands">Commands</a>
             <a class="info-link" href="#/faq">FAQ</a>
             <a class="info-link" href="#/status">Server Status</a>
-            <a class="info-link" href="https://discord.gg/Y8HNFPtxkE" target="_blank" rel="noopener noreferrer">Discord</a>
+            <a class="info-link" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
           </div>
         </aside>
       </div>
@@ -2079,6 +2101,368 @@ function renderOrderStatusResult(orderNumber) {
   `;
 }
 
+function clearServerStatusPageState() {
+  if (serverStatusPageState.timer) {
+    window.clearTimeout(serverStatusPageState.timer);
+    serverStatusPageState.timer = null;
+  }
+  if (serverStatusPageState.controller) {
+    serverStatusPageState.controller.abort();
+    serverStatusPageState.controller = null;
+  }
+}
+
+function getServerStatusRouteActive() {
+  return parseRoute().name === "status";
+}
+
+function formatServerTimestamp(value) {
+  if (!value) return "Just now";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "Just now";
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "short"
+  }).format(date);
+}
+
+function formatRefreshInterval(ms) {
+  const seconds = Math.max(1, Math.round(ms / 1000));
+  if (seconds < 60) return `${seconds}s`;
+  return `${Math.round(seconds / 60)}m`;
+}
+
+function readServerVar(vars, keys) {
+  for (const key of keys) {
+    if (vars && vars[key] != null && vars[key] !== "") return vars[key];
+  }
+  return "";
+}
+
+function normaliseServerPlayers(players) {
+  if (!Array.isArray(players)) return [];
+  return players
+    .map((player, index) => ({
+      id: player?.id ?? index + 1,
+      name: player?.name || `Player ${index + 1}`,
+      ping: Number.isFinite(Number(player?.ping)) ? Number(player.ping) : null
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function fetchServerJson(url, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  serverStatusPageState.controller = controller;
+
+  return fetch(url, {
+    headers: { accept: "application/json" },
+    signal: controller.signal
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Status request failed (${response.status})`);
+    }
+    return response.json();
+  }).finally(() => {
+    window.clearTimeout(timeout);
+    if (serverStatusPageState.controller === controller) {
+      serverStatusPageState.controller = null;
+    }
+  });
+}
+
+async function loadServerSnapshot() {
+  if (!SERVER_SINGLE_API_URL) {
+    throw new Error("Server join code is not configured yet.");
+  }
+
+  const payload = await fetchServerJson(SERVER_SINGLE_API_URL);
+  const data = payload?.Data ?? payload?.data ?? payload ?? {};
+  const vars = data?.vars ?? {};
+  const players = normaliseServerPlayers(data?.players);
+  const maxClients = Number(data?.sv_maxclients ?? readServerVar(vars, ["sv_maxclients", "sv_maxClients"]) ?? 0) || 0;
+  const endpoint = Array.isArray(data?.connectEndPoints) ? data.connectEndPoints[0] : "";
+  const tags = Array.isArray(data?.tags)
+    ? data.tags
+    : typeof data?.tags === "string"
+      ? data.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+      : [];
+
+  return {
+    online: true,
+    name: data?.hostname || readServerVar(vars, ["sv_projectName", "sv_hostname"]) || SERVER_CONFIG.name,
+    description: readServerVar(vars, ["sv_projectDesc", "sv_projectDescription"]),
+    clients: Number(data?.clients ?? players.length ?? 0) || 0,
+    maxClients,
+    endpoint,
+    joinCode: SERVER_JOIN_CODE,
+    joinUrl: SERVER_JOIN_URL,
+    mapName: data?.mapname || readServerVar(vars, ["mapname"]) || "Los Santos",
+    gameType: data?.gametype || readServerVar(vars, ["gametype"]) || "Cops & Robbers",
+    locale: readServerVar(vars, ["locale"]) || SERVER_CONFIG.region,
+    onesync: readServerVar(vars, ["onesync_enabled", "onesync"]) || "Enabled",
+    tags,
+    resources: Array.isArray(data?.resources) ? data.resources.length : null,
+    players,
+    source: "FiveM Public API",
+    txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
+    refreshedAt: new Date()
+  };
+}
+
+function renderServerStatusShell() {
+  return `
+    <div class="status-page">
+      ${renderHeader("Server Status", [{ label: "Server Status" }])}
+      <section class="section status-live status-live--hero">
+        <div class="status-live__head">
+          <div class="status-live__copy">
+            <div class="section__eyebrow">Live server hub</div>
+            <h2>${escapeHtml(SERVER_CONFIG.name)}</h2>
+            <p class="status-live__text">Track player count, endpoint details, and connection info from one page. This status panel is now prepared for your real bought server setup.</p>
+          </div>
+          <div class="status-live__actions">
+            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+            <button class="auth__btn" id="statusCopyJoinBtn" type="button">Copy Join Link</button>
+            <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
+          </div>
+        </div>
+        <div class="status-live__highlights">
+          <div class="status-live__highlight">
+            <div class="status-live__label">Join Code</div>
+            <div class="status-live__value">${escapeHtml(SERVER_JOIN_CODE || "Not set")}</div>
+          </div>
+          <div class="status-live__highlight">
+            <div class="status-live__label">Auto Refresh</div>
+            <div class="status-live__value">${escapeHtml(formatRefreshInterval(SERVER_CONFIG.statusRefreshMs))}</div>
+          </div>
+          <div class="status-live__highlight">
+            <div class="status-live__label">Live Source</div>
+            <div class="status-live__value">FiveM API</div>
+          </div>
+        </div>
+      </section>
+      <div id="serverStatusMount">${renderServerStatusLoading()}</div>
+    </div>
+  `;
+}
+
+function renderServerStatusLoading() {
+  return `
+    <section class="section">
+      <div class="status-empty">
+        <div class="status-empty__title">Loading live server data</div>
+        <div class="status-empty__text">Checking the server API and preparing the latest snapshot.</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderServerStatusError(message) {
+  return `
+    <section class="section">
+      <div class="status-empty status-empty--warning">
+        <div class="status-empty__title">Live status is not available right now</div>
+        <div class="status-empty__text">${escapeHtml(message || "The server API could not be reached from the website at the moment.")}</div>
+        <div class="status-note">
+          <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your bought server uses a different join code, Discord invite, or txAdmin endpoints.
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderStatusPlayers(players) {
+  if (!players.length) {
+    return `<div class="status-empty__text">No public player list is available right now.</div>`;
+  }
+
+  const featured = players.slice(0, Math.max(1, SERVER_CONFIG.maxPlayerPreview || 12));
+  return `
+    <div class="status-players__searchWrap">
+      <input class="status-players__search" id="statusPlayerSearch" type="search" placeholder="Filter live players..." />
+    </div>
+    <div class="players players--status" id="statusPlayersList">
+      ${featured.map((player) => `
+        <div class="player-card" data-player-name="${escapeHtml(normalize(player.name))}">
+          <div class="player-card__top">
+            <div class="player-card__name">${escapeHtml(player.name)}</div>
+            <div class="player-card__badge">#${escapeHtml(String(player.id))}</div>
+          </div>
+          <div class="player-card__meta">${player.ping != null ? `${escapeHtml(String(player.ping))} ms ping` : "Ping unavailable"}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderServerStatusContent(snapshot) {
+  const onlineLabel = snapshot.online ? "Online" : "Offline";
+  const playerValue = snapshot.maxClients
+    ? `${snapshot.clients}/${snapshot.maxClients}`
+    : `${snapshot.clients}`;
+  const tags = snapshot.tags?.length
+    ? `<div class="status-tags">${snapshot.tags.slice(0, 6).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
+    : "";
+
+  return `
+    <section class="section">
+      <div class="status-head">
+        <div class="status-head__left">
+          <div class="section__eyebrow">Live snapshot</div>
+          <h2>${escapeHtml(snapshot.name)}</h2>
+          <div class="status-meta">${escapeHtml(snapshot.description || "Connected to the live FiveM server feed.")}</div>
+        </div>
+        <div class="status-pill status-pill--${snapshot.online ? "online" : "offline"}">${onlineLabel}</div>
+      </div>
+      ${tags}
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="status-card__label">Players</div>
+          <div class="status-card__value">${escapeHtml(playerValue)}</div>
+          <div class="status-card__meta">Live public count</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Join Code</div>
+          <div class="status-card__value">${escapeHtml(snapshot.joinCode || "Not set")}</div>
+          <div class="status-card__meta">Direct cfx.re connection</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Endpoint</div>
+          <div class="status-card__value">${escapeHtml(snapshot.endpoint || "Hidden by API")}</div>
+          <div class="status-card__meta">Public connect endpoint</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Game Mode</div>
+          <div class="status-card__value">${escapeHtml(snapshot.gameType)}</div>
+          <div class="status-card__meta">${escapeHtml(snapshot.mapName)}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Server Features</div>
+          <div class="status-card__value">${escapeHtml(snapshot.onesync || "Unknown")}</div>
+          <div class="status-card__meta">${escapeHtml(snapshot.resources != null ? `${snapshot.resources} resources loaded` : "Resource count unavailable")}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Last Refresh</div>
+          <div class="status-card__value">${escapeHtml(formatServerTimestamp(snapshot.refreshedAt))}</div>
+          <div class="status-card__meta">${escapeHtml(snapshot.source)}</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid content-grid--sidebar">
+      <section class="section">
+        <div class="section__eyebrow">Live players</div>
+        <h2>Online player list</h2>
+        ${renderStatusPlayers(snapshot.players)}
+      </section>
+
+      <aside class="section section--stack">
+        <div class="section__eyebrow">Live setup</div>
+        <h2>Website readiness</h2>
+        <div class="stack-list stack-list--compact">
+          <div class="stack-list__item"><span class="stack-list__index">01</span><span>FiveM join code is wired into the website config.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Public player count and server details are fetched automatically.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">03</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
+        </div>
+        <div class="status-note">
+          <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and optional txAdmin URLs.
+        </div>
+      </aside>
+    </div>
+  `;
+}
+
+function filterStatusPlayers(query) {
+  const list = document.getElementById("statusPlayersList");
+  if (!list) return;
+  const normalisedQuery = normalize(query);
+  Array.from(list.querySelectorAll("[data-player-name]")).forEach((item) => {
+    const isVisible = !normalisedQuery || item.dataset.playerName.includes(normalisedQuery);
+    item.classList.toggle("is-hidden", !isVisible);
+  });
+}
+
+function copyServerJoinLink() {
+  const value = SERVER_JOIN_URL;
+  if (!value) return;
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(value).catch(() => {
+      window.prompt("Copy the join link:", value);
+    });
+    return;
+  }
+
+  window.prompt("Copy the join link:", value);
+}
+
+function bindStatusPageControls() {
+  const copyBtn = document.getElementById("statusCopyJoinBtn");
+  if (copyBtn) {
+    copyBtn.onclick = () => copyServerJoinLink();
+  }
+
+  const refreshBtn = document.getElementById("statusRefreshBtn");
+  if (refreshBtn) {
+    refreshBtn.onclick = () => {
+      refreshServerStatus({ silent: false });
+    };
+  }
+
+  const search = document.getElementById("statusPlayerSearch");
+  if (search) {
+    search.oninput = (event) => {
+      filterStatusPlayers(event.target.value);
+    };
+  }
+}
+
+function scheduleServerStatusRefresh() {
+  if (!getServerStatusRouteActive()) return;
+  serverStatusPageState.timer = window.setTimeout(() => {
+    refreshServerStatus({ silent: true });
+  }, SERVER_CONFIG.statusRefreshMs);
+}
+
+async function refreshServerStatus(options = {}) {
+  if (!getServerStatusRouteActive()) return;
+
+  const mount = document.getElementById("serverStatusMount");
+  if (!mount) return;
+
+  if (!options.silent || !serverStatusPageState.lastSnapshot) {
+    mount.innerHTML = renderServerStatusLoading();
+  }
+
+  clearServerStatusPageState();
+
+  try {
+    const snapshot = await loadServerSnapshot();
+    if (!getServerStatusRouteActive()) return;
+    serverStatusPageState.lastSnapshot = snapshot;
+    mount.innerHTML = renderServerStatusContent(snapshot);
+    bindStatusPageControls();
+    scheduleServerStatusRefresh();
+  } catch (error) {
+    if (!getServerStatusRouteActive()) return;
+    mount.innerHTML = renderServerStatusError(error?.message || "The server API did not respond.");
+    bindStatusPageControls();
+    scheduleServerStatusRefresh();
+  }
+}
+
+function renderStatus() {
+  clearServerStatusPageState();
+  setView(renderServerStatusShell());
+  bindStatusPageControls();
+  window.requestAnimationFrame(() => {
+    refreshServerStatus({ silent: false });
+  });
+}
+
 function findSectionById(sectionId) {
   const data = getData();
   const sections = Array.isArray(data?.sections) ? data.sections : [];
@@ -2325,6 +2709,9 @@ function route() {
   const sections = Array.isArray(data?.sections) ? data.sections : [];
 
   const r = parseRoute();
+  if (r.name !== "status") {
+    clearServerStatusPageState();
+  }
   updateDockActive(r.name);
 
   document.body.classList.toggle("is-landing", r.name === "home");
