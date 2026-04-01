@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401f";
+const SITE_ASSET_VERSION = "20260401g";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -810,21 +810,54 @@ function renderLandingHome() {
 
       <section class="landing-reboot__hero" aria-label="Welcome">
         <div class="landing-reboot__lead">
-          <div class="landing-reboot__kicker">Official Server Portal</div>
-          <div class="landing-reboot__line" aria-hidden="true"></div>
-          <h1 class="landing-reboot__title">One city. Two sides. Instant access.</h1>
-          <p class="landing-reboot__text">Join the server fast and use the floating bar below for rules, map, live status, commands, FAQ, and the rest of the portal.</p>
+          <div class="landing-reboot__header">
+            <div class="landing-reboot__intro">
+              <div class="landing-reboot__kicker">Official Server Portal</div>
+              <div class="landing-reboot__line" aria-hidden="true"></div>
+              <h1 class="landing-reboot__title">Step into SGCNR.</h1>
+              <p class="landing-reboot__text">Fast entry for joining the server, opening Discord, and getting to the core city tools without wasting space.</p>
+            </div>
 
-          <div class="landing-reboot__badges">
-            <span class="landing-reboot__badge landing-reboot__badge--blue">FiveM CnR</span>
-            <span class="landing-reboot__badge landing-reboot__badge--red">Los Santos</span>
-            <span class="landing-reboot__badge">${regionLabel}</span>
+            <div class="landing-reboot__stack">
+              <div class="landing-reboot__stackCard landing-reboot__stackCard--blue">
+                <div class="landing-reboot__stackLabel">Mode</div>
+                <div class="landing-reboot__stackValue">FiveM CnR</div>
+              </div>
+              <div class="landing-reboot__stackCard landing-reboot__stackCard--red">
+                <div class="landing-reboot__stackLabel">City</div>
+                <div class="landing-reboot__stackValue">Los Santos</div>
+              </div>
+              <div class="landing-reboot__stackCard">
+                <div class="landing-reboot__stackLabel">Region</div>
+                <div class="landing-reboot__stackValue">${regionLabel}</div>
+              </div>
+            </div>
           </div>
 
           <div class="landing-reboot__actions">
             <a class="landing-reboot__action landing-reboot__action--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
             <button class="landing-reboot__action" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
             <a class="landing-reboot__action" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          </div>
+
+          <div class="landing-reboot__miniGrid">
+            <div class="landing-reboot__miniCard">
+              <div class="landing-reboot__miniLabel">Portal</div>
+              <div class="landing-reboot__miniTitle">Rules, map, status</div>
+              <div class="landing-reboot__miniText">Everything important stays one click away in the floating bar.</div>
+            </div>
+
+            <div class="landing-reboot__miniCard">
+              <div class="landing-reboot__miniLabel">Access</div>
+              <div class="landing-reboot__miniTitle">Quick join flow</div>
+              <div class="landing-reboot__miniText">Join fast, copy the link, or move straight into community support.</div>
+            </div>
+
+            <div class="landing-reboot__miniCard">
+              <div class="landing-reboot__miniLabel">Community</div>
+              <div class="landing-reboot__miniTitle">Discord ready</div>
+              <div class="landing-reboot__miniText">Tickets, updates, announcements, and staff access live in one place.</div>
+            </div>
           </div>
         </div>
 
