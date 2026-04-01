@@ -1081,28 +1081,28 @@ body.is-landing .landing{
   margin-bottom: 10px;
 }
 
-.breadcrumb__sep{ color: rgba(230,237,246,.30); }
+.breadcrumb__sep{ color: rgba(219,197,165,.28); }
 
 .breadcrumb__link{
-  color: rgba(230,237,246,.82);
-  border: 1px solid rgba(255,255,255,.08);
+  color: rgba(237,221,195,.82);
+  border: 1px solid rgba(183,137,85,.16);
   border-radius: 999px;
   padding: 2px 8px;
-  background: rgba(255,255,255,.02);
+  background: rgba(201,149,87,.06);
   transition: border-color .22s var(--ease), background .22s var(--ease);
 }
 
 .breadcrumb__link:hover{
-  border-color: rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  border-color: rgba(206,150,92,.24);
+  background: rgba(201,149,87,.10);
 }
 
 .breadcrumb__current{
-  color: rgba(230,237,246,.62);
-  border: 1px solid rgba(255,255,255,.06);
+  color: rgba(223,206,180,.66);
+  border: 1px solid rgba(183,137,85,.12);
   border-radius: 999px;
   padding: 2px 8px;
-  background: rgba(0,0,0,.18);
+  background: rgba(25,18,14,.56);
 }
 
 .cards{
@@ -3583,8 +3583,11 @@ body.is-map .footer{
   margin-bottom: 16px;
   padding: 16px 18px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.16));
+  border: 1px solid rgba(183,137,85,.12);
+  background:
+    radial-gradient(circle at 16% 22%, rgba(206,150,92,.12), transparent 28%),
+    radial-gradient(circle at 88% 24%, rgba(125,47,47,.12), transparent 30%),
+    linear-gradient(180deg, rgba(28,22,18,.94), rgba(10,10,12,.96));
   backdrop-filter: blur(14px);
   overflow: hidden;
 }
@@ -3596,7 +3599,7 @@ body.is-map .footer{
   width: 240px;
   height: 240px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(201,255,90,.12) 0%, rgba(201,255,90,0) 72%);
+  background: radial-gradient(circle, rgba(206,150,92,.16) 0%, rgba(206,150,92,0) 72%);
   pointer-events: none;
 }
 
@@ -3619,9 +3622,9 @@ body.is-map .footer{
   min-height: 34px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid rgba(201,255,90,.20);
-  background: rgba(201,255,90,.08);
-  color: rgba(231,255,186,.92);
+  border: 1px solid rgba(206,150,92,.24);
+  background: linear-gradient(180deg, rgba(96,62,28,.20), rgba(45,21,21,.18));
+  color: rgba(247,236,214,.94);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .10em;
