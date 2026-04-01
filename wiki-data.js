@@ -1,22 +1,22 @@
 window.WIKI_DATA = {
   updatedAt: "2026-04-01",
   categories: [
-    { id: "basics", title: "Basics", pages: ["introduction"] },
-    { id: "emergency", title: "Emergency", pages: ["police-officer", "paramedic"] },
-    { id: "civilian", title: "Civilian", pages: ["civilian", "mechanic", "drug-dealer", "delivery-driver", "hitman", "doctor", "arms-dealer"] },
-    { id: "gameplay", title: "Gameplay", pages: ["wanted-level-system", "appearance", "stores", "personal-vehicles", "party-system", "crews-memberships", "phone", "economy"] },
-    { id: "criminal", title: "Criminal Activities", pages: ["robberies", "atm-hacking", "pickpocket", "vehicle-export", "vehicle-scrap"] },
-    { id: "properties", title: "Properties", pages: ["garages", "warehouses"] },
-    { id: "misc", title: "Miscellaneous", pages: ["help-center", "other-settings", "website-api"] }
+    { id: "basics", title: "Getting Started", pages: ["introduction"] },
+    { id: "emergency", title: "Response Roles", pages: ["police-officer", "paramedic"] },
+    { id: "civilian", title: "City Jobs", pages: ["civilian", "mechanic", "drug-dealer", "delivery-driver", "hitman", "doctor", "arms-dealer"] },
+    { id: "gameplay", title: "Systems & Utility", pages: ["wanted-level-system", "appearance", "stores", "personal-vehicles", "party-system", "crews-memberships", "phone", "economy"] },
+    { id: "criminal", title: "Illegal Operations", pages: ["robberies", "atm-hacking", "pickpocket", "vehicle-export", "vehicle-scrap"] },
+    { id: "properties", title: "Storage & Ownership", pages: ["garages", "warehouses"] },
+    { id: "misc", title: "Support & Tools", pages: ["help-center", "other-settings", "website-api"] }
   ],
   pages: {
     introduction: {
-      title: "Welcome to the Wiki",
-      navLabel: "Welcome",
-      eyebrow: "Player handbook",
-      summary: "The SGCNR wiki is the handbook for jobs, systems, criminal activities, and quality-of-life features. It is written to help new players settle in faster and give regular players a cleaner reference point when something changes.",
+      title: "Operations Manual",
+      navLabel: "Manual",
+      eyebrow: "SGCNR handbook",
+      summary: "The SGCNR operations manual is the central reference for roles, systems, illegal routes, and support tools. It is written to get new players settled faster and give regulars a cleaner place to check mechanics as the server changes.",
       facts: [
-        ["Purpose", "Server handbook"],
+        ["Purpose", "Operations reference"],
         ["Focus", "Jobs, systems, and progression"],
         ["Audience", "New and returning players"],
         ["Style", "Practical and fast to scan"]
@@ -740,9 +740,9 @@ window.WIKI_DATA = {
       ]
     },
     "help-center": {
-      title: "Help Center",
-      navLabel: "Help Center",
-      eyebrow: "Miscellaneous",
+      title: "Support Desk",
+      navLabel: "Support Desk",
+      eyebrow: "Support & Tools",
       summary: "The help center is the catch-all page for common player questions, support direction, and the simple answers people usually need before they open a ticket.",
       facts: [["Type", "Support"], ["Main goal", "Fast answers"], ["Best for", "New players"], ["Pairs with", "Discord"]],
       sections: [
@@ -771,7 +771,7 @@ window.WIKI_DATA = {
     "other-settings": {
       title: "Other Settings",
       navLabel: "Other Settings",
-      eyebrow: "Miscellaneous",
+      eyebrow: "Support & Tools",
       summary: "Other settings cover the quality-of-life side of the experience: controls, visual clarity, convenience bindings, and the small tweaks that make long sessions feel cleaner.",
       facts: [["Type", "Miscellaneous"], ["Main goal", "Quality of life"], ["Best for", "Comfort"], ["Touches", "All players"]],
       sections: [
@@ -799,7 +799,7 @@ window.WIKI_DATA = {
     "website-api": {
       title: "Website API",
       navLabel: "Website API",
-      eyebrow: "Miscellaneous",
+      eyebrow: "Support & Tools",
       summary: "The website API page is for live status or external integrations that read useful information from the server or site. It is mainly a utility reference for people building around the SGCNR ecosystem.",
       facts: [["Type", "Developer utility"], ["Main goal", "Integration reference"], ["Best for", "Website tools"], ["Touches", "Status and automation"]],
       sections: [

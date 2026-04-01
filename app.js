@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401m";
+const SITE_ASSET_VERSION = "20260401n";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -3480,11 +3480,11 @@ function createPointerRipple(x, y, options = {}) {
   siteFxState.ripples.push({
     x,
     y,
-    radius: options.radius ?? 10,
-    velocity: options.velocity ?? 118,
-    alpha: options.alpha ?? 0.32,
-    decay: options.decay ?? 0.24,
-    lineWidth: options.lineWidth ?? 1.8,
+    radius: options.radius ?? 14,
+    velocity: options.velocity ?? 88,
+    alpha: options.alpha ?? 0.22,
+    decay: options.decay ?? 0.18,
+    lineWidth: options.lineWidth ?? 1.6,
     softness: options.softness ?? 0.12,
     delay: options.delay ?? 0,
     tint: options.tint ?? "blue"
@@ -3496,9 +3496,9 @@ function createPointerRipple(x, y, options = {}) {
 }
 
 function spawnPointerBurst(x, y) {
-  createPointerRipple(x, y, { radius: 10, velocity: 128, alpha: 0.42, lineWidth: 2.4, decay: 0.21, tint: "blue" });
-  createPointerRipple(x, y, { radius: 22, velocity: 152, alpha: 0.26, lineWidth: 1.8, decay: 0.17, delay: 0.05, tint: "red" });
-  createPointerRipple(x, y, { radius: 34, velocity: 176, alpha: 0.18, lineWidth: 1.4, decay: 0.14, delay: 0.1, tint: "blue" });
+  createPointerRipple(x, y, { radius: 16, velocity: 112, alpha: 0.34, lineWidth: 2.4, decay: 0.18, tint: "blue" });
+  createPointerRipple(x, y, { radius: 34, velocity: 134, alpha: 0.22, lineWidth: 1.8, decay: 0.15, delay: 0.08, tint: "blue" });
+  createPointerRipple(x, y, { radius: 58, velocity: 154, alpha: 0.14, lineWidth: 1.2, decay: 0.12, delay: 0.16, tint: "red" });
 }
 
 function drawPointerFxFrame(now) {
@@ -3519,13 +3519,13 @@ function drawPointerFxFrame(now) {
     const dy = state.y - state.lastTrailY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance > 20 || timeSinceTrail > 88) {
+    if (distance > 30 || timeSinceTrail > 118) {
       createPointerRipple(state.x, state.y, {
-        radius: 8,
-        velocity: 94,
-        alpha: 0.14,
-        lineWidth: 1.2,
-        decay: 0.28,
+        radius: 10,
+        velocity: 78,
+        alpha: 0.10,
+        lineWidth: 1.1,
+        decay: 0.18,
         tint: distance > 40 ? "red" : "blue"
       });
       state.lastTrailAt = now;
@@ -3539,14 +3539,15 @@ function drawPointerFxFrame(now) {
   ctx.globalCompositeOperation = "screen";
 
   if (state.pointerVisible) {
-    const glow = ctx.createRadialGradient(state.x, state.y, 0, state.x, state.y, 150);
-    glow.addColorStop(0, "rgba(132,186,255,0.11)");
-    glow.addColorStop(0.28, "rgba(74,137,255,0.06)");
-    glow.addColorStop(0.5, "rgba(255,98,98,0.04)");
+    const glow = ctx.createRadialGradient(state.x, state.y, 0, state.x, state.y, 220);
+    glow.addColorStop(0, "rgba(214,233,255,0.07)");
+    glow.addColorStop(0.18, "rgba(120,178,255,0.06)");
+    glow.addColorStop(0.44, "rgba(83,138,255,0.045)");
+    glow.addColorStop(0.68, "rgba(255,108,108,0.028)");
     glow.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(state.x, state.y, 150, 0, Math.PI * 2);
+    ctx.arc(state.x, state.y, 220, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -3563,20 +3564,24 @@ function drawPointerFxFrame(now) {
     const strokeAlpha = Math.max(0, ripple.alpha);
     const innerAlpha = Math.max(0, ripple.alpha * 0.48);
     const strokeColor = ripple.tint === "red"
-      ? `rgba(255,112,112,${strokeAlpha.toFixed(3)})`
-      : `rgba(127,186,255,${strokeAlpha.toFixed(3)})`;
+      ? `rgba(226,118,102,${strokeAlpha.toFixed(3)})`
+      : `rgba(140,200,255,${strokeAlpha.toFixed(3)})`;
     const innerColor = ripple.tint === "red"
-      ? `rgba(255,126,126,${innerAlpha.toFixed(3)})`
-      : `rgba(196,228,255,${innerAlpha.toFixed(3)})`;
+      ? `rgba(255,185,165,${innerAlpha.toFixed(3)})`
+      : `rgba(215,239,255,${innerAlpha.toFixed(3)})`;
 
     ctx.lineWidth = ripple.lineWidth;
     ctx.strokeStyle = strokeColor;
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = strokeColor;
     ctx.beginPath();
     ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.lineWidth = Math.max(0.8, ripple.lineWidth * 0.45);
     ctx.strokeStyle = innerColor;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = innerColor;
     ctx.beginPath();
     ctx.arc(ripple.x, ripple.y, ripple.radius * 0.72, 0, Math.PI * 2);
     ctx.stroke();
@@ -3648,13 +3653,13 @@ function initPointerFx() {
     state.targetX = event.clientX;
     state.targetY = event.clientY;
     state.pointerVisible = true;
-    state.activeUntil = performance.now() + 1000;
+    state.activeUntil = performance.now() + 1400;
     schedulePointerFxFrame();
   };
 
   const handlePointerLeave = () => {
     state.pointerVisible = false;
-    state.activeUntil = performance.now() + 420;
+    state.activeUntil = performance.now() + 560;
   };
 
   const handlePointerOut = (event) => {
@@ -3668,7 +3673,7 @@ function initPointerFx() {
     state.targetX = event.clientX;
     state.targetY = event.clientY;
     state.pointerVisible = true;
-    state.activeUntil = performance.now() + 1400;
+    state.activeUntil = performance.now() + 1900;
     schedulePointerFxFrame();
     spawnPointerBurst(event.clientX, event.clientY);
   };
@@ -3686,7 +3691,7 @@ function initPointerFx() {
 
   siteFxState = state;
   resizePointerFxCanvas();
-  createPointerRipple(state.x, state.y, { radius: 14, velocity: 86, alpha: 0.1, lineWidth: 1.1, decay: 0.22 });
+  createPointerRipple(state.x, state.y, { radius: 18, velocity: 74, alpha: 0.08, lineWidth: 1, decay: 0.16 });
   schedulePointerFxFrame();
 }
 

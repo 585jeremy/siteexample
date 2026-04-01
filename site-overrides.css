@@ -1382,10 +1382,10 @@ body::before{
   min-width: 206px;
   min-height: 54px;
   border-radius: 16px;
-  border-color: rgba(255,255,255,.08);
+  border-color: rgba(183,137,85,.10);
   background:
     linear-gradient(180deg, rgba(12,15,19,.98), rgba(6,8,11,.98)),
-    linear-gradient(90deg, rgba(66,126,255,.18), rgba(255,255,255,0) 36%, rgba(220,54,54,.18));
+    linear-gradient(90deg, rgba(186,140,84,.16), rgba(255,255,255,0) 36%, rgba(200,77,77,.16));
 }
 
 .brandmark__sub{
@@ -1410,21 +1410,16 @@ body::before{
   background: rgba(255,255,255,.055);
 }
 
-.dock__item.is-active{
-  border-color: rgba(84,145,255,.42);
-  background: linear-gradient(180deg, rgba(61,112,210,.18), rgba(31,59,104,.18));
-}
-
 body.is-landing{
   background:
-    radial-gradient(circle at 14% 10%, rgba(48, 101, 222, .18), transparent 22%),
-    radial-gradient(circle at 86% 14%, rgba(201, 33, 33, .16), transparent 20%),
+    radial-gradient(circle at 14% 10%, rgba(171, 127, 74, .16), transparent 22%),
+    radial-gradient(circle at 86% 14%, rgba(179, 63, 63, .14), transparent 20%),
     linear-gradient(180deg, #020304 0%, #040507 55%, #010203 100%);
 }
 
 body.is-landing .topbar{
   background: linear-gradient(180deg, rgba(4,5,7,.95), rgba(4,5,7,.78));
-  border-bottom-color: rgba(255,255,255,.06);
+  border-bottom-color: rgba(183,137,85,.10);
 }
 
 body.is-landing .content{
@@ -2400,8 +2395,8 @@ body.is-landing .auth{
 }
 
 .dock__item.is-active{
-  border-color: rgba(96,156,255,.44);
-  background: linear-gradient(180deg, rgba(55,104,196,.2), rgba(32,57,101,.18));
+  border-color: rgba(210,156,92,.42);
+  background: linear-gradient(180deg, rgba(121,79,38,.20), rgba(70,37,37,.18));
 }
 
 .dock__label{
@@ -2415,7 +2410,7 @@ body.is-landing .auth{
 }
 
 .dock__item.is-active .dock__label{
-  color: rgba(122,182,255,.95);
+  color: rgba(230,190,129,.95);
 }
 
 @media (max-width: 1080px){
@@ -2931,9 +2926,9 @@ body.is-landing .dock{
   min-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.035);
-  color: rgba(230,237,246,.65);
+  border: 1px solid rgba(183,137,85,.18);
+  background: rgba(201,149,87,.08);
+  color: rgba(236,221,198,.78);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .14em;
@@ -2974,8 +2969,8 @@ body.is-landing .dock{
   gap: 6px;
   padding: 12px 10px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.026);
+  border: 1px solid rgba(183,137,85,.12);
+  background: linear-gradient(180deg, rgba(45,32,22,.34), rgba(10,10,12,.26));
 }
 
 .wiki-sidebar__statLabel{
@@ -3010,7 +3005,7 @@ body.is-landing .dock{
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: rgba(230,237,246,.46);
+  color: rgba(223,205,178,.50);
 }
 
 .wiki-nav__count{
@@ -3021,11 +3016,11 @@ body.is-landing .dock{
   height: 24px;
   padding: 0 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(183,137,85,.14);
+  background: rgba(201,149,87,.06);
   font-size: 10px;
   letter-spacing: .08em;
-  color: rgba(236,242,249,.74);
+  color: rgba(236,220,194,.80);
 }
 
 .wiki-nav__list{
@@ -3037,9 +3032,9 @@ body.is-landing .dock{
   display: block;
   padding: 11px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.06);
-  background: rgba(255,255,255,.025);
-  color: rgba(236,242,249,.76);
+  border: 1px solid rgba(255,255,255,.05);
+  background: linear-gradient(180deg, rgba(18,19,22,.92), rgba(10,10,12,.96));
+  color: rgba(231,223,207,.78);
   font-size: 13px;
   line-height: 1.35;
   transition: border-color .18s ease, background .18s ease, transform .18s ease;
@@ -3047,14 +3042,14 @@ body.is-landing .dock{
 
 .wiki-nav__item:hover{
   transform: translateY(-1px);
-  border-color: rgba(255,255,255,.12);
-  background: rgba(255,255,255,.045);
+  border-color: rgba(193,146,92,.16);
+  background: linear-gradient(180deg, rgba(28,23,19,.96), rgba(11,11,13,.98));
 }
 
 .wiki-nav__item.is-active{
-  border-color: rgba(92,150,255,.34);
-  background: linear-gradient(180deg, rgba(56,104,196,.14), rgba(21,37,68,.18));
-  color: rgba(245,249,255,.96);
+  border-color: rgba(206,150,92,.36);
+  background: linear-gradient(180deg, rgba(96,62,28,.20), rgba(45,21,21,.18));
+  color: rgba(247,236,214,.96);
 }
 
 .wiki-article{
@@ -3073,8 +3068,9 @@ body.is-landing .dock{
   gap: 10px;
   padding: 16px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.028);
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(20,18,17,.96), rgba(10,10,12,.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
 }
 
 .wiki-card__title{
@@ -3087,7 +3083,7 @@ body.is-landing .dock{
 .wiki-card__text{
   font-size: 13px;
   line-height: 1.55;
-  color: rgba(230,237,246,.74);
+  color: rgba(221,212,197,.72);
 }
 
 .wiki-hero{
@@ -3098,10 +3094,44 @@ body.is-landing .dock{
   padding-bottom: 4px;
 }
 
+.wiki-hero::before{
+  content: "";
+  position: absolute;
+  inset: -40px auto auto -60px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(201,149,87,.14), rgba(201,149,87,0) 70%);
+  pointer-events: none;
+}
+
+.wiki-hero::after{
+  content: "";
+  position: absolute;
+  right: -80px;
+  bottom: -90px;
+  width: 240px;
+  height: 240px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(173,71,71,.12), rgba(173,71,71,0) 70%);
+  pointer-events: none;
+}
+
+.wiki-hero > *{
+  position: relative;
+  z-index: 1;
+}
+
 .wiki-hero__meta{
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.wiki-hero__meta .tag{
+  border-color: rgba(183,137,85,.14);
+  background: rgba(201,149,87,.06);
+  color: rgba(237,221,195,.78);
 }
 
 .wiki-facts{
@@ -3113,8 +3143,8 @@ body.is-landing .dock{
 .wiki-fact{
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.028);
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(26,21,18,.92), rgba(10,10,12,.94));
 }
 
 .wiki-fact__label{
@@ -3122,7 +3152,7 @@ body.is-landing .dock{
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: rgba(230,237,246,.46);
+  color: rgba(220,202,175,.52);
   margin-bottom: 8px;
 }
 
@@ -3130,7 +3160,7 @@ body.is-landing .dock{
   font-size: 15px;
   font-weight: 700;
   line-height: 1.35;
-  color: rgba(242,246,251,.92);
+  color: rgba(244,236,220,.92);
 }
 
 .wiki-sectionBlock{
@@ -3138,8 +3168,12 @@ body.is-landing .dock{
   gap: 10px;
   padding: 18px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.16));
+  border: 1px solid rgba(183,137,85,.10);
+  background:
+    linear-gradient(180deg, rgba(30,24,20,.92), rgba(10,10,12,.96));
+  box-shadow:
+    inset 3px 0 0 rgba(201,149,87,.18),
+    inset 0 1px 0 rgba(255,255,255,.02);
 }
 
 .wiki-sectionBlock__title{
@@ -3162,15 +3196,15 @@ body.is-landing .dock{
   min-height: 112px;
   padding: 16px;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.16));
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(24,20,18,.96), rgba(10,10,12,.96));
   transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
 
 .wiki-pager__card:hover{
   transform: translateY(-1px);
-  border-color: rgba(255,255,255,.14);
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
+  border-color: rgba(206,150,92,.18);
+  background: linear-gradient(180deg, rgba(36,28,23,.96), rgba(12,12,14,.98));
 }
 
 .wiki-pager__card--empty{
@@ -3183,7 +3217,7 @@ body.is-landing .dock{
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: rgba(230,237,246,.42);
+  color: rgba(221,202,175,.48);
 }
 
 .wiki-pager__title{
@@ -3196,7 +3230,7 @@ body.is-landing .dock{
 .wiki-pager__text{
   font-size: 13px;
   line-height: 1.45;
-  color: rgba(230,237,246,.68);
+  color: rgba(219,210,194,.68);
 }
 
 @media (max-width: 1080px){
