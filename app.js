@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401d";
+const SITE_ASSET_VERSION = "20260401e";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -798,7 +798,6 @@ function renderLanding() {
 }
 
 function renderLandingHome() {
-  const joinCodeLabel = escapeHtml(SERVER_JOIN_CODE || "Not set");
   const joinLinkLabel = escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE || "not-set"}`);
   const discordLabel = escapeHtml(DISCORD_INVITE_URL.replace(/^https?:\/\//, ""));
   const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
@@ -827,16 +826,9 @@ function renderLandingHome() {
             <button class="landing-reboot__action" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
             <a class="landing-reboot__action" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
           </div>
-
-          <div class="landing-reboot__note">Everything else lives in the floating navigation bar. Home stays dedicated to access and first contact.</div>
         </div>
 
         <aside class="landing-reboot__info">
-          <div class="landing-reboot__card landing-reboot__card--code">
-            <div class="landing-reboot__label">Join Code</div>
-            <div class="landing-reboot__value">${joinCodeLabel}</div>
-          </div>
-
           <div class="landing-reboot__card landing-reboot__card--link">
             <div class="landing-reboot__label">Direct Link</div>
             <div class="landing-reboot__value landing-reboot__value--small">${joinLinkLabel}</div>
