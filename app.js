@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401b";
+const SITE_ASSET_VERSION = "20260401c";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -804,103 +804,42 @@ function renderLandingHome() {
   const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
 
   setView(`
-    <div class="portal-home portal-home--cnr">
+    <div class="portal-home portal-home--clean">
       <div class="portal-home__grid" aria-hidden="true"></div>
       <div class="portal-home__grain" aria-hidden="true"></div>
       <div class="portal-home__wash" aria-hidden="true"></div>
 
-      <section class="portal-home__hero" aria-label="Welcome">
-        <div class="portal-home__heroHead">
-          <div class="portal-home__eyebrow">Official Server Portal</div>
-          <div class="portal-home__chips">
-            <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
-            <span class="portal-home__chip portal-home__chip--red">Los Santos</span>
-            <span class="portal-home__chip">${regionLabel}</span>
-          </div>
+      <section class="portal-home__hero portal-home__hero--clean" aria-label="Welcome">
+        <div class="portal-home__eyebrow">Official Server Portal</div>
+        <div class="portal-home__chips">
+          <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
+          <span class="portal-home__chip portal-home__chip--red">Los Santos</span>
+          <span class="portal-home__chip">${regionLabel}</span>
         </div>
 
-        <div class="portal-home__heroBanner">
-          <div class="portal-home__heroBannerGlow" aria-hidden="true"></div>
-          <img
-            class="portal-home__bannerLogo"
-            src="${escapeHtml(BRAND_LOGO_BANNER_URL)}"
-            alt="SG Cops and Robbers logo"
-            loading="eager"
-            onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
-            onerror="this.remove();"
-          />
-          <div class="portal-home__bannerFallback">SG Cops &amp; Robbers</div>
+        <div class="portal-home__signal">SGCNR Network</div>
+        <h1 class="portal-home__title">Join the city.</h1>
+        <p class="portal-home__text">Rules, map, status, FAQ and the rest live in the floating bar below. Home stays focused on getting players in fast.</p>
+
+        <div class="portal-home__actions portal-home__actions--hero">
+          <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+          <button class="auth__btn" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
+          <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
         </div>
 
-        <div class="portal-home__heroBody">
-          <div class="portal-home__mainPanel">
-            <div class="portal-home__copy">
-            <div class="portal-home__copyTop">
-              <div class="portal-home__signal">SGCNR Network</div>
-              <h1 class="portal-home__title">Los Santos Cops &amp; Robbers.</h1>
-              <p class="portal-home__text">Fast access to the server, the city map, and the live status page without turning the front page into a wall of text.</p>
-            </div>
-
-            <div class="portal-home__actions portal-home__actions--hero">
-              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-              <button class="auth__btn" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
-              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
-            </div>
-
-            <div class="portal-home__joinPanel">
-              <div class="portal-home__joinItem">
-                <div class="portal-home__joinLabel">Join Code</div>
-                <div class="portal-home__joinValue">${joinCodeLabel}</div>
-              </div>
-              <div class="portal-home__joinItem">
-                <div class="portal-home__joinLabel">Direct Link</div>
-                <div class="portal-home__joinValue portal-home__joinValue--small">${joinLinkLabel}</div>
-              </div>
-              <div class="portal-home__joinItem portal-home__joinItem--wide">
-                <div class="portal-home__joinLabel">Community</div>
-                <div class="portal-home__joinValue portal-home__joinValue--small">${discordLabel}</div>
-              </div>
-            </div>
-            </div>
+        <div class="portal-home__joinPanel">
+          <div class="portal-home__joinItem">
+            <div class="portal-home__joinLabel">Join Code</div>
+            <div class="portal-home__joinValue">${joinCodeLabel}</div>
           </div>
-
-          <aside class="portal-home__sidePanel">
-            <div class="portal-home__badgeCard">
-              <div class="portal-home__badgeWrap">
-                <img
-                  class="portal-home__badgeLogo"
-                  src="${escapeHtml(BRAND_LOGO_BADGE_URL)}"
-                  alt="SGCNR badge"
-                  loading="eager"
-                  onload="this.classList.add('is-ready'); if (this.nextElementSibling) this.nextElementSibling.hidden = true;"
-                  onerror="this.remove();"
-                />
-                <div class="portal-home__badgeFallback">SGCNR</div>
-              </div>
-              <div class="portal-home__badgeMeta">
-                <div class="portal-home__badgeTitle">${escapeHtml(SERVER_CONFIG.name || "SGCNR")}</div>
-                <div class="portal-home__badgeText">Clean entry point for status, rules, and city access.</div>
-              </div>
-            </div>
-
-            <div class="portal-home__quickGrid">
-              <a class="portal-home__quickCard" href="#/status">
-                <span class="portal-home__quickLabel">Live</span>
-                <strong class="portal-home__quickTitle">Server Status</strong>
-                <span class="portal-home__quickText">Current player state and server response.</span>
-              </a>
-              <a class="portal-home__quickCard" href="#/map">
-                <span class="portal-home__quickLabel">City</span>
-                <strong class="portal-home__quickTitle">Los Santos Map</strong>
-                <span class="portal-home__quickText">Services, stations, and marked server spots.</span>
-              </a>
-              <a class="portal-home__quickCard" href="#/rules">
-                <span class="portal-home__quickLabel">Read</span>
-                <strong class="portal-home__quickTitle">Rules</strong>
-                <span class="portal-home__quickText">Server rules, FAQ, and quick references.</span>
-              </a>
-            </div>
-          </aside>
+          <div class="portal-home__joinItem">
+            <div class="portal-home__joinLabel">Direct Link</div>
+            <div class="portal-home__joinValue portal-home__joinValue--small">${joinLinkLabel}</div>
+          </div>
+          <div class="portal-home__joinItem portal-home__joinItem--wide">
+            <div class="portal-home__joinLabel">Community</div>
+            <div class="portal-home__joinValue portal-home__joinValue--small">${discordLabel}</div>
+          </div>
         </div>
       </section>
     </div>
