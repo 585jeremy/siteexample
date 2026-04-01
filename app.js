@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401g";
+const SITE_ASSET_VERSION = "20260401i";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -873,6 +873,32 @@ function renderLandingHome() {
           </div>
         </aside>
       </section>
+
+      <section class="landing-reboot__rail" aria-label="Portal shortcuts">
+        <a class="landing-reboot__railCard" href="#/rules">
+          <div class="landing-reboot__railLabel">Rules</div>
+          <div class="landing-reboot__railTitle">Server standards</div>
+          <div class="landing-reboot__railText">Core behavior, combat rules, zone rules, and staff guidance.</div>
+        </a>
+
+        <a class="landing-reboot__railCard" href="#/map">
+          <div class="landing-reboot__railLabel">Map</div>
+          <div class="landing-reboot__railTitle">City services</div>
+          <div class="landing-reboot__railText">Los Santos service map with police, medical, and utility locations.</div>
+        </a>
+
+        <a class="landing-reboot__railCard" href="#/status">
+          <div class="landing-reboot__railLabel">Status</div>
+          <div class="landing-reboot__railTitle">Live server page</div>
+          <div class="landing-reboot__railText">Connection state, live player info, and server-side status details.</div>
+        </a>
+
+        <a class="landing-reboot__railCard" href="#/wiki">
+          <div class="landing-reboot__railLabel">Wiki</div>
+          <div class="landing-reboot__railTitle">Player handbook</div>
+          <div class="landing-reboot__railText">Jobs, mechanics, robberies, systems, and getting-started guidance.</div>
+        </a>
+      </section>
     </div>
   `);
 
@@ -914,7 +940,7 @@ function renderStart() {
           <div class="info-links">
             <a class="info-link" href="#/rules">Rules</a>
             <a class="info-link" href="#/commands">Commands</a>
-            <a class="info-link" href="#/faq">FAQ</a>
+            <a class="info-link" href="#/help">Help</a>
             <a class="info-link" href="#/status">Server Status</a>
             <a class="info-link" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
           </div>
@@ -926,7 +952,7 @@ function renderStart() {
         <h2>New player checklist</h2>
         <div class="stack-list">
           <div class="stack-list__item"><span class="stack-list__index">01</span><span>Read the Rules and follow the category that applies to what you're doing.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check FAQ for common questions and support.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions and support.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>Join Discord to open tickets and get announcements.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">04</span><span>Be respectful and keep it fair — staff decisions are based on evidence.</span></div>
         </div>
@@ -975,7 +1001,7 @@ function renderCommands() {
             </div>
             <div class="feature-card">
               <div class="feature-card__label">Navigation</div>
-              <div class="feature-card__value">Use map + FAQ</div>
+                <div class="feature-card__value">Use map + Help</div>
             </div>
           </div>
         </aside>
@@ -995,14 +1021,14 @@ function renderCommands() {
   `);
 }
 
-function renderFaq() {
+function renderHelp() {
   setView(`
-    <div>
-      ${renderHeader("FAQ", [{ label: "FAQ" }])}
-      <div class="content-grid content-grid--sidebar">
-        <section class="section section--hero">
-          <div class="section__eyebrow">Frequently asked</div>
-          <h2>Quick answers</h2>
+      <div>
+      ${renderHeader("Help", [{ label: "Help" }])}
+        <div class="content-grid content-grid--sidebar">
+          <section class="section section--hero">
+            <div class="section__eyebrow">Frequently asked</div>
+            <h2>Quick answers</h2>
           <div class="info-faq">
             <div class="info-faq__item">
               <div class="info-faq__q">Do I need a microphone?</div>
@@ -2879,6 +2905,117 @@ function renderStatus() {
   });
 }
 
+function renderWiki(pageSlug) {
+  const activePage = (pageSlug || "introduction").toString().toLowerCase();
+  const currentPage = activePage || "introduction";
+
+  const categoryCards = [
+    {
+      title: "Emergency Roles",
+      text: "Police and medical pages explain the job focus, response flow, and the systems that matter when you are working the city."
+    },
+    {
+      title: "Civilian Paths",
+      text: "Civilian jobs cover the legal side of the server, from utility work and side income to role-specific progression."
+    },
+    {
+      title: "Gameplay Systems",
+      text: "Use this area for wanted level, appearance, stores, economy, party features, and other core mechanics."
+    },
+    {
+      title: "Criminal Activities",
+      text: "Robberies, pickpocketing, hacking, exports, and other illegal routes belong here."
+    },
+    {
+      title: "Properties & Storage",
+      text: "Garages, warehouses, and any future housing or storage systems can be documented in one place."
+    },
+    {
+      title: "Support & Extras",
+      text: "Help pages, setup tips, quality-of-life settings, and technical references solve common issues fast."
+    }
+  ];
+
+  const updateItems = [
+    "The wiki structure is built to stay simple on desktop and mobile instead of hiding basics behind too many layers.",
+    "Jobs, gameplay systems, and criminal content are separated more clearly so new players can learn the server faster.",
+    "The introduction page now works as a real front door to the handbook instead of just a placeholder.",
+    "Future pages can be added under clear groups without rewriting the whole navigation every time a feature changes."
+  ];
+
+  const quickLinks = [
+    { label: "Start Here", href: "#/start" },
+    { label: "Rules", href: "#/rules" },
+    { label: "Commands", href: "#/commands" },
+    { label: "Map", href: "#/map" },
+    { label: "Server Status", href: "#/status" },
+    { label: "Help", href: "#/help" }
+  ];
+
+  const categoryHtml = categoryCards.map((card) => `
+    <article class="wiki-card">
+      <div class="wiki-card__title">${escapeHtml(card.title)}</div>
+      <div class="wiki-card__text">${escapeHtml(card.text)}</div>
+    </article>
+  `).join("");
+
+  const updatesHtml = updateItems.map((item, index) => `
+    <div class="stack-list__item">
+      <span class="stack-list__index">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+      <span>${escapeHtml(item)}</span>
+    </div>
+  `).join("");
+
+  const quickLinkHtml = quickLinks.map((link) => `
+    <a class="info-link" href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>
+  `).join("");
+
+  const heading = currentPage === "introduction" ? "Introduction" : "Wiki";
+
+  setView(`
+    <div>
+      ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+
+      <section class="section wiki-intro wiki-intro--hero">
+        <div class="wiki-intro__eyebrow">Player handbook</div>
+        <h2>Welcome to the SGCNR wiki.</h2>
+        <p class="doc-p">
+          This section is the clean starting point for learning the server. It is written to help brand-new players get comfortable quickly, while still giving regular players a fast reference for jobs, mechanics, and city systems.
+        </p>
+        <p class="doc-p">
+          Instead of treating the wiki like a wall of text, this introduction splits the handbook into practical groups: emergency roles, civilian paths, gameplay systems, criminal activities, properties, and support pages.
+        </p>
+      </section>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">What you will find here</div>
+          <h2>Structured around how players actually use the server</h2>
+          <div class="doc-p">
+            The goal is simple: if someone needs to learn a job, understand a mechanic, or find a system quickly, they should know exactly where to look without bouncing between unrelated pages.
+          </div>
+          <div class="wiki-grid">${categoryHtml}</div>
+        </section>
+
+        <aside class="section section--stack wiki-intro__aside">
+          <div class="section__eyebrow">Quick links</div>
+          <h2>Jump in fast</h2>
+          <div class="info-links">${quickLinkHtml}</div>
+          <div class="status-note">
+            <strong>Best use:</strong> start here for the overview, then jump into the specific page that matches the system you want to learn next.
+          </div>
+        </aside>
+      </div>
+
+      <section class="section wiki-intro">
+        <div class="section__eyebrow">Latest direction</div>
+        <h2>How this handbook is being organized</h2>
+        <div class="stack-list stack-list--compact">${updatesHtml}</div>
+      </section>
+    </div>
+  `);
+}
+
 function findSectionById(sectionId) {
   const data = getData();
   const sections = Array.isArray(data?.sections) ? data.sections : [];
@@ -3094,7 +3231,7 @@ function parseRoute() {
   if (parts[0] === "start") return { name: "start" };
   if (parts[0] === "rules") return { name: "rules" };
   if (parts[0] === "commands") return { name: "commands" };
-  if (parts[0] === "faq") return { name: "faq" };
+  if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
   if (parts[0] === "status") return { name: "status" };
@@ -3154,8 +3291,8 @@ function route() {
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
-  if (r.name === "faq") {
-    renderFaq();
+  if (r.name === "help") {
+    renderHelp();
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }

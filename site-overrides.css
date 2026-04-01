@@ -2664,9 +2664,15 @@ body.is-landing .dock{
 }
 
 /* 2026-04-01 portal redesign pass */
+.landing-reboot{
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
 .landing-reboot__hero{
   max-width: 1120px;
-  grid-template-columns: minmax(0, 1fr) minmax(270px, 310px);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
   gap: 18px;
 }
 
@@ -2801,22 +2807,142 @@ body.is-landing .dock{
 }
 
 .landing-reboot__info{
-  align-content: stretch;
+  align-content: start;
+  gap: 10px;
 }
 
 .landing-reboot__card{
   min-height: 0;
-  padding: 20px;
-  align-content: center;
+  padding: 14px 16px;
+  align-content: start;
+  gap: 8px;
+  border-radius: 18px;
 }
 
 .landing-reboot__value{
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .landing-reboot__value--small{
-  font-size: 15px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(244,248,252,.86);
+}
+
+.landing-reboot__label{
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+
+.landing-reboot__card--link,
+.landing-reboot__card--community{
+  min-height: 116px;
+}
+
+.landing-reboot__rail{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.landing-reboot__railCard{
+  display: grid;
+  gap: 8px;
+  min-height: 108px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(180deg, rgba(14,18,22,.92), rgba(7,9,12,.95));
+  box-shadow:
+    0 14px 36px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.03);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.landing-reboot__railCard:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.12);
+  background:
+    linear-gradient(180deg, rgba(17,21,26,.95), rgba(8,10,13,.98));
+}
+
+.landing-reboot__railLabel{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(238,244,251,.42);
+}
+
+.landing-reboot__railTitle{
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  color: #f4f7fb;
+}
+
+.landing-reboot__railText{
+  font-size: 13px;
   line-height: 1.5;
+  color: rgba(238,244,251,.68);
+}
+
+.wiki-intro--hero{
+  position: relative;
+  overflow: hidden;
+}
+
+.wiki-intro--hero::before{
+  content: "";
+  position: absolute;
+  inset: -120px auto auto -120px;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(64,122,255,.18), rgba(64,122,255,0) 72%);
+  pointer-events: none;
+}
+
+.wiki-intro--hero::after{
+  content: "";
+  position: absolute;
+  right: -90px;
+  bottom: -120px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(205,40,40,.16), rgba(205,40,40,0) 72%);
+  pointer-events: none;
+}
+
+.wiki-intro > *{
+  position: relative;
+  z-index: 1;
+}
+
+.wiki-intro__eyebrow{
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.035);
+  color: rgba(230,237,246,.65);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.wiki-intro__aside{
+  min-width: 0;
 }
 
 @media (max-width: 1080px){
@@ -2830,6 +2956,10 @@ body.is-landing .dock{
 
   .landing-reboot__miniGrid{
     grid-template-columns: 1fr;
+  }
+
+  .landing-reboot__rail{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2847,6 +2977,10 @@ body.is-landing .dock{
   }
 
   .landing-reboot__miniGrid{
+    grid-template-columns: 1fr;
+  }
+
+  .landing-reboot__rail{
     grid-template-columns: 1fr;
   }
 }
