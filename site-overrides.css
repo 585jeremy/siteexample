@@ -2482,6 +2482,7 @@ body.is-landing .footer{
 }
 
 body.is-landing .topbar{
+  position: relative;
   justify-content: flex-end;
   min-height: 82px;
 }
@@ -2502,7 +2503,7 @@ body.is-landing .auth{
 
 body.is-landing .content{
   width: min(1180px, calc(100% - 28px));
-  padding: 18px 0 104px !important;
+  padding: 18px 0 96px !important;
   min-height: calc(100svh - 82px);
   height: calc(100svh - 82px);
   overflow: hidden;
@@ -2584,8 +2585,12 @@ body.is-landing .content{
   font-size: 17px;
 }
 
-.dock{
-  bottom: 18px;
+body.is-landing .dock{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 80;
 }
 
 @media (max-width: 1080px){
@@ -2633,6 +2638,10 @@ body.is-landing .content{
     height: auto;
     min-height: calc(100svh - 74px);
     overflow: visible;
+  }
+
+  body.is-landing .dock{
+    bottom: 16px;
   }
 
   .landing-reboot__lead,

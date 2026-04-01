@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401e";
+const SITE_ASSET_VERSION = "20260401f";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -798,7 +798,7 @@ function renderLanding() {
 }
 
 function renderLandingHome() {
-  const joinLinkLabel = escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE || "not-set"}`);
+  const joinLinkLabel = "Coming soon";
   const discordLabel = escapeHtml(DISCORD_INVITE_URL.replace(/^https?:\/\//, ""));
   const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
 
