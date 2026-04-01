@@ -29,7 +29,8 @@ const DEFAULT_SERVER_CONFIG = {
   websiteHealthUrl: "",
   publicStatusUrl: "",
   nextRestartLabel: "Scheduled restart",
-  websiteName: "SGCNR Portal"
+  websiteName: "SGCNR Portal",
+  liveTrackingRequiresOptIn: true
 };
 const SERVER_CONFIG = {
   ...DEFAULT_SERVER_CONFIG,
@@ -41,7 +42,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260402c";
+const SITE_ASSET_VERSION = "20260402d";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1318,12 +1319,13 @@ function renderMapDetail(location) {
     const fireCount = MAP_LOCATIONS.filter((entry) => entry.type === "fire").length;
     const carWashCount = MAP_LOCATIONS.filter((entry) => entry.type === "carwash").length;
     const liveFeedReady = Boolean(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl);
+    const trackingMode = SERVER_CONFIG.liveTrackingRequiresOptIn ? "Opt-in only" : "Enabled";
 
     return `
       <div class="map-detail__eyebrow">Overview</div>
       <div class="map-detail__title">Los Santos Service Map</div>
-      <div class="map-detail__meta">Satellite only / ${policeCount} police / ${hospitalCount} hospitals / ${fireCount} fire stations / ${carWashCount} car washes</div>
-      <div class="map-detail__body">Markers on this page are pulled from the Services layer on gta-5-map.com, with Lester's House kept as a separate custom point. Live player overlays are ${liveFeedReady ? "ready to read your server feed." : "ready once you connect a live player endpoint."}</div>
+      <div class="map-detail__meta">Satellite only / ${policeCount} police / ${hospitalCount} hospitals / ${fireCount} fire stations / ${carWashCount} car washes / ${escapeHtml(trackingMode)}</div>
+      <div class="map-detail__body">Markers on this page are pulled from the Services layer on gta-5-map.com, with Lester's House kept as a separate custom point. Live player overlays are ${liveFeedReady ? "ready to read your server feed." : "ready once you connect a live player endpoint."} Only players who enable website tracking in-game should appear on the live map.</div>
     `;
   }
 
@@ -1340,15 +1342,20 @@ function renderMapDetail(location) {
 function renderMapStageAside(location) {
   const legend = renderMapLegend();
   const liveConfigured = Boolean(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl);
-  const livePlayerCount = customMapState?.liveData?.players?.length ?? 0;
+  const livePlayerCount = customMapState?.liveData?.visiblePlayers ?? customMapState?.liveData?.players?.length ?? 0;
+  const hiddenPlayerCount = customMapState?.liveData?.hiddenPlayers ?? 0;
   const liveUpdatedAt = customMapState?.liveData?.updatedAt ? formatServerTimestamp(customMapState.liveData.updatedAt) : "Pending";
   const hotZones = customMapState?.liveOps?.hotZones?.items?.slice(0, 3) || [];
   const activeEvents = customMapState?.liveOps?.events?.items?.slice(0, 2) || [];
+  const trackingLabel = customMapState?.liveData?.settingLabel || "Website Live Tracking";
+  const optInText = customMapState?.liveData?.requiresOptIn
+    ? `${hiddenPlayerCount} hidden until players enable ${trackingLabel} in-game.`
+    : "Live map feed is not restricted by opt-in.";
   const liveCard = `
     <div class="map-stage-card">
       <div class="map-stage-card__eyebrow">Live tracking</div>
       <div class="map-stage-card__title">${liveConfigured ? `${livePlayerCount} tracked players` : "Endpoint ready"}</div>
-      <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. Player dots will appear here as soon as your live endpoint starts returning coordinates.` : "Add a live map endpoint in server-config.js to show player positions directly on the Los Santos map."}</div>
+      <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. ${optInText}` : "Add a live map endpoint in server-config.js to show player positions directly on the Los Santos map."}</div>
     </div>
   `;
   const hotZonesCard = `
@@ -2993,12 +3000,21 @@ function normaliseLiveMapPlayers(payload) {
       : Array.isArray(payload?.items)
         ? payload.items
         : [];
+  const requiresOptIn = Boolean(
+    pickFirstDefined(payload, ["requiresOptIn", "optInOnly", "trackingOptIn"]) ??
+    SERVER_CONFIG.liveTrackingRequiresOptIn
+  );
+  const settingLabel = pickFirstDefined(payload, ["settingLabel", "toggleLabel", "preferenceLabel"]) || "Website Live Tracking";
 
-  const players = playerSource.map((player, index) => {
+  const allPlayers = playerSource.map((player, index) => {
     const mapX = toFiniteNumber(pickFirstDefined(player, ["mapX", "xPercent", "percentX"]));
     const mapY = toFiniteNumber(pickFirstDefined(player, ["mapY", "yPercent", "percentY"]));
     const lat = toFiniteNumber(pickFirstDefined(player, ["lat", "latitude"]));
     const lng = toFiniteNumber(pickFirstDefined(player, ["lng", "lon", "longitude"]));
+    const trackingEnabled = Boolean(
+      pickFirstDefined(player, ["trackingEnabled", "optedIn", "websiteTracking", "shareLocation"]) ??
+      !requiresOptIn
+    );
     const position = mapX != null && mapY != null
       ? {
           x: clamp(mapX, 1.6, 98.4),
@@ -3016,14 +3032,21 @@ function normaliseLiveMapPlayers(payload) {
       role: pickFirstDefined(player, ["role", "job", "group"]) || "",
       ping: toFiniteNumber(pickFirstDefined(player, ["ping", "latency"])),
       heading: toFiniteNumber(pickFirstDefined(player, ["heading", "rotation"])),
+      trackingEnabled,
       position
     };
   }).filter(Boolean);
+  const visiblePlayers = allPlayers.filter((player) => !requiresOptIn || player.trackingEnabled);
 
   return {
     configured: Boolean(payload),
+    requiresOptIn,
+    settingLabel,
+    totalPlayers: allPlayers.length,
+    visiblePlayers: visiblePlayers.length,
+    hiddenPlayers: Math.max(0, allPlayers.length - visiblePlayers.length),
     updatedAt: parseSnapshotDate(pickFirstDefined(payload, ["updatedAt", "timestamp", "refreshedAt"])),
-    players
+    players: visiblePlayers
   };
 }
 
@@ -3506,7 +3529,7 @@ function renderServerStatusContent(snapshot) {
         <div class="status-card">
           <div class="status-card__label">Live Map Feed</div>
           <div class="status-card__value">${escapeHtml(String(liveMapCount))}</div>
-          <div class="status-card__meta">${escapeHtml(liveOps.liveMap?.configured ? "Tracked players ready for map overlay" : "Add a live player map endpoint")}</div>
+          <div class="status-card__meta">${escapeHtml(liveOps.liveMap?.configured ? (liveOps.liveMap?.requiresOptIn ? `${liveOps.liveMap.hiddenPlayers || 0} hidden until opt-in is enabled in-game` : "Tracked players ready for map overlay") : "Add a live player map endpoint")}</div>
         </div>
         ${renderStatusMetricCard("Queue", queueValue, liveOps.queue?.estimatedWaitMinutes != null ? `About ${liveOps.queue.estimatedWaitMinutes} minutes wait` : "Queue feed ready for live numbers")}
         <div class="status-card">
@@ -3549,6 +3572,7 @@ function renderServerStatusContent(snapshot) {
           <div class="stack-list__item"><span class="stack-list__index">04</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">05</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">06</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">07</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
         </div>
         <div class="status-note">
           <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.

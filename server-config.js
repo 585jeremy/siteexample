@@ -14,7 +14,14 @@ window.SGCNR_SERVER_CONFIG = {
   // Preferred: one combined endpoint that returns any live ops data you want
   // the website to show. The app will look for:
   // {
-  //   "liveMap": { "updatedAt": "...", "players": [ { "id": 1, "name": "Player", "mapX": 54.2, "mapY": 38.7 } ] },
+  //   "liveMap": {
+  //     "updatedAt": "...",
+  //     "requiresOptIn": true,
+  //     "settingLabel": "Website Live Tracking",
+  //     "players": [
+  //       { "id": 1, "name": "Player", "mapX": 54.2, "mapY": 38.7, "trackingEnabled": true }
+  //     ]
+  //   },
   //   "uptime": { "startedAt": "...", "uptimeSeconds": 12345 },
   //   "restart": { "nextRestartAt": "...", "label": "Daily restart" },
   //   "queue": { "count": 18, "estimatedWaitMinutes": 7 },
@@ -43,5 +50,6 @@ window.SGCNR_SERVER_CONFIG = {
   // Optional public status page link and fallback restart label.
   publicStatusUrl: "",
   nextRestartLabel: "Scheduled restart",
-  websiteName: "SGCNR Portal"
+  websiteName: "SGCNR Portal",
+  liveTrackingRequiresOptIn: true
 };
