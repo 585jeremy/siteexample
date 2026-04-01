@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401t";
+const SITE_ASSET_VERSION = "20260402a";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -40,6 +40,8 @@ const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers
 const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png?v=${SITE_ASSET_VERSION}`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
 const MAP_IMAGE_URL = `${APP_ASSET_BASE_URL}map-assets/los-santos-satellite-z6.jpg?v=${SITE_ASSET_VERSION}`;
+const MAP_IMAGE_FALLBACK_URL = `${APP_ASSET_BASE_URL}satellite-map.jpg?v=${SITE_ASSET_VERSION}`;
+const MAP_IMAGE_LEGACY_URL = `${APP_ASSET_BASE_URL}map.jpg?v=${SITE_ASSET_VERSION}`;
 const MAP_TILE_GRID = {
   zoom: 6,
   tileSize: 256,
@@ -1289,7 +1291,7 @@ function renderMap() {
                   </div>
                   <div class="map-toolbar__hint">Scroll or use +/- to zoom. Drag to move.</div>
                 </div>
-                <div class="service-map" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
+                <div class="service-map is-loading" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
                 <aside class="map-stage__aside" id="mapStageAside">${stageAside}</aside>
               </div>
             </div>
@@ -1642,13 +1644,50 @@ function initCustomMap() {
   mapEl.innerHTML = `
     <div class="service-map__canvas">
       <div class="service-map__stage">
-        <img class="service-map__image" src="${escapeHtml(MAP_IMAGE_URL)}" alt="Los Santos satellite map" loading="eager" />
+        <img class="service-map__image" src="${escapeHtml(MAP_IMAGE_URL)}" alt="Los Santos satellite map" loading="eager" decoding="async" fetchpriority="high" />
         <div class="service-map__layer">
           ${markersMarkup}
         </div>
       </div>
     </div>
   `;
+
+  const imageEl = mapEl.querySelector(".service-map__image");
+  const mapImageQueue = [MAP_IMAGE_URL, MAP_IMAGE_FALLBACK_URL, MAP_IMAGE_LEGACY_URL];
+
+  if (imageEl) {
+    const handleMapImageLoad = () => {
+      mapEl.classList.remove("is-loading", "is-map-error");
+      mapEl.classList.add("is-ready");
+      window.requestAnimationFrame(() => {
+        updateMapViewport();
+      });
+      window.setTimeout(() => {
+        updateMapViewport();
+      }, 140);
+    };
+
+    const handleMapImageError = () => {
+      const currentIndex = Number(imageEl.dataset.assetIndex || "0");
+      const nextIndex = currentIndex + 1;
+      if (nextIndex < mapImageQueue.length) {
+        imageEl.dataset.assetIndex = String(nextIndex);
+        imageEl.src = mapImageQueue[nextIndex];
+        return;
+      }
+
+      mapEl.classList.remove("is-loading", "is-ready");
+      mapEl.classList.add("is-map-error");
+    };
+
+    imageEl.dataset.assetIndex = "0";
+    imageEl.addEventListener("load", handleMapImageLoad);
+    imageEl.addEventListener("error", handleMapImageError);
+
+    if (imageEl.complete && imageEl.naturalWidth > 0) {
+      handleMapImageLoad();
+    }
+  }
 
   customMapState = {
     activeId: null,
@@ -1768,6 +1807,12 @@ function initCustomMap() {
   updateMapSelection(null);
   applyMapFilter("all");
   updateMapViewport();
+  window.requestAnimationFrame(() => {
+    updateMapViewport();
+  });
+  window.setTimeout(() => {
+    updateMapViewport();
+  }, 160);
 }
 
 function readCart() {
@@ -3499,8 +3544,8 @@ function createPointerRipple(x, y, options = {}) {
 }
 
 function spawnPointerBurst(x, y) {
-  createPointerRipple(x, y, { radius: 16, velocity: 112, alpha: 0.34, lineWidth: 2.4, decay: 0.18, tint: "blue" });
-  createPointerRipple(x, y, { radius: 34, velocity: 134, alpha: 0.22, lineWidth: 1.8, decay: 0.15, delay: 0.08, tint: "blue" });
+  createPointerRipple(x, y, { radius: 16, velocity: 112, alpha: 0.34, lineWidth: 2.4, decay: 0.18, tint: "gold" });
+  createPointerRipple(x, y, { radius: 34, velocity: 134, alpha: 0.22, lineWidth: 1.8, decay: 0.15, delay: 0.08, tint: "gold" });
   createPointerRipple(x, y, { radius: 58, velocity: 154, alpha: 0.14, lineWidth: 1.2, decay: 0.12, delay: 0.16, tint: "red" });
 }
 
@@ -3568,10 +3613,10 @@ function drawPointerFxFrame(now) {
     const innerAlpha = Math.max(0, ripple.alpha * 0.48);
     const strokeColor = ripple.tint === "red"
       ? `rgba(226,118,102,${strokeAlpha.toFixed(3)})`
-      : `rgba(140,200,255,${strokeAlpha.toFixed(3)})`;
+      : `rgba(218,164,96,${strokeAlpha.toFixed(3)})`;
     const innerColor = ripple.tint === "red"
       ? `rgba(255,185,165,${innerAlpha.toFixed(3)})`
-      : `rgba(215,239,255,${innerAlpha.toFixed(3)})`;
+      : `rgba(255,229,188,${innerAlpha.toFixed(3)})`;
 
     ctx.lineWidth = ripple.lineWidth;
     ctx.strokeStyle = strokeColor;
