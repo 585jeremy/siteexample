@@ -42,7 +42,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260402d";
+const SITE_ASSET_VERSION = "20260402e";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1297,7 +1297,7 @@ function renderMap() {
                   </div>
                   <div class="map-toolbar__hint">Scroll or use +/- to zoom. Drag to move.</div>
                 </div>
-                <div class="service-map is-loading" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 136px); min-height:620px;"></div>
+                <div class="service-map is-loading" id="serviceMap" aria-label="Satellite-only Los Santos services map" style="height:calc(100svh - 188px); min-height:500px;"></div>
                 <aside class="map-stage__aside" id="mapStageAside">${stageAside}</aside>
               </div>
             </div>

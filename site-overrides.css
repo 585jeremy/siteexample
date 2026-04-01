@@ -3937,3 +3937,219 @@ body.is-wiki .footer{
     grid-template-columns: 1fr;
   }
 }
+
+/* 2026-04-02 final shell consistency overrides */
+.brandmark{
+  gap: 0 !important;
+}
+
+.brandmark__badge{
+  min-width: 236px !important;
+  min-height: 58px !important;
+}
+
+.brandmark__logo--badge{
+  max-width: 142px !important;
+  max-height: 44px !important;
+}
+
+.brandmark__sub{
+  display: none !important;
+}
+
+body.is-landing,
+body.is-wiki,
+body.is-map{
+  background:
+    radial-gradient(circle at 16% 12%, rgba(191, 143, 88, .14), transparent 24%),
+    radial-gradient(circle at 84% 14%, rgba(144, 71, 61, .13), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(98, 62, 33, .08), transparent 28%),
+    linear-gradient(180deg, #040506 0%, #070809 52%, #030304 100%) !important;
+}
+
+body.is-landing .topbar,
+body.is-wiki .topbar,
+body.is-map .topbar{
+  background: linear-gradient(180deg, rgba(6,7,9,.96), rgba(5,6,8,.84)) !important;
+  border-bottom-color: rgba(183,137,85,.10) !important;
+}
+
+body.is-landing .clock,
+body.is-landing .auth__btn,
+body.is-wiki .clock,
+body.is-wiki .auth__btn,
+body.is-map .clock,
+body.is-map .auth__btn{
+  border-color: rgba(183,137,85,.14) !important;
+  background: rgba(18,15,13,.78) !important;
+  color: rgba(239,231,216,.82) !important;
+}
+
+body.is-landing .content,
+body.is-wiki .content,
+body.is-map .content{
+  width: min(1450px, calc(100% - 24px)) !important;
+  margin: 0 auto !important;
+}
+
+body.is-landing .content{
+  padding: 14px 0 114px !important;
+}
+
+body.is-wiki .content{
+  padding: 14px 0 120px !important;
+}
+
+body.is-map .content{
+  padding: 10px 0 112px !important;
+  min-height: calc(100svh - 84px) !important;
+}
+
+.landing-reboot__glow{
+  opacity: .56 !important;
+  filter: blur(92px) !important;
+}
+
+.landing-reboot__glow--blue{
+  background: radial-gradient(circle, rgba(188, 143, 86, .22), rgba(188, 143, 86, 0) 68%) !important;
+}
+
+.landing-reboot__glow--red{
+  background: radial-gradient(circle, rgba(149, 76, 61, .20), rgba(149, 76, 61, 0) 68%) !important;
+}
+
+.landing-reboot__hero,
+.wiki-shell .section,
+.wiki-sidebar,
+.wiki-article,
+.map-panel,
+.service-map-shell{
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(16,13,12,.97), rgba(7,8,10,.98)) !important;
+  box-shadow:
+    0 28px 74px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+.wiki-hero{
+  background:
+    radial-gradient(circle at top right, rgba(191,143,88,.10), transparent 34%),
+    linear-gradient(180deg, rgba(20,16,14,.96), rgba(9,10,12,.98)) !important;
+}
+
+.wiki-nav__item,
+.wiki-sidebar__stat,
+.wiki-card,
+.wiki-fact,
+.wiki-sectionBlock{
+  border-color: rgba(183,137,85,.10) !important;
+  background:
+    linear-gradient(180deg, rgba(22,18,15,.94), rgba(10,10,12,.96)) !important;
+}
+
+.wiki-nav__item.is-active{
+  border-color: rgba(211,158,97,.28) !important;
+  background:
+    linear-gradient(180deg, rgba(64,46,26,.46), rgba(22,18,15,.94)) !important;
+}
+
+body.is-map .dock{
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+  z-index: 120 !important;
+}
+
+.map-page{
+  min-height: calc(100svh - 136px) !important;
+}
+
+.map-layout{
+  grid-template-columns: 284px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  height: calc(100svh - 164px) !important;
+  min-height: calc(100svh - 164px) !important;
+}
+
+.map-panel{
+  padding: 12px !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.map-panel__stats{
+  gap: 7px !important;
+}
+
+.map-quick{
+  min-height: 0 !important;
+}
+
+.service-map-shell{
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+.service-map{
+  height: calc(100svh - 188px) !important;
+  min-height: 500px !important;
+}
+
+.service-map__canvas{
+  padding: 14px 212px 14px 14px !important;
+}
+
+.service-map__stage{
+  width: min(max(380px, calc(100% - 206px)), calc(100svh - 240px)) !important;
+}
+
+.map-stage__aside{
+  top: 70px !important;
+  right: 14px !important;
+  bottom: 14px !important;
+  width: 198px !important;
+  gap: 10px !important;
+}
+
+.map-stage-card{
+  padding: 12px 12px 13px !important;
+  border-radius: 16px !important;
+}
+
+.map-toolbar--overlay{
+  top: 12px !important;
+  left: 12px !important;
+}
+
+@media (max-width: 1080px){
+  body.is-map .content,
+  body.is-wiki .content,
+  body.is-landing .content{
+    width: min(100%, calc(100% - 20px)) !important;
+  }
+
+  .map-layout{
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .service-map{
+    height: auto !important;
+    min-height: 540px !important;
+  }
+
+  .service-map__canvas{
+    padding: 14px !important;
+  }
+
+  .service-map__stage{
+    width: min(100%, 760px) !important;
+  }
+
+  .map-stage__aside{
+    width: 210px !important;
+  }
+}
