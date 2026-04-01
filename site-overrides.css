@@ -2965,6 +2965,201 @@ body.is-landing .dock{
   min-height: 0;
 }
 
+body.is-standard{
+  background:
+    radial-gradient(circle at 14% 12%, rgba(171,127,74,.14), transparent 22%),
+    radial-gradient(circle at 86% 16%, rgba(179,63,63,.12), transparent 20%),
+    linear-gradient(180deg, #060708 0%, #08090b 100%);
+}
+
+body.is-standard .topbar{
+  position: relative;
+  justify-content: flex-end;
+  gap: 14px;
+  min-height: 82px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, rgba(4,5,7,.95), rgba(4,5,7,.78));
+  border-bottom-color: rgba(183,137,85,.10);
+}
+
+body.is-standard .brandmark{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  align-items: center;
+}
+
+body.is-standard .auth{
+  position: relative;
+  z-index: 2;
+  margin-left: 0;
+}
+
+body.is-standard .content{
+  width: min(1180px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 16px 0 148px !important;
+}
+
+body.is-standard .dock{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 80;
+}
+
+body.is-standard .footer{
+  display: none;
+}
+
+body.is-standard .section,
+body.is-standard .section__content,
+body.is-standard .doc-table,
+body.is-standard .feature-card,
+body.is-standard .stack-list__item,
+body.is-standard .info-faq__item,
+body.is-standard .rule-card,
+body.is-standard .card,
+body.is-standard .rules-legal{
+  border-color: rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(28,22,18,.94), rgba(10,10,12,.96));
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+body.is-standard .doc-table th{
+  background: rgba(25,18,14,.72);
+  color: rgba(221,202,175,.60);
+}
+
+body.is-standard .doc-table td,
+body.is-standard .doc-p,
+body.is-standard .rule-card__body,
+body.is-standard .rule-card__section,
+body.is-standard .card__meta{
+  color: rgba(222,212,196,.78);
+}
+
+body.is-standard .tag{
+  border-color: rgba(183,137,85,.14);
+  background: rgba(201,149,87,.06);
+  color: rgba(237,221,195,.78);
+}
+
+body.is-standard .rule-card:hover{
+  border-color: rgba(206,150,92,.22);
+  background: linear-gradient(180deg, rgba(36,28,23,.96), rgba(12,12,14,.98));
+}
+
+body.is-standard .rule-card:focus-visible{
+  border-color: rgba(206,150,92,.34);
+  box-shadow: 0 0 0 3px rgba(206,150,92,.10);
+}
+
+body.is-standard .content-grid--sidebar{
+  grid-template-columns: minmax(0, 1.22fr) minmax(270px, .82fr);
+  gap: 16px;
+}
+
+body.is-standard .page-hero{
+  margin-bottom: 18px;
+  border-color: rgba(183,137,85,.12);
+  background:
+    radial-gradient(circle at 16% 22%, rgba(206,150,92,.12), transparent 28%),
+    radial-gradient(circle at 88% 24%, rgba(125,47,47,.12), transparent 30%),
+    linear-gradient(180deg, rgba(28,22,18,.94), rgba(10,10,12,.96));
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+body.is-standard .page-hero__row{
+  align-items: flex-end;
+}
+
+body.is-standard .page-title,
+body.is-standard .section h2{
+  color: rgba(246,238,224,.96);
+}
+
+body.is-standard .section__eyebrow,
+body.is-standard .feature-card__label,
+body.is-standard .status-card__label,
+body.is-standard .status-live__label,
+body.is-standard .wiki-sidebar__statLabel{
+  color: rgba(220,202,175,.54);
+}
+
+body.is-standard .feature-card__value,
+body.is-standard .status-card__value,
+body.is-standard .status-live__value{
+  color: rgba(246,238,224,.94);
+}
+
+body.is-standard .status-meta,
+body.is-standard .status-live__text,
+body.is-standard .status-card__meta,
+body.is-standard .status-note{
+  color: rgba(222,212,196,.72);
+}
+
+body.is-standard .status-live::before{
+  background:
+    radial-gradient(circle at 14% 18%, rgba(201,149,87,.14), transparent 28%),
+    radial-gradient(circle at 86% 20%, rgba(173,71,71,.12), transparent 26%),
+    radial-gradient(circle at 52% 82%, rgba(201,149,87,.06), transparent 30%);
+}
+
+body.is-standard .status-live__highlight,
+body.is-standard .status-card,
+body.is-standard .status-note{
+  border-color: rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(28,22,18,.88), rgba(10,10,12,.94));
+}
+
+body.is-standard .status-pill{
+  border-color: rgba(183,137,85,.14);
+  background: rgba(201,149,87,.06);
+  color: rgba(242,226,200,.90);
+}
+
+body.is-standard .status-pill--online{
+  border-color: rgba(206,150,92,.20);
+  background: rgba(206,150,92,.10);
+  color: rgba(246,231,205,.96);
+}
+
+body.is-standard .status-pill--offline{
+  border-color: rgba(173,71,71,.22);
+  background: rgba(173,71,71,.10);
+  color: rgba(255,200,200,.92);
+}
+
+body.is-standard .stack-list__index{
+  border-color: rgba(183,137,85,.18);
+  background: rgba(201,149,87,.09);
+  color: rgba(246,231,205,.94);
+}
+
+body.is-standard .info-link{
+  border-color: rgba(183,137,85,.12);
+  background: linear-gradient(180deg, rgba(30,24,20,.88), rgba(10,10,12,.92));
+  color: rgba(240,229,207,.86);
+}
+
+body.is-standard .info-link:hover{
+  border-color: rgba(206,150,92,.22);
+  background: linear-gradient(180deg, rgba(38,29,23,.94), rgba(12,12,14,.96));
+}
+
+body.is-standard .info-link:focus-visible{
+  border-color: rgba(206,150,92,.34);
+  box-shadow: 0 0 0 3px rgba(206,150,92,.10);
+}
+
 body.is-wiki .content{
   width: min(1420px, calc(100% - 28px));
   margin: 0 auto;
@@ -3297,6 +3492,10 @@ body.is-wiki .footer{
 }
 
 @media (max-width: 1080px){
+  body.is-standard .content{
+    width: min(100%, calc(100% - 20px));
+  }
+
   body.is-wiki{
     overflow: auto;
   }
@@ -3357,6 +3556,29 @@ body.is-wiki .footer{
 }
 
 @media (max-width: 760px){
+  body.is-standard .topbar{
+    justify-content: center;
+    min-height: 74px;
+  }
+
+  body.is-standard .brandmark{
+    position: static;
+    transform: none;
+  }
+
+  body.is-standard .auth{
+    display: none;
+  }
+
+  body.is-standard .content{
+    width: min(100%, calc(100% - 16px));
+    padding: 12px 0 120px !important;
+  }
+
+  body.is-standard .dock{
+    bottom: 16px;
+  }
+
   body.is-wiki .content{
     width: min(100%, calc(100% - 16px));
     padding: 12px 0 120px !important;

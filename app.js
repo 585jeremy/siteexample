@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401s";
+const SITE_ASSET_VERSION = "20260401t";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -3379,9 +3379,11 @@ function route() {
   }
   updateDockActive(r.name);
 
+  const isStandardPage = !["home", "map", "wiki"].includes(r.name);
   document.body.classList.toggle("is-landing", r.name === "home");
   document.body.classList.toggle("is-map", r.name === "map");
   document.body.classList.toggle("is-wiki", r.name === "wiki");
+  document.body.classList.toggle("is-standard", isStandardPage);
 
   const inRulesFlow = r.name === "rules" || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);
