@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401l";
+const SITE_ASSET_VERSION = "20260401m";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -3457,47 +3457,145 @@ function route() {
   meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
 }
 
-function schedulePointerFxFrame() {
-  if (!siteFxState || siteFxState.rafId) return;
+function resizePointerFxCanvas() {
+  if (!siteFxState?.canvasEl || !siteFxState?.ctx) return;
 
-  siteFxState.rafId = window.requestAnimationFrame(() => {
-    if (!siteFxState) return;
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-    const ease = 0.16;
-    siteFxState.x += (siteFxState.targetX - siteFxState.x) * ease;
-    siteFxState.y += (siteFxState.targetY - siteFxState.y) * ease;
+  siteFxState.dpr = dpr;
+  siteFxState.width = width;
+  siteFxState.height = height;
+  siteFxState.canvasEl.width = Math.round(width * dpr);
+  siteFxState.canvasEl.height = Math.round(height * dpr);
+  siteFxState.canvasEl.style.width = `${width}px`;
+  siteFxState.canvasEl.style.height = `${height}px`;
+  siteFxState.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
 
-    if (siteFxState.glowEl) {
-      siteFxState.glowEl.style.left = `${siteFxState.x}px`;
-      siteFxState.glowEl.style.top = `${siteFxState.y}px`;
-    }
+function createPointerRipple(x, y, options = {}) {
+  if (!siteFxState) return;
 
-    const needsMoreFrames =
-      Math.abs(siteFxState.targetX - siteFxState.x) > 0.45 ||
-      Math.abs(siteFxState.targetY - siteFxState.y) > 0.45;
-
-    siteFxState.rafId = 0;
-    if (needsMoreFrames) {
-      schedulePointerFxFrame();
-    }
+  siteFxState.ripples.push({
+    x,
+    y,
+    radius: options.radius ?? 10,
+    velocity: options.velocity ?? 118,
+    alpha: options.alpha ?? 0.32,
+    decay: options.decay ?? 0.24,
+    lineWidth: options.lineWidth ?? 1.8,
+    softness: options.softness ?? 0.12,
+    delay: options.delay ?? 0,
+    tint: options.tint ?? "blue"
   });
+
+  if (siteFxState.ripples.length > 28) {
+    siteFxState.ripples.splice(0, siteFxState.ripples.length - 28);
+  }
 }
 
 function spawnPointerBurst(x, y) {
-  if (!siteFxState?.burstLayerEl) return;
+  createPointerRipple(x, y, { radius: 10, velocity: 128, alpha: 0.42, lineWidth: 2.4, decay: 0.21, tint: "blue" });
+  createPointerRipple(x, y, { radius: 22, velocity: 152, alpha: 0.26, lineWidth: 1.8, decay: 0.17, delay: 0.05, tint: "red" });
+  createPointerRipple(x, y, { radius: 34, velocity: 176, alpha: 0.18, lineWidth: 1.4, decay: 0.14, delay: 0.1, tint: "blue" });
+}
 
-  const createBurst = (className, size) => {
-    const burst = document.createElement("span");
-    burst.className = className;
-    burst.style.left = `${x}px`;
-    burst.style.top = `${y}px`;
-    burst.style.setProperty("--burst-size", `${size}px`);
-    burst.addEventListener("animationend", () => burst.remove(), { once: true });
-    siteFxState?.burstLayerEl?.appendChild(burst);
-  };
+function drawPointerFxFrame(now) {
+  if (!siteFxState?.ctx) return;
 
-  createBurst("site-fx__burst", 120);
-  createBurst("site-fx__burst site-fx__burst--alt", 176);
+  const state = siteFxState;
+  const ctx = state.ctx;
+  const dt = Math.min(0.032, Math.max(0.001, (now - (state.lastFrameAt || now)) / 1000));
+  state.lastFrameAt = now;
+
+  const ease = 0.14;
+  state.x += (state.targetX - state.x) * ease;
+  state.y += (state.targetY - state.y) * ease;
+
+  if (state.pointerVisible) {
+    const timeSinceTrail = now - state.lastTrailAt;
+    const dx = state.x - state.lastTrailX;
+    const dy = state.y - state.lastTrailY;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance > 20 || timeSinceTrail > 88) {
+      createPointerRipple(state.x, state.y, {
+        radius: 8,
+        velocity: 94,
+        alpha: 0.14,
+        lineWidth: 1.2,
+        decay: 0.28,
+        tint: distance > 40 ? "red" : "blue"
+      });
+      state.lastTrailAt = now;
+      state.lastTrailX = state.x;
+      state.lastTrailY = state.y;
+    }
+  }
+
+  ctx.clearRect(0, 0, state.width, state.height);
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+
+  if (state.pointerVisible) {
+    const glow = ctx.createRadialGradient(state.x, state.y, 0, state.x, state.y, 150);
+    glow.addColorStop(0, "rgba(132,186,255,0.11)");
+    glow.addColorStop(0.28, "rgba(74,137,255,0.06)");
+    glow.addColorStop(0.5, "rgba(255,98,98,0.04)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(state.x, state.y, 150, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  state.ripples = state.ripples.filter((ripple) => {
+    if (ripple.delay > 0) {
+      ripple.delay -= dt;
+      return true;
+    }
+
+    ripple.radius += ripple.velocity * dt;
+    ripple.alpha -= ripple.decay * dt;
+    if (ripple.alpha <= 0.01) return false;
+
+    const strokeAlpha = Math.max(0, ripple.alpha);
+    const innerAlpha = Math.max(0, ripple.alpha * 0.48);
+    const strokeColor = ripple.tint === "red"
+      ? `rgba(255,112,112,${strokeAlpha.toFixed(3)})`
+      : `rgba(127,186,255,${strokeAlpha.toFixed(3)})`;
+    const innerColor = ripple.tint === "red"
+      ? `rgba(255,126,126,${innerAlpha.toFixed(3)})`
+      : `rgba(196,228,255,${innerAlpha.toFixed(3)})`;
+
+    ctx.lineWidth = ripple.lineWidth;
+    ctx.strokeStyle = strokeColor;
+    ctx.beginPath();
+    ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.lineWidth = Math.max(0.8, ripple.lineWidth * 0.45);
+    ctx.strokeStyle = innerColor;
+    ctx.beginPath();
+    ctx.arc(ripple.x, ripple.y, ripple.radius * 0.72, 0, Math.PI * 2);
+    ctx.stroke();
+
+    return true;
+  });
+
+  ctx.restore();
+
+  state.rafId = 0;
+  const keepAlive = state.pointerVisible || state.ripples.length > 0 || now < state.activeUntil;
+  if (keepAlive) {
+    schedulePointerFxFrame();
+  }
+}
+
+function schedulePointerFxFrame() {
+  if (!siteFxState || siteFxState.rafId) return;
+  siteFxState.rafId = window.requestAnimationFrame(drawPointerFxFrame);
 }
 
 function initPointerFx() {
@@ -3513,32 +3611,50 @@ function initPointerFx() {
   rootEl.className = "site-fx";
   rootEl.setAttribute("aria-hidden", "true");
   rootEl.innerHTML = `
-    <div class="site-fx__glow"></div>
-    <div class="site-fx__burstLayer"></div>
+    <canvas class="site-fx__canvas"></canvas>
   `;
   document.body.appendChild(rootEl);
   document.body.classList.add("has-pointer-fx");
 
+  const canvasEl = rootEl.querySelector(".site-fx__canvas");
+  const ctx = canvasEl?.getContext("2d");
+  if (!canvasEl || !ctx) {
+    rootEl.remove();
+    return;
+  }
+
   const state = {
     rootEl,
-    glowEl: rootEl.querySelector(".site-fx__glow"),
-    burstLayerEl: rootEl.querySelector(".site-fx__burstLayer"),
+    canvasEl,
+    ctx,
     x: window.innerWidth * 0.5,
     y: window.innerHeight * 0.32,
     targetX: window.innerWidth * 0.5,
     targetY: window.innerHeight * 0.32,
-    rafId: 0
+    lastTrailX: window.innerWidth * 0.5,
+    lastTrailY: window.innerHeight * 0.32,
+    lastTrailAt: performance.now(),
+    lastFrameAt: 0,
+    activeUntil: performance.now() + 700,
+    pointerVisible: false,
+    ripples: [],
+    rafId: 0,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    dpr: 1
   };
 
   const handlePointerMove = (event) => {
     state.targetX = event.clientX;
     state.targetY = event.clientY;
-    state.rootEl.classList.add("is-active");
+    state.pointerVisible = true;
+    state.activeUntil = performance.now() + 1000;
     schedulePointerFxFrame();
   };
 
   const handlePointerLeave = () => {
-    state.rootEl.classList.remove("is-active");
+    state.pointerVisible = false;
+    state.activeUntil = performance.now() + 420;
   };
 
   const handlePointerOut = (event) => {
@@ -3551,17 +3667,26 @@ function initPointerFx() {
     if (typeof event.clientX !== "number" || typeof event.clientY !== "number") return;
     state.targetX = event.clientX;
     state.targetY = event.clientY;
-    state.rootEl.classList.add("is-active");
+    state.pointerVisible = true;
+    state.activeUntil = performance.now() + 1400;
     schedulePointerFxFrame();
     spawnPointerBurst(event.clientX, event.clientY);
+  };
+
+  const handleResize = () => {
+    resizePointerFxCanvas();
+    schedulePointerFxFrame();
   };
 
   document.addEventListener("pointermove", handlePointerMove, { passive: true });
   document.addEventListener("pointerdown", handlePointerDown, { passive: true });
   document.addEventListener("pointerout", handlePointerOut, { passive: true });
   window.addEventListener("blur", handlePointerLeave);
+  window.addEventListener("resize", handleResize, { passive: true });
 
   siteFxState = state;
+  resizePointerFxCanvas();
+  createPointerRipple(state.x, state.y, { radius: 14, velocity: 86, alpha: 0.1, lineWidth: 1.1, decay: 0.22 });
   schedulePointerFxFrame();
 }
 
