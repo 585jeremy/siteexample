@@ -41,7 +41,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260402b";
+const SITE_ASSET_VERSION = "20260402c";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1124,16 +1124,12 @@ function getMapTypeIcon(type) {
 }
 
 function renderMapMarkerVisual(type) {
-  const sprite = MAPGENIE_MARKER_SPRITES[type];
-  if (sprite) {
-    return `<span class="service-map__sprite service-map__sprite--${escapeHtml(type)}" aria-hidden="true"></span>`;
-  }
-
   return `
-    <span class="service-marker__pin service-marker__pin--${escapeHtml(type)}">
+    <span class="service-marker__pin service-marker__pin--service service-marker__pin--${escapeHtml(type)}">
       <span class="service-marker__halo"></span>
       <span class="service-marker__core"></span>
       <span class="service-marker__icon" aria-hidden="true">${getMapTypeIcon(type)}</span>
+      <span class="service-marker__tail" aria-hidden="true"></span>
     </span>
   `;
 }
@@ -1346,11 +1342,39 @@ function renderMapStageAside(location) {
   const liveConfigured = Boolean(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl);
   const livePlayerCount = customMapState?.liveData?.players?.length ?? 0;
   const liveUpdatedAt = customMapState?.liveData?.updatedAt ? formatServerTimestamp(customMapState.liveData.updatedAt) : "Pending";
+  const hotZones = customMapState?.liveOps?.hotZones?.items?.slice(0, 3) || [];
+  const activeEvents = customMapState?.liveOps?.events?.items?.slice(0, 2) || [];
   const liveCard = `
     <div class="map-stage-card">
       <div class="map-stage-card__eyebrow">Live tracking</div>
       <div class="map-stage-card__title">${liveConfigured ? `${livePlayerCount} tracked players` : "Endpoint ready"}</div>
       <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. Player dots will appear here as soon as your live endpoint starts returning coordinates.` : "Add a live map endpoint in server-config.js to show player positions directly on the Los Santos map."}</div>
+    </div>
+  `;
+  const hotZonesCard = `
+    <div class="map-stage-card">
+      <div class="map-stage-card__eyebrow">Hot zones</div>
+      <div class="map-stage-card__legend">
+        ${hotZones.length ? hotZones.map((zone) => `
+          <div class="map-legend__item map-legend__item--text">
+            <span>${escapeHtml(zone.name)}</span>
+            <strong>${escapeHtml(String(zone.heat))}</strong>
+          </div>
+        `).join("") : `<div class="map-stage-card__body">Connect a hot-zones feed to surface the busiest areas here.</div>`}
+      </div>
+    </div>
+  `;
+  const eventsCard = `
+    <div class="map-stage-card">
+      <div class="map-stage-card__eyebrow">Events</div>
+      <div class="map-stage-card__legend">
+        ${activeEvents.length ? activeEvents.map((event) => `
+          <div class="map-legend__item map-legend__item--text">
+            <span>${escapeHtml(event.title)}</span>
+            <strong>${escapeHtml(event.location)}</strong>
+          </div>
+        `).join("") : `<div class="map-stage-card__body">Active city events will show here once the endpoint is connected.</div>`}
+      </div>
     </div>
   `;
 
@@ -1368,6 +1392,8 @@ function renderMapStageAside(location) {
         </div>
       </div>
       ${liveCard}
+      ${hotZonesCard}
+      ${eventsCard}
     `;
   }
 
@@ -1392,6 +1418,8 @@ function renderMapStageAside(location) {
       </div>
     </div>
     ${liveCard}
+    ${hotZonesCard}
+    ${eventsCard}
   `;
 }
 
@@ -1685,6 +1713,7 @@ async function refreshCustomMapLiveFeed() {
   const liveOps = await loadLiveOpsSnapshot();
   if (!customMapState || !getMapRouteActive()) return;
 
+  customMapState.liveOps = liveOps;
   updateCustomMapLiveLayer(liveOps.liveMap);
   scheduleCustomMapLiveRefresh();
 }
@@ -1780,6 +1809,10 @@ function initCustomMap() {
       updatedAt: null
     },
     liveLayerEl: mapEl.querySelector(".service-map__layer--live"),
+    liveOps: {
+      events: { items: [] },
+      hotZones: { items: [] }
+    },
     liveRefreshTimer: null,
     markerButtons: new Map(),
     mapEl,
@@ -2859,6 +2892,99 @@ function normaliseRestartPayload(payload) {
   };
 }
 
+function normaliseQueuePayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      count: null,
+      estimatedWaitMinutes: null
+    };
+  }
+
+  return {
+    configured: true,
+    count: toFiniteNumber(pickFirstDefined(payload, ["count", "queueCount", "playersQueued"])),
+    estimatedWaitMinutes: toFiniteNumber(pickFirstDefined(payload, ["estimatedWaitMinutes", "waitMinutes", "etaMinutes"]))
+  };
+}
+
+function normaliseCountsPayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      cops: null,
+      ems: null,
+      civs: null,
+      gangs: null,
+      mechanics: null
+    };
+  }
+
+  return {
+    configured: true,
+    cops: toFiniteNumber(pickFirstDefined(payload, ["cops", "police", "leo"])),
+    ems: toFiniteNumber(pickFirstDefined(payload, ["ems", "medics", "ambulance"])),
+    civs: toFiniteNumber(pickFirstDefined(payload, ["civs", "civilians"])),
+    gangs: toFiniteNumber(pickFirstDefined(payload, ["gangs", "criminals"])),
+    mechanics: toFiniteNumber(pickFirstDefined(payload, ["mechanics", "mechs"]))
+  };
+}
+
+function normaliseEventsPayload(payload) {
+  const source = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.events)
+      ? payload.events
+      : [];
+
+  return {
+    configured: Boolean(payload),
+    items: source.map((event, index) => ({
+      id: pickFirstDefined(event, ["id", "slug"]) || `event-${index + 1}`,
+      title: pickFirstDefined(event, ["title", "name"]) || `Event ${index + 1}`,
+      location: pickFirstDefined(event, ["location", "zone", "area"]) || "Unknown zone",
+      status: pickFirstDefined(event, ["status", "state"]) || "Active",
+      detail: pickFirstDefined(event, ["detail", "description", "summary"]) || ""
+    }))
+  };
+}
+
+function normaliseHistoryPayload(payload) {
+  const uptimeSource = Array.isArray(payload?.uptime) ? payload.uptime : [];
+  const outageSource = Array.isArray(payload?.outages) ? payload.outages : [];
+
+  return {
+    configured: Boolean(payload && typeof payload === "object"),
+    uptime: uptimeSource.map((entry, index) => ({
+      label: pickFirstDefined(entry, ["label", "name"]) || `Window ${index + 1}`,
+      uptimeSeconds: toFiniteNumber(pickFirstDefined(entry, ["uptimeSeconds", "uptime"]))
+    })),
+    outages: outageSource.map((entry, index) => ({
+      label: pickFirstDefined(entry, ["label", "name"]) || `Outage ${index + 1}`,
+      startedAt: parseSnapshotDate(pickFirstDefined(entry, ["startedAt", "timestamp"])),
+      durationMinutes: toFiniteNumber(pickFirstDefined(entry, ["durationMinutes", "minutes", "duration"]))
+    }))
+  };
+}
+
+function normaliseHotZonesPayload(payload) {
+  const source = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.zones)
+      ? payload.zones
+      : [];
+
+  return {
+    configured: Boolean(payload),
+    items: source.map((zone, index) => ({
+      id: pickFirstDefined(zone, ["id", "slug"]) || `zone-${index + 1}`,
+      name: pickFirstDefined(zone, ["name", "label", "title"]) || `Zone ${index + 1}`,
+      heat: toFiniteNumber(pickFirstDefined(zone, ["heat", "score", "activity"])) ?? 0,
+      type: pickFirstDefined(zone, ["type", "category"]) || "activity"
+    }))
+  };
+}
+
 function normaliseLiveMapPlayers(payload) {
   const playerSource = Array.isArray(payload)
     ? payload
@@ -2922,12 +3048,22 @@ async function loadLiveOpsSnapshot() {
   const liveMap = normaliseLiveMapPlayers(combined.liveMap || combined.map || liveMapResult.data);
   const uptime = normaliseUptimePayload(combined.uptime || combined.runtime || uptimeResult.data);
   const restart = normaliseRestartPayload(combined.restart || combined.restartInfo || restartResult.data);
+  const queue = normaliseQueuePayload(combined.queue);
+  const counts = normaliseCountsPayload(combined.counts || combined.roles || combined.factions);
+  const events = normaliseEventsPayload(combined.events || combined.activeEvents);
+  const history = normaliseHistoryPayload(combined.history);
+  const hotZones = normaliseHotZonesPayload(combined.hotZones || combined.zones || combined.heatmap);
   const serverHealth = normaliseHealthPayload(combined.serverHealth || combined.server || serverHealthResult.data, "Game Server");
   const websiteHealth = normaliseHealthPayload(combined.websiteHealth || combined.website || websiteHealthResult.data, SERVER_CONFIG.websiteName || "Website");
 
   liveMap.configured = Boolean(liveMap.configured || combined.liveMap || combined.map || combinedResult.configured || liveMapResult.configured);
   uptime.configured = Boolean(uptime.configured || combined.uptime || combined.runtime || combinedResult.configured || uptimeResult.configured);
   restart.configured = Boolean(restart.configured || combined.restart || combined.restartInfo || combinedResult.configured || restartResult.configured);
+  queue.configured = Boolean(queue.configured || combined.queue || combinedResult.configured);
+  counts.configured = Boolean(counts.configured || combined.counts || combined.roles || combined.factions || combinedResult.configured);
+  events.configured = Boolean(events.configured || combined.events || combined.activeEvents || combinedResult.configured);
+  history.configured = Boolean(history.configured || combined.history || combinedResult.configured);
+  hotZones.configured = Boolean(hotZones.configured || combined.hotZones || combined.zones || combined.heatmap || combinedResult.configured);
   serverHealth.configured = Boolean(serverHealth.configured || combined.serverHealth || combined.server || combinedResult.configured || serverHealthResult.configured);
   websiteHealth.configured = Boolean(websiteHealth.configured || combined.websiteHealth || combined.website || combinedResult.configured || websiteHealthResult.configured);
 
@@ -2945,6 +3081,11 @@ async function loadLiveOpsSnapshot() {
     liveMap,
     uptime,
     restart,
+    queue,
+    counts,
+    events,
+    history,
+    hotZones,
     serverHealth,
     websiteHealth,
     errors: [
@@ -3159,6 +3300,16 @@ function renderStatusPlayers(players) {
   `;
 }
 
+function renderStatusMetricCard(label, value, meta) {
+  return `
+    <div class="status-card">
+      <div class="status-card__label">${escapeHtml(label)}</div>
+      <div class="status-card__value">${escapeHtml(value)}</div>
+      <div class="status-card__meta">${escapeHtml(meta)}</div>
+    </div>
+  `;
+}
+
 function renderHealthSummaryCard(label, health) {
   const stateLabel = health.status === "online"
     ? "Online"
@@ -3178,6 +3329,101 @@ function renderHealthSummaryCard(label, health) {
   `;
 }
 
+function renderOpsCounts(counts) {
+  const items = [
+    ["Cops", counts?.cops],
+    ["EMS", counts?.ems],
+    ["Civs", counts?.civs],
+    ["Gangs", counts?.gangs],
+    ["Mechanics", counts?.mechanics]
+  ];
+
+  return `
+    <div class="status-miniGrid">
+      ${items.map(([label, value]) => `
+        <div class="status-miniStat">
+          <div class="status-miniStat__label">${escapeHtml(label)}</div>
+          <div class="status-miniStat__value">${escapeHtml(value != null ? String(value) : "—")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderEventsList(events) {
+  const items = Array.isArray(events?.items) ? events.items : [];
+  if (!items.length) {
+    return `<div class="status-empty__text">No active events are connected right now.</div>`;
+  }
+
+  return `
+    <div class="status-feed">
+      ${items.slice(0, 5).map((event) => `
+        <article class="status-feed__item">
+          <div class="status-feed__top">
+            <div class="status-feed__title">${escapeHtml(event.title)}</div>
+            <div class="status-feed__pill">${escapeHtml(event.status)}</div>
+          </div>
+          <div class="status-feed__meta">${escapeHtml(event.location)}</div>
+          ${event.detail ? `<div class="status-feed__text">${escapeHtml(event.detail)}</div>` : ""}
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderHistoryList(history) {
+  const uptimeItems = Array.isArray(history?.uptime) ? history.uptime.slice(0, 3) : [];
+  const outageItems = Array.isArray(history?.outages) ? history.outages.slice(0, 3) : [];
+
+  return `
+    <div class="status-history">
+      <div class="status-history__group">
+        <div class="status-history__title">Uptime history</div>
+        ${uptimeItems.length ? uptimeItems.map((entry) => `
+          <div class="status-history__item">
+            <span>${escapeHtml(entry.label)}</span>
+            <strong>${escapeHtml(entry.uptimeSeconds != null ? formatDurationCompact(entry.uptimeSeconds) : "Pending")}</strong>
+          </div>
+        `).join("") : `<div class="status-empty__text">No uptime history connected yet.</div>`}
+      </div>
+      <div class="status-history__group">
+        <div class="status-history__title">Outage history</div>
+        ${outageItems.length ? outageItems.map((entry) => `
+          <div class="status-history__item">
+            <span>${escapeHtml(entry.label)}</span>
+            <strong>${escapeHtml(entry.durationMinutes != null ? `${entry.durationMinutes}m` : "Pending")}</strong>
+          </div>
+        `).join("") : `<div class="status-empty__text">No outage history connected yet.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderHotZonesList(hotZones) {
+  const items = Array.isArray(hotZones?.items) ? hotZones.items.slice(0, 4) : [];
+  if (!items.length) {
+    return `<div class="status-empty__text">No hot zones are connected right now.</div>`;
+  }
+
+  return `
+    <div class="status-hotzones">
+      ${items.map((zone) => `
+        <div class="status-hotzones__item">
+          <div class="status-hotzones__row">
+            <span class="status-hotzones__name">${escapeHtml(zone.name)}</span>
+            <span class="status-hotzones__score">${escapeHtml(String(zone.heat))}</span>
+          </div>
+          <div class="status-hotzones__bar">
+            <span style="width:${escapeHtml(String(clamp(zone.heat, 0, 100)))}%"></span>
+          </div>
+          <div class="status-hotzones__meta">${escapeHtml(zone.type)}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderServerStatusContent(snapshot) {
   const onlineLabel = snapshot.online ? "Online" : "Offline";
   const playerValue = snapshot.maxClients
@@ -3191,6 +3437,14 @@ function renderServerStatusContent(snapshot) {
     ? formatRestartCountdown(liveOps.restart.nextRestartAt)
     : "Pending";
   const liveMapCount = liveOps.liveMap?.players?.length ?? 0;
+  const queueValue = liveOps.queue?.count != null ? String(liveOps.queue.count) : "Pending";
+  const restartBanner = `
+    <section class="section status-banner">
+      <div class="status-banner__kicker">${escapeHtml(liveOps.restart?.label || SERVER_CONFIG.nextRestartLabel || "Scheduled restart")}</div>
+      <div class="status-banner__value">${escapeHtml(restartValue)}</div>
+      <div class="status-banner__meta">${escapeHtml(liveOps.restart?.nextRestartAt ? `Target ${formatServerTimestamp(liveOps.restart.nextRestartAt)}` : "Connect a restart endpoint to show the next timed reboot.")}</div>
+    </section>
+  `;
   const tags = snapshot.tags?.length
     ? `<div class="status-tags">${snapshot.tags.slice(0, 6).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
     : "";
@@ -3217,6 +3471,7 @@ function renderServerStatusContent(snapshot) {
     : "";
 
   return `
+    ${restartBanner}
     <section class="section">
       <div class="status-head">
         <div class="status-head__left">
@@ -3253,6 +3508,7 @@ function renderServerStatusContent(snapshot) {
           <div class="status-card__value">${escapeHtml(String(liveMapCount))}</div>
           <div class="status-card__meta">${escapeHtml(liveOps.liveMap?.configured ? "Tracked players ready for map overlay" : "Add a live player map endpoint")}</div>
         </div>
+        ${renderStatusMetricCard("Queue", queueValue, liveOps.queue?.estimatedWaitMinutes != null ? `About ${liveOps.queue.estimatedWaitMinutes} minutes wait` : "Queue feed ready for live numbers")}
         <div class="status-card">
           <div class="status-card__label">Game Mode</div>
           <div class="status-card__value">${escapeHtml(snapshot.gameType)}</div>
@@ -3298,6 +3554,34 @@ function renderServerStatusContent(snapshot) {
           <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.
         </div>
       </aside>
+    </div>
+
+    <div class="content-grid content-grid--sidebar">
+      <section class="section">
+        <div class="section__eyebrow">Department counts</div>
+        <h2>Ops breakdown</h2>
+        ${renderOpsCounts(liveOps.counts)}
+      </section>
+
+      <section class="section">
+        <div class="section__eyebrow">Active events</div>
+        <h2>Current city activity</h2>
+        ${renderEventsList(liveOps.events)}
+      </section>
+    </div>
+
+    <div class="content-grid content-grid--sidebar">
+      <section class="section">
+        <div class="section__eyebrow">History</div>
+        <h2>Uptime and outages</h2>
+        ${renderHistoryList(liveOps.history)}
+      </section>
+
+      <section class="section">
+        <div class="section__eyebrow">Heatmap</div>
+        <h2>Hottest zones</h2>
+        ${renderHotZonesList(liveOps.hotZones)}
+      </section>
     </div>
   `;
 }

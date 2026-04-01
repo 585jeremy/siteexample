@@ -17,6 +17,14 @@ window.SGCNR_SERVER_CONFIG = {
   //   "liveMap": { "updatedAt": "...", "players": [ { "id": 1, "name": "Player", "mapX": 54.2, "mapY": 38.7 } ] },
   //   "uptime": { "startedAt": "...", "uptimeSeconds": 12345 },
   //   "restart": { "nextRestartAt": "...", "label": "Daily restart" },
+  //   "queue": { "count": 18, "estimatedWaitMinutes": 7 },
+  //   "counts": { "cops": 12, "ems": 4, "civs": 67, "gangs": 19 },
+  //   "events": [ { "title": "Bank robbery", "location": "Vinewood", "status": "Active" } ],
+  //   "history": {
+  //     "uptime": [ { "label": "Today", "uptimeSeconds": 75600 } ],
+  //     "outages": [ { "label": "ISP issue", "startedAt": "...", "durationMinutes": 14 } ]
+  //   },
+  //   "hotZones": [ { "name": "Vinewood", "heat": 92, "type": "crime" } ],
   //   "serverHealth": { "status": "online", "message": "Stable", "latencyMs": 42 },
   //   "websiteHealth": { "status": "online", "message": "Healthy", "latencyMs": 18 }
   // }
