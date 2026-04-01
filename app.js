@@ -20,7 +20,16 @@ const DEFAULT_SERVER_CONFIG = {
   maxPlayerPreview: 12,
   region: "EU",
   txAdminStatusUrl: "",
-  txAdminPlayersUrl: ""
+  txAdminPlayersUrl: "",
+  liveOpsUrl: "",
+  livePlayerMapUrl: "",
+  uptimeStatusUrl: "",
+  restartInfoUrl: "",
+  serverHealthUrl: "",
+  websiteHealthUrl: "",
+  publicStatusUrl: "",
+  nextRestartLabel: "Scheduled restart",
+  websiteName: "SGCNR Portal"
 };
 const SERVER_CONFIG = {
   ...DEFAULT_SERVER_CONFIG,
@@ -32,7 +41,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260402a";
+const SITE_ASSET_VERSION = "20260402b";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -1312,12 +1321,13 @@ function renderMapDetail(location) {
     const hospitalCount = MAP_LOCATIONS.filter((entry) => entry.type === "hospital").length;
     const fireCount = MAP_LOCATIONS.filter((entry) => entry.type === "fire").length;
     const carWashCount = MAP_LOCATIONS.filter((entry) => entry.type === "carwash").length;
+    const liveFeedReady = Boolean(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl);
 
     return `
       <div class="map-detail__eyebrow">Overview</div>
       <div class="map-detail__title">Los Santos Service Map</div>
       <div class="map-detail__meta">Satellite only / ${policeCount} police / ${hospitalCount} hospitals / ${fireCount} fire stations / ${carWashCount} car washes</div>
-      <div class="map-detail__body">Markers on this page are pulled from the Services layer on gta-5-map.com, with Lester's House kept as a separate custom point.</div>
+      <div class="map-detail__body">Markers on this page are pulled from the Services layer on gta-5-map.com, with Lester's House kept as a separate custom point. Live player overlays are ${liveFeedReady ? "ready to read your server feed." : "ready once you connect a live player endpoint."}</div>
     `;
   }
 
@@ -1333,6 +1343,16 @@ function renderMapDetail(location) {
 
 function renderMapStageAside(location) {
   const legend = renderMapLegend();
+  const liveConfigured = Boolean(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl);
+  const livePlayerCount = customMapState?.liveData?.players?.length ?? 0;
+  const liveUpdatedAt = customMapState?.liveData?.updatedAt ? formatServerTimestamp(customMapState.liveData.updatedAt) : "Pending";
+  const liveCard = `
+    <div class="map-stage-card">
+      <div class="map-stage-card__eyebrow">Live tracking</div>
+      <div class="map-stage-card__title">${liveConfigured ? `${livePlayerCount} tracked players` : "Endpoint ready"}</div>
+      <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. Player dots will appear here as soon as your live endpoint starts returning coordinates.` : "Add a live map endpoint in server-config.js to show player positions directly on the Los Santos map."}</div>
+    </div>
+  `;
 
   if (!location) {
     return `
@@ -1347,6 +1367,7 @@ function renderMapStageAside(location) {
           ${legend}
         </div>
       </div>
+      ${liveCard}
     `;
   }
 
@@ -1370,6 +1391,7 @@ function renderMapStageAside(location) {
         ${legend}
       </div>
     </div>
+    ${liveCard}
   `;
 }
 
@@ -1399,6 +1421,9 @@ function getMapPositionPercent(location) {
 }
 
 function destroyCustomMap() {
+  if (customMapState?.liveRefreshTimer) {
+    window.clearTimeout(customMapState.liveRefreshTimer);
+  }
   if (customMapState?.resizeHandler) {
     window.removeEventListener("resize", customMapState.resizeHandler);
   }
@@ -1546,6 +1571,10 @@ function getVisibleMapLocations() {
   return MAP_LOCATIONS.filter((location) => location.type === customMapState.filter);
 }
 
+function getMapRouteActive() {
+  return parseRoute().name === "map";
+}
+
 function fitMapToLocations() {
   return;
 }
@@ -1612,6 +1641,54 @@ function resetCustomMapView() {
   updateMapSelection(null);
 }
 
+function renderLiveMapMarkers(players) {
+  return players.map((player) => `
+    <button
+      class="service-map__marker service-map__marker--live"
+      type="button"
+      title="${escapeHtml(player.name)}${player.role ? ` (${escapeHtml(player.role)})` : ""}"
+      aria-label="${escapeHtml(player.name)}"
+      style="left:${player.position.x}%; top:${player.position.y}%; --map-accent:#f0b767; --map-glow:rgba(240, 183, 103, .24);"
+    >
+      <span class="service-marker__halo"></span>
+      <span class="service-marker__pin service-marker__pin--live">
+        <span class="service-marker__core"></span>
+        <span class="service-marker__icon" aria-hidden="true">•</span>
+      </span>
+    </button>
+  `).join("");
+}
+
+function updateCustomMapLiveLayer(liveMap) {
+  if (!customMapState?.liveLayerEl) return;
+
+  customMapState.liveData = liveMap || { players: [], updatedAt: null };
+  customMapState.liveLayerEl.innerHTML = renderLiveMapMarkers(customMapState.liveData.players || []);
+
+  if (customMapState.asideEl) {
+    customMapState.asideEl.innerHTML = renderMapStageAside(findMapLocation(customMapState.activeId));
+  }
+}
+
+function scheduleCustomMapLiveRefresh() {
+  if (!customMapState || !getMapRouteActive()) return;
+  if (!(SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl)) return;
+
+  customMapState.liveRefreshTimer = window.setTimeout(() => {
+    refreshCustomMapLiveFeed();
+  }, SERVER_CONFIG.statusRefreshMs);
+}
+
+async function refreshCustomMapLiveFeed() {
+  if (!customMapState || !getMapRouteActive()) return;
+
+  const liveOps = await loadLiveOpsSnapshot();
+  if (!customMapState || !getMapRouteActive()) return;
+
+  updateCustomMapLiveLayer(liveOps.liveMap);
+  scheduleCustomMapLiveRefresh();
+}
+
 function initCustomMap() {
   const mapEl = document.getElementById("serviceMap");
   const infoEl = document.getElementById("customMapInfo");
@@ -1648,6 +1725,7 @@ function initCustomMap() {
         <div class="service-map__layer">
           ${markersMarkup}
         </div>
+        <div class="service-map__layer service-map__layer--live"></div>
       </div>
     </div>
   `;
@@ -1697,7 +1775,14 @@ function initCustomMap() {
     filter: "all",
     filterButtons: Array.from(document.querySelectorAll("[data-map-filter]")),
     infoEl,
+    liveData: {
+      players: [],
+      updatedAt: null
+    },
+    liveLayerEl: mapEl.querySelector(".service-map__layer--live"),
+    liveRefreshTimer: null,
     markerButtons: new Map(),
+    mapEl,
     offsetX: 0,
     offsetY: 0,
     quickGroups: Array.from(document.querySelectorAll("[data-map-group]")),
@@ -1807,6 +1892,7 @@ function initCustomMap() {
   updateMapSelection(null);
   applyMapFilter("all");
   updateMapViewport();
+  refreshCustomMapLiveFeed();
   window.requestAnimationFrame(() => {
     updateMapViewport();
   });
@@ -2633,6 +2719,245 @@ function normaliseServerPlayers(players) {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function pickFirstDefined(source, keys) {
+  for (const key of keys) {
+    const value = source?.[key];
+    if (value != null && value !== "") return value;
+  }
+  return null;
+}
+
+function toFiniteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function parseSnapshotDate(value) {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDurationCompact(totalSeconds) {
+  const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  if (!seconds) return "Pending";
+
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${Math.max(1, minutes)}m`;
+}
+
+function formatRestartCountdown(dateValue) {
+  const date = parseSnapshotDate(dateValue);
+  if (!date) return "Pending";
+
+  const diff = date.getTime() - Date.now();
+  if (diff <= 0) return "Now";
+  return `In ${formatDurationCompact(Math.round(diff / 1000))}`;
+}
+
+function fetchOptionalServerJson(url, timeoutMs = 10000) {
+  if (!url) {
+    return Promise.resolve({
+      configured: false,
+      data: null,
+      error: ""
+    });
+  }
+
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  return fetch(url, {
+    headers: { accept: "application/json" },
+    signal: controller.signal
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Status request failed (${response.status})`);
+    }
+
+    return {
+      configured: true,
+      data: await response.json(),
+      error: ""
+    };
+  }).catch((error) => ({
+    configured: true,
+    data: null,
+    error: error?.message || "Request failed"
+  })).finally(() => {
+    window.clearTimeout(timeout);
+  });
+}
+
+function normaliseHealthPayload(payload, fallbackLabel) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      status: "pending",
+      label: fallbackLabel,
+      message: "Endpoint not connected yet.",
+      latencyMs: null,
+      checkedAt: null
+    };
+  }
+
+  const statusRaw = normalize(pickFirstDefined(payload, ["status", "state", "health"]) || "pending");
+  const latencyMs = toFiniteNumber(pickFirstDefined(payload, ["latencyMs", "latency", "responseMs", "ping"]));
+  const checkedAt = parseSnapshotDate(pickFirstDefined(payload, ["checkedAt", "updatedAt", "timestamp", "refreshedAt"]));
+
+  return {
+    configured: true,
+    status: ["online", "healthy", "ok", "up"].includes(statusRaw)
+      ? "online"
+      : ["offline", "down", "error", "critical"].includes(statusRaw)
+        ? "offline"
+        : "pending",
+    label: pickFirstDefined(payload, ["label", "name"]) || fallbackLabel,
+    message: pickFirstDefined(payload, ["message", "detail", "summary"]) || "No extra health note provided.",
+    latencyMs,
+    checkedAt
+  };
+}
+
+function normaliseUptimePayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      startedAt: null,
+      uptimeSeconds: null
+    };
+  }
+
+  const startedAt = parseSnapshotDate(pickFirstDefined(payload, ["startedAt", "bootedAt", "onlineSince", "since"]));
+  const uptimeSeconds = toFiniteNumber(pickFirstDefined(payload, ["uptimeSeconds", "uptime", "uptimeSec"]));
+
+  return {
+    configured: true,
+    startedAt,
+    uptimeSeconds: uptimeSeconds ?? (startedAt ? Math.max(0, Math.round((Date.now() - startedAt.getTime()) / 1000)) : null)
+  };
+}
+
+function normaliseRestartPayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      nextRestartAt: null,
+      label: SERVER_CONFIG.nextRestartLabel || "Scheduled restart"
+    };
+  }
+
+  return {
+    configured: true,
+    nextRestartAt: parseSnapshotDate(pickFirstDefined(payload, ["nextRestartAt", "restartAt", "scheduledAt", "next"])),
+    label: pickFirstDefined(payload, ["label", "name", "title"]) || SERVER_CONFIG.nextRestartLabel || "Scheduled restart"
+  };
+}
+
+function normaliseLiveMapPlayers(payload) {
+  const playerSource = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.players)
+      ? payload.players
+      : Array.isArray(payload?.items)
+        ? payload.items
+        : [];
+
+  const players = playerSource.map((player, index) => {
+    const mapX = toFiniteNumber(pickFirstDefined(player, ["mapX", "xPercent", "percentX"]));
+    const mapY = toFiniteNumber(pickFirstDefined(player, ["mapY", "yPercent", "percentY"]));
+    const lat = toFiniteNumber(pickFirstDefined(player, ["lat", "latitude"]));
+    const lng = toFiniteNumber(pickFirstDefined(player, ["lng", "lon", "longitude"]));
+    const position = mapX != null && mapY != null
+      ? {
+          x: clamp(mapX, 1.6, 98.4),
+          y: clamp(mapY, 1.6, 98.4)
+        }
+      : lat != null && lng != null
+        ? getMapPositionPercent({ lat, lng })
+        : null;
+
+    if (!position) return null;
+
+    return {
+      id: pickFirstDefined(player, ["id", "serverId"]) || `live-${index + 1}`,
+      name: pickFirstDefined(player, ["name", "playerName"]) || `Player ${index + 1}`,
+      role: pickFirstDefined(player, ["role", "job", "group"]) || "",
+      ping: toFiniteNumber(pickFirstDefined(player, ["ping", "latency"])),
+      heading: toFiniteNumber(pickFirstDefined(player, ["heading", "rotation"])),
+      position
+    };
+  }).filter(Boolean);
+
+  return {
+    configured: Boolean(payload),
+    updatedAt: parseSnapshotDate(pickFirstDefined(payload, ["updatedAt", "timestamp", "refreshedAt"])),
+    players
+  };
+}
+
+async function loadLiveOpsSnapshot() {
+  const [
+    combinedResult,
+    liveMapResult,
+    uptimeResult,
+    restartResult,
+    serverHealthResult,
+    websiteHealthResult
+  ] = await Promise.all([
+    fetchOptionalServerJson(SERVER_CONFIG.liveOpsUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.livePlayerMapUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.uptimeStatusUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.restartInfoUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.serverHealthUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.websiteHealthUrl)
+  ]);
+
+  const combined = combinedResult.data && typeof combinedResult.data === "object" ? combinedResult.data : {};
+  const liveMap = normaliseLiveMapPlayers(combined.liveMap || combined.map || liveMapResult.data);
+  const uptime = normaliseUptimePayload(combined.uptime || combined.runtime || uptimeResult.data);
+  const restart = normaliseRestartPayload(combined.restart || combined.restartInfo || restartResult.data);
+  const serverHealth = normaliseHealthPayload(combined.serverHealth || combined.server || serverHealthResult.data, "Game Server");
+  const websiteHealth = normaliseHealthPayload(combined.websiteHealth || combined.website || websiteHealthResult.data, SERVER_CONFIG.websiteName || "Website");
+
+  liveMap.configured = Boolean(liveMap.configured || combined.liveMap || combined.map || combinedResult.configured || liveMapResult.configured);
+  uptime.configured = Boolean(uptime.configured || combined.uptime || combined.runtime || combinedResult.configured || uptimeResult.configured);
+  restart.configured = Boolean(restart.configured || combined.restart || combined.restartInfo || combinedResult.configured || restartResult.configured);
+  serverHealth.configured = Boolean(serverHealth.configured || combined.serverHealth || combined.server || combinedResult.configured || serverHealthResult.configured);
+  websiteHealth.configured = Boolean(websiteHealth.configured || combined.websiteHealth || combined.website || combinedResult.configured || websiteHealthResult.configured);
+
+  return {
+    configured: Boolean(
+      SERVER_CONFIG.liveOpsUrl ||
+      SERVER_CONFIG.livePlayerMapUrl ||
+      SERVER_CONFIG.uptimeStatusUrl ||
+      SERVER_CONFIG.restartInfoUrl ||
+      SERVER_CONFIG.serverHealthUrl ||
+      SERVER_CONFIG.websiteHealthUrl
+    ),
+    source: SERVER_CONFIG.liveOpsUrl ? "Custom live ops API" : "Per-feature endpoints",
+    publicStatusUrl: SERVER_CONFIG.publicStatusUrl || pickFirstDefined(combined, ["publicStatusUrl", "statusPageUrl", "statusUrl"]) || "",
+    liveMap,
+    uptime,
+    restart,
+    serverHealth,
+    websiteHealth,
+    errors: [
+      combinedResult.error && `Live ops: ${combinedResult.error}`,
+      liveMapResult.error && `Live map: ${liveMapResult.error}`,
+      uptimeResult.error && `Uptime: ${uptimeResult.error}`,
+      restartResult.error && `Restart: ${restartResult.error}`,
+      serverHealthResult.error && `Server health: ${serverHealthResult.error}`,
+      websiteHealthResult.error && `Website health: ${websiteHealthResult.error}`
+    ].filter(Boolean)
+  };
+}
+
 function fetchServerJson(url, timeoutMs = 10000) {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -2655,11 +2980,60 @@ function fetchServerJson(url, timeoutMs = 10000) {
 }
 
 async function loadServerSnapshot() {
+  const liveOps = await loadLiveOpsSnapshot();
   if (!SERVER_SINGLE_API_URL) {
-    throw new Error("Server join code is not configured yet.");
+    return {
+      online: false,
+      name: SERVER_CONFIG.name,
+      description: "Server join code is not configured yet.",
+      clients: 0,
+      maxClients: 0,
+      endpoint: "",
+      joinCode: SERVER_JOIN_CODE,
+      joinUrl: SERVER_JOIN_URL,
+      mapName: "Los Santos",
+      gameType: "Cops & Robbers",
+      locale: SERVER_CONFIG.region,
+      onesync: "Unknown",
+      tags: [],
+      resources: null,
+      players: [],
+      source: "Website fallback",
+      txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
+      liveOps,
+      apiError: "Server join code is not configured yet.",
+      refreshedAt: new Date()
+    };
   }
 
-  const payload = await fetchServerJson(SERVER_SINGLE_API_URL);
+  let payload;
+  try {
+    payload = await fetchServerJson(SERVER_SINGLE_API_URL);
+  } catch (error) {
+    return {
+      online: false,
+      name: SERVER_CONFIG.name,
+      description: "The public FiveM API did not answer, but custom health and restart panels can still be used.",
+      clients: 0,
+      maxClients: 0,
+      endpoint: "",
+      joinCode: SERVER_JOIN_CODE,
+      joinUrl: SERVER_JOIN_URL,
+      mapName: "Los Santos",
+      gameType: "Cops & Robbers",
+      locale: SERVER_CONFIG.region,
+      onesync: "Unknown",
+      tags: [],
+      resources: null,
+      players: [],
+      source: "Website fallback",
+      txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
+      liveOps,
+      apiError: error?.message || "The FiveM API did not respond.",
+      refreshedAt: new Date()
+    };
+  }
+
   const data = payload?.Data ?? payload?.data ?? payload ?? {};
   const vars = data?.vars ?? {};
   const players = normaliseServerPlayers(data?.players);
@@ -2689,6 +3063,8 @@ async function loadServerSnapshot() {
     players,
     source: "FiveM Public API",
     txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
+    liveOps,
+    apiError: "",
     refreshedAt: new Date()
   };
 }
@@ -2702,7 +3078,7 @@ function renderServerStatusShell() {
           <div class="status-live__copy">
             <div class="section__eyebrow">Live server hub</div>
             <h2>${escapeHtml(SERVER_CONFIG.name)}</h2>
-            <p class="status-live__text">Track player count, endpoint details, and connection info from one page. This status panel is now prepared for your real bought server setup.</p>
+            <p class="status-live__text">Track player count, uptime, restarts, live map readiness, and health checks from one page. This status panel is prepared for your real bought server setup.</p>
           </div>
           <div class="status-live__actions">
             <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
@@ -2722,6 +3098,10 @@ function renderServerStatusShell() {
           <div class="status-live__highlight">
             <div class="status-live__label">Live Source</div>
             <div class="status-live__value">FiveM API</div>
+          </div>
+          <div class="status-live__highlight">
+            <div class="status-live__label">Live Ops</div>
+            <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
           </div>
         </div>
       </section>
@@ -2779,13 +3159,61 @@ function renderStatusPlayers(players) {
   `;
 }
 
+function renderHealthSummaryCard(label, health) {
+  const stateLabel = health.status === "online"
+    ? "Online"
+    : health.status === "offline"
+      ? "Offline"
+      : "Pending";
+  const meta = health.latencyMs != null
+    ? `${health.latencyMs} ms response`
+    : health.message;
+
+  return `
+    <div class="status-card">
+      <div class="status-card__label">${escapeHtml(label)}</div>
+      <div class="status-card__value">${escapeHtml(stateLabel)}</div>
+      <div class="status-card__meta">${escapeHtml(meta || "No data yet")}</div>
+    </div>
+  `;
+}
+
 function renderServerStatusContent(snapshot) {
   const onlineLabel = snapshot.online ? "Online" : "Offline";
   const playerValue = snapshot.maxClients
     ? `${snapshot.clients}/${snapshot.maxClients}`
     : `${snapshot.clients}`;
+  const liveOps = snapshot.liveOps || {};
+  const uptimeValue = liveOps.uptime?.uptimeSeconds != null
+    ? formatDurationCompact(liveOps.uptime.uptimeSeconds)
+    : "Pending";
+  const restartValue = liveOps.restart?.nextRestartAt
+    ? formatRestartCountdown(liveOps.restart.nextRestartAt)
+    : "Pending";
+  const liveMapCount = liveOps.liveMap?.players?.length ?? 0;
   const tags = snapshot.tags?.length
     ? `<div class="status-tags">${snapshot.tags.slice(0, 6).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
+    : "";
+  const liveOpsErrors = Array.isArray(liveOps.errors) && liveOps.errors.length
+    ? `
+      <div class="status-note">
+        <strong>Live ops note:</strong> ${escapeHtml(liveOps.errors[0])}
+      </div>
+    `
+    : "";
+  const apiErrorNote = snapshot.apiError
+    ? `
+      <div class="status-note">
+        <strong>FiveM API note:</strong> ${escapeHtml(snapshot.apiError)}
+      </div>
+    `
+    : "";
+  const statusLink = liveOps.publicStatusUrl
+    ? `
+      <div class="status-note">
+        <strong>Public status page:</strong> <a class="info-link" href="${escapeHtml(liveOps.publicStatusUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(liveOps.publicStatusUrl)}</a>
+      </div>
+    `
     : "";
 
   return `
@@ -2811,15 +3239,27 @@ function renderServerStatusContent(snapshot) {
           <div class="status-card__meta">Direct cfx.re connection</div>
         </div>
         <div class="status-card">
-          <div class="status-card__label">Endpoint</div>
-          <div class="status-card__value">${escapeHtml(snapshot.endpoint || "Hidden by API")}</div>
-          <div class="status-card__meta">Public connect endpoint</div>
+          <div class="status-card__label">Uptime</div>
+          <div class="status-card__value">${escapeHtml(uptimeValue)}</div>
+          <div class="status-card__meta">${escapeHtml(liveOps.uptime?.startedAt ? `Since ${formatServerTimestamp(liveOps.uptime.startedAt)}` : "Add an uptime endpoint to show runtime.")}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Next Restart</div>
+          <div class="status-card__value">${escapeHtml(restartValue)}</div>
+          <div class="status-card__meta">${escapeHtml(liveOps.restart?.label || SERVER_CONFIG.nextRestartLabel || "Scheduled restart")}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card__label">Live Map Feed</div>
+          <div class="status-card__value">${escapeHtml(String(liveMapCount))}</div>
+          <div class="status-card__meta">${escapeHtml(liveOps.liveMap?.configured ? "Tracked players ready for map overlay" : "Add a live player map endpoint")}</div>
         </div>
         <div class="status-card">
           <div class="status-card__label">Game Mode</div>
           <div class="status-card__value">${escapeHtml(snapshot.gameType)}</div>
           <div class="status-card__meta">${escapeHtml(snapshot.mapName)}</div>
         </div>
+        ${renderHealthSummaryCard("Server Status", liveOps.serverHealth || { status: "pending", message: "Pending" })}
+        ${renderHealthSummaryCard("Website Status", liveOps.websiteHealth || { status: "pending", message: "Pending" })}
         <div class="status-card">
           <div class="status-card__label">Server Features</div>
           <div class="status-card__value">${escapeHtml(snapshot.onesync || "Unknown")}</div>
@@ -2831,6 +3271,9 @@ function renderServerStatusContent(snapshot) {
           <div class="status-card__meta">${escapeHtml(snapshot.source)}</div>
         </div>
       </div>
+      ${apiErrorNote}
+      ${liveOpsErrors}
+      ${statusLink}
     </section>
 
     <div class="content-grid content-grid--sidebar">
@@ -2842,14 +3285,17 @@ function renderServerStatusContent(snapshot) {
 
       <aside class="section section--stack">
         <div class="section__eyebrow">Live setup</div>
-        <h2>Website readiness</h2>
+        <h2>Integration readiness</h2>
         <div class="stack-list stack-list--compact">
           <div class="stack-list__item"><span class="stack-list__index">01</span><span>FiveM join code is wired into the website config.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">02</span><span>Public player count and server details are fetched automatically.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">04</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">05</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">06</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
         </div>
         <div class="status-note">
-          <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and optional txAdmin URLs.
+          <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.
         </div>
       </aside>
     </div>

@@ -1058,6 +1058,11 @@ body.is-map .footer{
   inset: 0;
 }
 
+.service-map__layer--live{
+  z-index: 5;
+  pointer-events: none;
+}
+
 .service-map__marker{
   position: absolute;
   left: 0;
@@ -1088,11 +1093,44 @@ body.is-map .footer{
   display: none;
 }
 
+.service-map__marker--live{
+  width: 18px;
+  height: 18px;
+  cursor: default;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.service-map__marker--live .service-marker__pin{
+  width: 18px;
+  height: 18px;
+}
+
+.service-map__marker--live .service-marker__halo{
+  inset: -10px;
+  opacity: .54;
+  filter: blur(2px);
+}
+
+.service-map__marker--live .service-marker__core{
+  inset: 0;
+  border: 1px solid rgba(11,15,20,.86);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.14),
+    0 0 16px rgba(240,183,103,.24);
+}
+
+.service-map__marker--live .service-marker__icon{
+  font-size: 16px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
 .service-map__sprite{
   display: block;
   width: 24px;
   height: 28px;
-  background-image: url("./map-assets/mapgenie-markers.png?v=20260402a");
+background-image: url("./map-assets/mapgenie-markers.png?v=20260402b");
   background-repeat: no-repeat;
   background-size: 24px 1887px;
   filter: drop-shadow(0 8px 14px rgba(0,0,0,.28));
