@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401c";
+const SITE_ASSET_VERSION = "20260401d";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -804,43 +804,49 @@ function renderLandingHome() {
   const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
 
   setView(`
-    <div class="portal-home portal-home--clean">
-      <div class="portal-home__grid" aria-hidden="true"></div>
-      <div class="portal-home__grain" aria-hidden="true"></div>
-      <div class="portal-home__wash" aria-hidden="true"></div>
+    <div class="landing-reboot">
+      <div class="landing-reboot__noise" aria-hidden="true"></div>
+      <div class="landing-reboot__glow landing-reboot__glow--blue" aria-hidden="true"></div>
+      <div class="landing-reboot__glow landing-reboot__glow--red" aria-hidden="true"></div>
 
-      <section class="portal-home__hero portal-home__hero--clean" aria-label="Welcome">
-        <div class="portal-home__eyebrow">Official Server Portal</div>
-        <div class="portal-home__chips">
-          <span class="portal-home__chip portal-home__chip--blue">FiveM CnR</span>
-          <span class="portal-home__chip portal-home__chip--red">Los Santos</span>
-          <span class="portal-home__chip">${regionLabel}</span>
+      <section class="landing-reboot__hero" aria-label="Welcome">
+        <div class="landing-reboot__lead">
+          <div class="landing-reboot__kicker">Official Server Portal</div>
+          <div class="landing-reboot__line" aria-hidden="true"></div>
+          <h1 class="landing-reboot__title">One city. Two sides. Instant access.</h1>
+          <p class="landing-reboot__text">Join the server fast and use the floating bar below for rules, map, live status, commands, FAQ, and the rest of the portal.</p>
+
+          <div class="landing-reboot__badges">
+            <span class="landing-reboot__badge landing-reboot__badge--blue">FiveM CnR</span>
+            <span class="landing-reboot__badge landing-reboot__badge--red">Los Santos</span>
+            <span class="landing-reboot__badge">${regionLabel}</span>
+          </div>
+
+          <div class="landing-reboot__actions">
+            <a class="landing-reboot__action landing-reboot__action--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
+            <button class="landing-reboot__action" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
+            <a class="landing-reboot__action" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          </div>
+
+          <div class="landing-reboot__note">Everything else lives in the floating navigation bar. Home stays dedicated to access and first contact.</div>
         </div>
 
-        <div class="portal-home__signal">SGCNR Network</div>
-        <h1 class="portal-home__title">Join the city.</h1>
-        <p class="portal-home__text">Rules, map, status, FAQ and the rest live in the floating bar below. Home stays focused on getting players in fast.</p>
+        <aside class="landing-reboot__info">
+          <div class="landing-reboot__card landing-reboot__card--code">
+            <div class="landing-reboot__label">Join Code</div>
+            <div class="landing-reboot__value">${joinCodeLabel}</div>
+          </div>
 
-        <div class="portal-home__actions portal-home__actions--hero">
-          <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-          <button class="auth__btn" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
-          <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
-        </div>
+          <div class="landing-reboot__card landing-reboot__card--link">
+            <div class="landing-reboot__label">Direct Link</div>
+            <div class="landing-reboot__value landing-reboot__value--small">${joinLinkLabel}</div>
+          </div>
 
-        <div class="portal-home__joinPanel">
-          <div class="portal-home__joinItem">
-            <div class="portal-home__joinLabel">Join Code</div>
-            <div class="portal-home__joinValue">${joinCodeLabel}</div>
+          <div class="landing-reboot__card landing-reboot__card--community">
+            <div class="landing-reboot__label">Community</div>
+            <div class="landing-reboot__value landing-reboot__value--small">${discordLabel}</div>
           </div>
-          <div class="portal-home__joinItem">
-            <div class="portal-home__joinLabel">Direct Link</div>
-            <div class="portal-home__joinValue portal-home__joinValue--small">${joinLinkLabel}</div>
-          </div>
-          <div class="portal-home__joinItem portal-home__joinItem--wide">
-            <div class="portal-home__joinLabel">Community</div>
-            <div class="portal-home__joinValue portal-home__joinValue--small">${discordLabel}</div>
-          </div>
-        </div>
+        </aside>
       </section>
     </div>
   `);
