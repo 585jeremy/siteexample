@@ -3004,7 +3004,9 @@ body.is-wiki .footer{
   height: 100%;
   overflow: auto;
   padding-right: 4px;
+  padding-bottom: 132px;
   scrollbar-gutter: stable;
+  scroll-padding-bottom: 132px;
 }
 
 .wiki-sidebar__meta{
@@ -3114,7 +3116,9 @@ body.is-wiki .footer{
   height: 100%;
   overflow: auto;
   padding-right: 6px;
+  padding-bottom: 132px;
   scrollbar-gutter: stable;
+  scroll-padding-bottom: 132px;
 }
 
 .wiki-grid{
@@ -3340,6 +3344,7 @@ body.is-wiki .footer{
     height: auto;
     overflow: visible;
     padding-right: 0;
+    padding-bottom: 0;
   }
 
   .wiki-facts{
@@ -3393,6 +3398,7 @@ body.is-wiki .footer{
     height: auto;
     overflow: visible;
     padding-right: 0;
+    padding-bottom: 0;
   }
 
   .wiki-pager{
