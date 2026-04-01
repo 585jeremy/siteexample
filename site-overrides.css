@@ -2959,16 +2959,52 @@ body.is-landing .dock{
   min-width: 0;
 }
 
+.wiki-shell{
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  min-height: 100%;
+  height: 100%;
+}
+
+body.is-wiki .content{
+  width: min(1420px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 16px 0 118px !important;
+  min-height: calc(100svh - 84px);
+  height: calc(100svh - 84px);
+  overflow: hidden;
+}
+
+body.is-wiki .dock{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 40;
+}
+
+body.is-wiki .footer{
+  display: none;
+}
+
 .wiki-layout{
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+  min-height: 0;
+  height: 100%;
 }
 
 .wiki-sidebar{
-  position: sticky;
-  top: 96px;
+  position: relative;
+  top: auto;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
 }
 
 .wiki-sidebar__meta{
@@ -3074,6 +3110,11 @@ body.is-landing .dock{
 .wiki-article{
   display: grid;
   gap: 16px;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
 }
 
 .wiki-grid{
@@ -3253,6 +3294,26 @@ body.is-landing .dock{
 }
 
 @media (max-width: 1080px){
+  body.is-wiki{
+    overflow: auto;
+  }
+
+  body.is-wiki .content{
+    width: min(100%, calc(100% - 20px));
+    height: auto;
+    min-height: calc(100svh - 84px);
+    overflow: visible;
+  }
+
+  body.is-wiki .dock{
+    bottom: 18px;
+  }
+
+  .wiki-shell{
+    height: auto;
+    min-height: 0;
+  }
+
   .landing-reboot__header{
     grid-template-columns: 1fr;
   }
@@ -3271,10 +3332,14 @@ body.is-landing .dock{
 
   .wiki-layout{
     grid-template-columns: 1fr;
+    height: auto;
   }
 
   .wiki-sidebar{
     position: static;
+    height: auto;
+    overflow: visible;
+    padding-right: 0;
   }
 
   .wiki-facts{
@@ -3287,6 +3352,15 @@ body.is-landing .dock{
 }
 
 @media (max-width: 760px){
+  body.is-wiki .content{
+    width: min(100%, calc(100% - 16px));
+    padding: 12px 0 116px !important;
+  }
+
+  body.is-wiki .dock{
+    bottom: 16px;
+  }
+
   .landing-reboot__lead{
     padding: 22px 18px;
   }
@@ -3313,6 +3387,12 @@ body.is-landing .dock{
 
   .wiki-sidebar__stats{
     grid-template-columns: 1fr;
+  }
+
+  .wiki-article{
+    height: auto;
+    overflow: visible;
+    padding-right: 0;
   }
 
   .wiki-pager{

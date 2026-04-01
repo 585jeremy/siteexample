@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401p";
+const SITE_ASSET_VERSION = "20260401q";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -3080,7 +3080,7 @@ function renderWiki(pageSlug) {
 
   if (!page) {
     setView(`
-      <div>
+      <div class="wiki-shell">
         ${renderHeader("Wiki", [{ label: "Wiki" }])}
         <section class="section">
           <div class="empty">Wiki data is missing right now.</div>
@@ -3100,7 +3100,7 @@ function renderWiki(pageSlug) {
   const pager = renderWikiPager(categories, pages, currentSlug);
 
   setView(`
-    <div>
+    <div class="wiki-shell">
       ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
       <div class="wiki-layout">
         ${sidebar}
@@ -3381,6 +3381,7 @@ function route() {
 
   document.body.classList.toggle("is-landing", r.name === "home");
   document.body.classList.toggle("is-map", r.name === "map");
+  document.body.classList.toggle("is-wiki", r.name === "wiki");
 
   const inRulesFlow = r.name === "rules" || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);
@@ -3735,6 +3736,11 @@ document.addEventListener("click", (e) => {
 
 window.addEventListener("hashchange", () => {
   route();
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  const contentEl = document.querySelector(".content");
+  if (contentEl) {
+    contentEl.scrollTop = 0;
+  }
 });
 
 init();
