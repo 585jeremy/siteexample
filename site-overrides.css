@@ -2663,6 +2663,8 @@ body.is-landing .dock{
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 14px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .landing-reboot__hero{
@@ -2885,6 +2887,23 @@ body.is-landing .dock{
   font-size: 13px;
   line-height: 1.5;
   color: rgba(238,244,251,.68);
+}
+
+.landing-reboot__kicker,
+.landing-reboot__title,
+.landing-reboot__text,
+.landing-reboot__stackLabel,
+.landing-reboot__stackValue,
+.landing-reboot__miniLabel,
+.landing-reboot__miniTitle,
+.landing-reboot__miniText,
+.landing-reboot__label,
+.landing-reboot__value,
+.landing-reboot__railLabel,
+.landing-reboot__railTitle,
+.landing-reboot__railText{
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .wiki-intro--hero{
