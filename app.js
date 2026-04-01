@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401i";
+const SITE_ASSET_VERSION = "20260401k";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -2905,113 +2905,221 @@ function renderStatus() {
   });
 }
 
-function renderWiki(pageSlug) {
-  const activePage = (pageSlug || "introduction").toString().toLowerCase();
-  const currentPage = activePage || "introduction";
+function getWikiDataset() {
+  const wiki = window.WIKI_DATA;
+  if (!wiki || typeof wiki !== "object") {
+    return { categories: [], pages: {} };
+  }
+  return wiki;
+}
 
-  const categoryCards = [
-    {
-      title: "Emergency Roles",
-      text: "Police and medical pages explain the job focus, response flow, and the systems that matter when you are working the city."
-    },
-    {
-      title: "Civilian Paths",
-      text: "Civilian jobs cover the legal side of the server, from utility work and side income to role-specific progression."
-    },
-    {
-      title: "Gameplay Systems",
-      text: "Use this area for wanted level, appearance, stores, economy, party features, and other core mechanics."
-    },
-    {
-      title: "Criminal Activities",
-      text: "Robberies, pickpocketing, hacking, exports, and other illegal routes belong here."
-    },
-    {
-      title: "Properties & Storage",
-      text: "Garages, warehouses, and any future housing or storage systems can be documented in one place."
-    },
-    {
-      title: "Support & Extras",
-      text: "Help pages, setup tips, quality-of-life settings, and technical references solve common issues fast."
-    }
-  ];
+function findWikiCategoryForPage(categories, slug) {
+  return categories.find((category) => Array.isArray(category.pages) && category.pages.includes(slug)) || null;
+}
 
-  const updateItems = [
-    "The wiki structure is built to stay simple on desktop and mobile instead of hiding basics behind too many layers.",
-    "Jobs, gameplay systems, and criminal content are separated more clearly so new players can learn the server faster.",
-    "The introduction page now works as a real front door to the handbook instead of just a placeholder.",
-    "Future pages can be added under clear groups without rewriting the whole navigation every time a feature changes."
-  ];
+function getWikiPageOrder(categories) {
+  return categories.flatMap((category) => Array.isArray(category.pages) ? category.pages : []);
+}
 
-  const quickLinks = [
-    { label: "Start Here", href: "#/start" },
-    { label: "Rules", href: "#/rules" },
-    { label: "Commands", href: "#/commands" },
-    { label: "Map", href: "#/map" },
-    { label: "Server Status", href: "#/status" },
-    { label: "Help", href: "#/help" }
-  ];
+function renderWikiSidebar(categories, pages, currentSlug, updatedAt) {
+  const totalPages = Object.keys(pages).length;
+  const groups = categories.map((category) => {
+    const links = (category.pages || []).map((slug) => {
+      const page = pages[slug];
+      if (!page) return "";
+      const isActive = slug === currentSlug ? " is-active" : "";
+      const label = page.navLabel || page.title;
+      return `<a class="wiki-nav__item${isActive}" href="#/wiki/${escapeHtml(slug)}">${escapeHtml(label)}</a>`;
+    }).join("");
 
-  const categoryHtml = categoryCards.map((card) => `
-    <article class="wiki-card">
-      <div class="wiki-card__title">${escapeHtml(card.title)}</div>
-      <div class="wiki-card__text">${escapeHtml(card.text)}</div>
-    </article>
-  `).join("");
+    return `
+      <div class="wiki-nav__group">
+        <div class="wiki-nav__title">
+          <span>${escapeHtml(category.title)}</span>
+          <span class="wiki-nav__count">${escapeHtml(String((category.pages || []).length))}</span>
+        </div>
+        <div class="wiki-nav__list">${links}</div>
+      </div>
+    `;
+  }).join("");
 
-  const updatesHtml = updateItems.map((item, index) => `
-    <div class="stack-list__item">
-      <span class="stack-list__index">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
-      <span>${escapeHtml(item)}</span>
+  return `
+    <aside class="section section--stack wiki-sidebar">
+      <div class="wiki-sidebar__meta">
+        <div class="section__eyebrow">Navigation</div>
+        <h2>Wiki pages</h2>
+        <p class="doc-p">Browse the full SGCNR handbook by role, activity, and system.</p>
+        <div class="wiki-sidebar__stats">
+          <div class="wiki-sidebar__stat">
+            <span class="wiki-sidebar__statLabel">Pages</span>
+            <span class="wiki-sidebar__statValue">${escapeHtml(String(totalPages))}</span>
+          </div>
+          <div class="wiki-sidebar__stat">
+            <span class="wiki-sidebar__statLabel">Groups</span>
+            <span class="wiki-sidebar__statValue">${escapeHtml(String(categories.length))}</span>
+          </div>
+          <div class="wiki-sidebar__stat">
+            <span class="wiki-sidebar__statLabel">Updated</span>
+            <span class="wiki-sidebar__statValue">${escapeHtml(updatedAt || "2026-04-01")}</span>
+          </div>
+        </div>
+      </div>
+      <div class="wiki-nav">${groups}</div>
+    </aside>
+  `;
+}
+
+function renderWikiPager(categories, pages, currentSlug) {
+  const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+  const currentIndex = order.indexOf(currentSlug);
+  if (currentIndex === -1) return "";
+
+  const previousSlug = order[currentIndex - 1] || null;
+  const nextSlug = order[currentIndex + 1] || null;
+  if (!previousSlug && !nextSlug) return "";
+
+  const renderLink = (slug, direction) => {
+    if (!slug || !pages[slug]) return `<div class="wiki-pager__card wiki-pager__card--empty"></div>`;
+    const page = pages[slug];
+    const label = direction === "prev" ? "Previous page" : "Next page";
+    return `
+      <a class="wiki-pager__card" href="#/wiki/${escapeHtml(slug)}">
+        <div class="wiki-pager__eyebrow">${escapeHtml(label)}</div>
+        <div class="wiki-pager__title">${escapeHtml(page.navLabel || page.title)}</div>
+        <div class="wiki-pager__text">${escapeHtml(page.eyebrow || "Wiki page")}</div>
+      </a>
+    `;
+  };
+
+  return `
+    <section class="wiki-pager">
+      ${renderLink(previousSlug, "prev")}
+      ${renderLink(nextSlug, "next")}
+    </section>
+  `;
+}
+
+function renderWikiFacts(page) {
+  const facts = Array.isArray(page?.facts) ? page.facts : [];
+  if (!facts.length) return "";
+
+  return `
+    <div class="wiki-facts">
+      ${facts.map(([label, value]) => `
+        <div class="wiki-fact">
+          <div class="wiki-fact__label">${escapeHtml(label)}</div>
+          <div class="wiki-fact__value">${escapeHtml(value)}</div>
+        </div>
+      `).join("")}
     </div>
-  `).join("");
+  `;
+}
 
-  const quickLinkHtml = quickLinks.map((link) => `
-    <a class="info-link" href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>
-  `).join("");
+function renderWikiSections(sections) {
+  const entries = Array.isArray(sections) ? sections : [];
+  return entries.map((section) => {
+    const paragraphs = (section.paragraphs || []).map((paragraph) => `<p class="doc-p">${escapeHtml(paragraph)}</p>`).join("");
+    const bullets = Array.isArray(section.bullets) && section.bullets.length
+      ? `<ul class="doc-list">${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+      : "";
 
-  const heading = currentPage === "introduction" ? "Introduction" : "Wiki";
+    return `
+      <section class="wiki-sectionBlock">
+        <h3 class="wiki-sectionBlock__title">${escapeHtml(section.title)}</h3>
+        ${paragraphs}
+        ${bullets}
+      </section>
+    `;
+  }).join("");
+}
+
+function renderWikiOverviewCards(cards) {
+  const items = Array.isArray(cards) ? cards : [];
+  if (!items.length) return "";
+  return `
+    <section class="wiki-sectionBlock">
+      <h3 class="wiki-sectionBlock__title">Guide overview</h3>
+      <div class="wiki-grid">
+        ${items.map((card) => `
+          <article class="wiki-card">
+            <div class="wiki-card__title">${escapeHtml(card.title)}</div>
+            <div class="wiki-card__text">${escapeHtml(card.text)}</div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderWikiUpdates(items) {
+  const entries = Array.isArray(items) ? items : [];
+  if (!entries.length) return "";
+  return `
+    <section class="wiki-sectionBlock">
+      <h3 class="wiki-sectionBlock__title">Current direction</h3>
+      <div class="stack-list stack-list--compact">
+        ${entries.map((item, index) => `
+          <div class="stack-list__item">
+            <span class="stack-list__index">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+            <span>${escapeHtml(item)}</span>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderWiki(pageSlug) {
+  const wiki = getWikiDataset();
+  const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+  const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+  const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+  const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+  const page = pages[currentSlug];
+
+  if (!page) {
+    setView(`
+      <div>
+        ${renderHeader("Wiki", [{ label: "Wiki" }])}
+        <section class="section">
+          <div class="empty">Wiki data is missing right now.</div>
+        </section>
+      </div>
+    `);
+    return;
+  }
+
+  const category = findWikiCategoryForPage(categories, currentSlug);
+  const heading = page.navLabel || page.title;
+  const sidebar = renderWikiSidebar(categories, pages, currentSlug, wiki.updatedAt);
+  const facts = renderWikiFacts(page);
+  const overview = renderWikiOverviewCards(page.overviewCards);
+  const updates = renderWikiUpdates(page.updates);
+  const content = renderWikiSections(page.sections);
+  const pager = renderWikiPager(categories, pages, currentSlug);
 
   setView(`
     <div>
       ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
-
-      <section class="section wiki-intro wiki-intro--hero">
-        <div class="wiki-intro__eyebrow">Player handbook</div>
-        <h2>Welcome to the SGCNR wiki.</h2>
-        <p class="doc-p">
-          This section is the clean starting point for learning the server. It is written to help brand-new players get comfortable quickly, while still giving regular players a fast reference for jobs, mechanics, and city systems.
-        </p>
-        <p class="doc-p">
-          Instead of treating the wiki like a wall of text, this introduction splits the handbook into practical groups: emergency roles, civilian paths, gameplay systems, criminal activities, properties, and support pages.
-        </p>
-      </section>
-
-      <div class="content-grid content-grid--sidebar">
-        <section class="section">
-          <div class="section__eyebrow">What you will find here</div>
-          <h2>Structured around how players actually use the server</h2>
-          <div class="doc-p">
-            The goal is simple: if someone needs to learn a job, understand a mechanic, or find a system quickly, they should know exactly where to look without bouncing between unrelated pages.
+      <div class="wiki-layout">
+        ${sidebar}
+        <section class="section wiki-article">
+          <div class="wiki-hero">
+            <div class="wiki-intro__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
+            <h2>${escapeHtml(page.title)}</h2>
+            <p class="doc-p">${escapeHtml(page.summary || "")}</p>
+            <div class="wiki-hero__meta">
+              <span class="tag">${escapeHtml(category?.title || "Wiki")}</span>
+              <span class="tag">Updated ${escapeHtml(wiki.updatedAt || "2026-04-01")}</span>
+            </div>
           </div>
-          <div class="wiki-grid">${categoryHtml}</div>
+          ${facts}
+          ${overview}
+          ${content}
+          ${updates}
+          ${pager}
         </section>
-
-        <aside class="section section--stack wiki-intro__aside">
-          <div class="section__eyebrow">Quick links</div>
-          <h2>Jump in fast</h2>
-          <div class="info-links">${quickLinkHtml}</div>
-          <div class="status-note">
-            <strong>Best use:</strong> start here for the overview, then jump into the specific page that matches the system you want to learn next.
-          </div>
-        </aside>
       </div>
-
-      <section class="section wiki-intro">
-        <div class="section__eyebrow">Latest direction</div>
-        <h2>How this handbook is being organized</h2>
-        <div class="stack-list stack-list--compact">${updatesHtml}</div>
-      </section>
     </div>
   `);
 }
