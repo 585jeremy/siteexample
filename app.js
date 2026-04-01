@@ -32,7 +32,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260401k";
+const SITE_ASSET_VERSION = "20260401l";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -427,6 +427,7 @@ const ORDER_STATUS_DEMO = {
 let currentQuery = "";
 let storeHandlersBound = false;
 let customMapState = null;
+let siteFxState = null;
 let serverStatusPageState = {
   timer: null,
   controller: null,
@@ -3456,6 +3457,114 @@ function route() {
   meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
 }
 
+function schedulePointerFxFrame() {
+  if (!siteFxState || siteFxState.rafId) return;
+
+  siteFxState.rafId = window.requestAnimationFrame(() => {
+    if (!siteFxState) return;
+
+    const ease = 0.16;
+    siteFxState.x += (siteFxState.targetX - siteFxState.x) * ease;
+    siteFxState.y += (siteFxState.targetY - siteFxState.y) * ease;
+
+    if (siteFxState.glowEl) {
+      siteFxState.glowEl.style.left = `${siteFxState.x}px`;
+      siteFxState.glowEl.style.top = `${siteFxState.y}px`;
+    }
+
+    const needsMoreFrames =
+      Math.abs(siteFxState.targetX - siteFxState.x) > 0.45 ||
+      Math.abs(siteFxState.targetY - siteFxState.y) > 0.45;
+
+    siteFxState.rafId = 0;
+    if (needsMoreFrames) {
+      schedulePointerFxFrame();
+    }
+  });
+}
+
+function spawnPointerBurst(x, y) {
+  if (!siteFxState?.burstLayerEl) return;
+
+  const createBurst = (className, size) => {
+    const burst = document.createElement("span");
+    burst.className = className;
+    burst.style.left = `${x}px`;
+    burst.style.top = `${y}px`;
+    burst.style.setProperty("--burst-size", `${size}px`);
+    burst.addEventListener("animationend", () => burst.remove(), { once: true });
+    siteFxState?.burstLayerEl?.appendChild(burst);
+  };
+
+  createBurst("site-fx__burst", 120);
+  createBurst("site-fx__burst site-fx__burst--alt", 176);
+}
+
+function initPointerFx() {
+  if (siteFxState || !document.body) return;
+
+  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)");
+  if (prefersReducedMotion?.matches || coarsePointer?.matches) {
+    return;
+  }
+
+  const rootEl = document.createElement("div");
+  rootEl.className = "site-fx";
+  rootEl.setAttribute("aria-hidden", "true");
+  rootEl.innerHTML = `
+    <div class="site-fx__glow"></div>
+    <div class="site-fx__burstLayer"></div>
+  `;
+  document.body.appendChild(rootEl);
+  document.body.classList.add("has-pointer-fx");
+
+  const state = {
+    rootEl,
+    glowEl: rootEl.querySelector(".site-fx__glow"),
+    burstLayerEl: rootEl.querySelector(".site-fx__burstLayer"),
+    x: window.innerWidth * 0.5,
+    y: window.innerHeight * 0.32,
+    targetX: window.innerWidth * 0.5,
+    targetY: window.innerHeight * 0.32,
+    rafId: 0
+  };
+
+  const handlePointerMove = (event) => {
+    state.targetX = event.clientX;
+    state.targetY = event.clientY;
+    state.rootEl.classList.add("is-active");
+    schedulePointerFxFrame();
+  };
+
+  const handlePointerLeave = () => {
+    state.rootEl.classList.remove("is-active");
+  };
+
+  const handlePointerOut = (event) => {
+    if (!event.relatedTarget) {
+      handlePointerLeave();
+    }
+  };
+
+  const handlePointerDown = (event) => {
+    if (typeof event.clientX !== "number" || typeof event.clientY !== "number") return;
+    state.targetX = event.clientX;
+    state.targetY = event.clientY;
+    state.rootEl.classList.add("is-active");
+    schedulePointerFxFrame();
+    spawnPointerBurst(event.clientX, event.clientY);
+  };
+
+  document.addEventListener("pointermove", handlePointerMove, { passive: true });
+  document.addEventListener("pointerdown", handlePointerDown, { passive: true });
+  document.addEventListener("pointerout", handlePointerOut, { passive: true });
+  window.addEventListener("blur", handlePointerLeave);
+
+  siteFxState = state;
+  schedulePointerFxFrame();
+}
+
 function init() {
   const data = window.RULES_DATA;
   if (!data || !data.sections) {
@@ -3464,6 +3573,7 @@ function init() {
   }
 
   initAuth();
+  initPointerFx();
   startLocalClock();
   if (!location.hash) location.hash = "#/";
   route();
