@@ -1,5 +1,5 @@
 window.RULES_DATA = {
-  updatedAt: "2026-03-31",
+  updatedAt: "2026-04-02",
   sections: [
     {
       id: "preface",
@@ -117,6 +117,13 @@ window.RULES_DATA = {
           body: "The same behavior standards apply in official Discord channels, tickets, and other community spaces as they do in-game.",
           explanation: "Players should not behave one way in-game and another way in official channels just because they left the server.",
           tags: ["discord", "conduct", "staff"]
+        },
+        {
+          id: "2d",
+          title: "No metagaming through Discord or outside info",
+          body: "Do not use Discord calls, streams, screen shares, or other outside information to track, find, or prepare on players in-game when your character would not reasonably have that information.",
+          explanation: "Even on a CnR server, using out-of-game information to gain an in-game advantage creates unfair tracking, stream sniping, and forced fights.",
+          tags: ["discord", "metagaming", "fairplay"]
         }
       ]
     },
@@ -260,6 +267,13 @@ window.RULES_DATA = {
           body: "Cheating, exploiting, griefing, staff disrespect, and other obvious rulebreaking are still not allowed inside red zones.",
           explanation: "Higher-risk combat does not mean a complete rule vacuum.",
           tags: ["red-zone", "cheating", "conduct"]
+        },
+        {
+          id: "6f",
+          title: "Leaving a red zone does not erase valid conflict",
+          body: "If a player shoots at you, attacks you, or creates a valid revenge situation from inside a red zone and then runs out of it, that conflict does not automatically reset just because they crossed the border.",
+          explanation: "Red zones are not a free first-shot mechanic. If a player starts valid hostility there, staff may still recognise your retaliation or revenge right when the situation continues outside the zone.",
+          tags: ["red-zone", "revenge", "combat"]
         }
       ]
     },
@@ -427,8 +441,8 @@ window.RULES_DATA = {
         {
           id: "11b",
           title: "Evidence should be clear and complete",
-          body: "If you report another player, you should have enough proof to support your claim. Clips, screenshots, and context matter, especially in PvP-related reports.",
-          explanation: "The stronger your evidence, the easier it is for staff to make a fair decision.",
+          body: "If you report another player, you should have enough proof to support your claim. Video clips are highly preferred over screenshots for RDM and VDM reports, because screenshots rarely show initiation, intent, or the full lead-up to the situation.",
+          explanation: "Shadowplay, Medal, OBS, or other clip-based evidence makes it much easier for staff to judge who started the conflict and whether the action was actually valid.",
           tags: ["reports", "evidence", "staff"]
         },
         {
