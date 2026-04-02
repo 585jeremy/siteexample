@@ -26,6 +26,12 @@ window.SGCNR_SERVER_CONFIG = {
   //   "restart": { "nextRestartAt": "...", "label": "Daily restart" },
   //   "queue": { "count": 18, "estimatedWaitMinutes": 7 },
   //   "counts": { "cops": 12, "ems": 4, "civs": 67, "gangs": 19 },
+  //   "leaderboard": {
+  //     "updatedAt": "...",
+  //     "rows": [
+  //       { "name": "Player", "role": "Police", "crew": "Mission Row", "kd": 2.1, "netWorth": 5200000, "playtimeHours": 188 }
+  //     ]
+  //   },
   //   "events": [ { "title": "Bank robbery", "location": "Vinewood", "status": "Active" } ],
   //   "history": {
   //     "uptime": [ { "label": "Today", "uptimeSeconds": 75600 } ],
@@ -36,6 +42,7 @@ window.SGCNR_SERVER_CONFIG = {
   //   "websiteHealth": { "status": "online", "message": "Healthy", "latencyMs": 18 }
   // }
   liveOpsUrl: "",
+  leaderboardUrl: "",
 
   // Optional separate endpoints if you do not want one combined API.
   // For live map players, the website accepts either:

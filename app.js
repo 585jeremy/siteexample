@@ -22,6 +22,7 @@ const DEFAULT_SERVER_CONFIG = {
   txAdminStatusUrl: "",
   txAdminPlayersUrl: "",
   liveOpsUrl: "",
+  leaderboardUrl: "",
   livePlayerMapUrl: "",
   uptimeStatusUrl: "",
   restartInfoUrl: "",
@@ -42,7 +43,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403a";
+const SITE_ASSET_VERSION = "20260403c";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -137,18 +138,6 @@ const LEADERBOARD_METRICS = [
   { key: "robberies", label: "Robberies", valueKey: "robberies", description: "Completed robberies, takeovers, and major hits.", format: (value) => formatLeaderboardInteger(value) },
   { key: "revives", label: "Revives", valueKey: "revives", description: "Completed EMS revives and medical saves.", format: (value) => formatLeaderboardInteger(value) },
   { key: "exports", label: "Exports", valueKey: "exports", description: "Vehicle exports and high-value recovery runs.", format: (value) => formatLeaderboardInteger(value) }
-];
-const LEADERBOARD_ROWS = [
-  { name: "Kane Mercer", role: "Police", crew: "Mission Row", kd: 4.82, netWorth: 18800000, playtimeHours: 512, kills: 931, arrests: 402, robberies: 44, revives: 12, exports: 18 },
-  { name: "Luca Reyes", role: "Civilian", crew: "East Side", kd: 3.94, netWorth: 24600000, playtimeHours: 468, kills: 804, arrests: 36, robberies: 89, revives: 2, exports: 42 },
-  { name: "Mia Hart", role: "EMS", crew: "Pillbox", kd: 1.12, netWorth: 12100000, playtimeHours: 596, kills: 114, arrests: 4, robberies: 12, revives: 338, exports: 5 },
-  { name: "Noah Pierce", role: "Gang", crew: "La Mesa", kd: 5.16, netWorth: 16400000, playtimeHours: 438, kills: 1012, arrests: 18, robberies: 102, revives: 0, exports: 21 },
-  { name: "Jade Collins", role: "Mechanic", crew: "LS Customs", kd: 2.41, netWorth: 14800000, playtimeHours: 387, kills: 421, arrests: 9, robberies: 26, revives: 8, exports: 96 },
-  { name: "Elias Ward", role: "Police", crew: "Vespucci", kd: 3.27, netWorth: 13900000, playtimeHours: 442, kills: 628, arrests: 351, robberies: 21, revives: 0, exports: 12 },
-  { name: "Ivy Brooks", role: "Civilian", crew: "Downtown", kd: 2.73, netWorth: 22900000, playtimeHours: 655, kills: 544, arrests: 7, robberies: 77, revives: 4, exports: 55 },
-  { name: "Roman Voss", role: "Gang", crew: "Davis", kd: 4.41, netWorth: 17200000, playtimeHours: 404, kills: 868, arrests: 14, robberies: 108, revives: 1, exports: 28 },
-  { name: "Skye Monroe", role: "EMS", crew: "Central LS", kd: 1.34, netWorth: 11700000, playtimeHours: 523, kills: 146, arrests: 2, robberies: 11, revives: 301, exports: 6 },
-  { name: "Tyson Vale", role: "Civilian", crew: "Rockford", kd: 2.98, netWorth: 27100000, playtimeHours: 721, kills: 492, arrests: 5, robberies: 63, revives: 3, exports: 87 }
 ];
 const MAP_LOCATIONS = [
   {
@@ -466,6 +455,9 @@ let serverStatusPageState = {
   timer: null,
   controller: null,
   lastSnapshot: null
+};
+let leaderboardPageState = {
+  requestId: 0
 };
 
 function normalize(s) {
@@ -1108,19 +1100,18 @@ function getLeaderboardMetricConfig(metricKey) {
   return LEADERBOARD_METRICS.find((metric) => metric.key === normalize(metricKey)) || LEADERBOARD_METRICS[0];
 }
 
-function getLeaderboardSortedRows(metricKey) {
+function getLeaderboardSortedRows(rows, metricKey) {
   const metric = getLeaderboardMetricConfig(metricKey);
-  return [...LEADERBOARD_ROWS]
+  return [...rows]
     .sort((left, right) => (Number(right[metric.valueKey]) || 0) - (Number(left[metric.valueKey]) || 0))
     .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
 function renderLeaderboard(metricKey) {
   const metric = getLeaderboardMetricConfig(metricKey);
-  const rows = getLeaderboardSortedRows(metric.key);
-  const leader = rows[0];
-  const totalPlaytime = LEADERBOARD_ROWS.reduce((sum, row) => sum + (Number(row.playtimeHours) || 0), 0);
-  const totalNetWorth = LEADERBOARD_ROWS.reduce((sum, row) => sum + (Number(row.netWorth) || 0), 0);
+  const loadingText = SERVER_CONFIG.leaderboardUrl
+    ? "Loading live leaderboard data..."
+    : "Leaderboard endpoint not connected yet. Showing a live-ready layout with real online roster only.";
 
   setView(`
     <div>
@@ -1128,8 +1119,13 @@ function renderLeaderboard(metricKey) {
       <div class="content-grid content-grid--sidebar leaderboard-shell">
         <section class="section section--hero leaderboard-main">
           <div class="section__eyebrow">City rankings</div>
-          <h2>${escapeHtml(metric.label)} leaderboard</h2>
-          <p class="doc-p leaderboard-intro">${escapeHtml(metric.description)}</p>
+          <div class="leaderboard-head">
+            <div class="leaderboard-head__copy">
+              <h2>${escapeHtml(metric.label)} leaderboard</h2>
+              <p class="doc-p leaderboard-intro">${escapeHtml(metric.description)} Only real tracked data is shown here. Placeholder players stay hidden until the stat feed is connected.</p>
+            </div>
+            <div class="leaderboard-badge">Live-ready</div>
+          </div>
 
           <div class="leaderboard-metrics">
             ${LEADERBOARD_METRICS.map((entry) => `
@@ -1139,64 +1135,326 @@ function renderLeaderboard(metricKey) {
             `).join("")}
           </div>
 
-          <div class="leaderboard-tableWrap">
-            <div class="leaderboard-table">
-              <div class="leaderboard-row leaderboard-row--head">
-                <div>Rank</div>
-                <div>Player</div>
-                <div>Role</div>
-                <div>${escapeHtml(metric.label)}</div>
-                <div>Playtime</div>
-              </div>
-              ${rows.map((row) => `
-                <div class="leaderboard-row${row.rank <= 3 ? " leaderboard-row--top" : ""}">
-                  <div class="leaderboard-rank">${escapeHtml(String(row.rank).padStart(2, "0"))}</div>
-                  <div class="leaderboard-player">
-                    <strong>${escapeHtml(row.name)}</strong>
-                    <span>${escapeHtml(row.crew)}</span>
-                  </div>
-                  <div class="leaderboard-role">${escapeHtml(row.role)}</div>
-                  <div class="leaderboard-value">${escapeHtml(metric.format(row[metric.valueKey]))}</div>
-                  <div class="leaderboard-sub">${escapeHtml(`${Math.round(Number(row.playtimeHours) || 0)}h`)}</div>
-                </div>
-              `).join("")}
+          <div class="leaderboard-summary" id="leaderboardSummaryHost">
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Feed</span>
+              <strong class="leaderboard-stat__value">Checking</strong>
+            </div>
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Selected metric</span>
+              <strong class="leaderboard-stat__value">${escapeHtml(metric.label)}</strong>
+            </div>
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Status</span>
+              <strong class="leaderboard-stat__value">Pending</strong>
+            </div>
+          </div>
+
+          <div class="leaderboard-bodyHost" id="leaderboardBodyHost">
+            <div class="leaderboard-empty">
+              <div class="leaderboard-empty__eyebrow">Preparing board</div>
+              <h3>Leaderboard feed</h3>
+              <p>${escapeHtml(loadingText)}</p>
             </div>
           </div>
         </section>
 
-        <aside class="section section--stack leaderboard-side">
-          <div class="section__eyebrow">Snapshot</div>
-          <h2>Current leaders</h2>
-          <div class="leaderboard-highlight">
-            <div class="leaderboard-highlight__label">Top ${escapeHtml(metric.label)}</div>
-            <div class="leaderboard-highlight__name">${escapeHtml(leader.name)}</div>
-            <div class="leaderboard-highlight__value">${escapeHtml(metric.format(leader[metric.valueKey]))}</div>
-            <div class="leaderboard-highlight__meta">${escapeHtml(`${leader.role} / ${leader.crew}`)}</div>
-          </div>
-
-          <div class="leaderboard-stats">
-            <div class="leaderboard-stat">
-              <span class="leaderboard-stat__label">Tracked players</span>
-              <strong class="leaderboard-stat__value">${escapeHtml(String(LEADERBOARD_ROWS.length))}</strong>
-            </div>
-            <div class="leaderboard-stat">
-              <span class="leaderboard-stat__label">Combined playtime</span>
-              <strong class="leaderboard-stat__value">${escapeHtml(formatLeaderboardInteger(totalPlaytime))}h</strong>
-            </div>
-            <div class="leaderboard-stat">
-              <span class="leaderboard-stat__label">Combined net worth</span>
-              <strong class="leaderboard-stat__value">${escapeHtml(formatMoneyCompact(totalNetWorth))}</strong>
-            </div>
-          </div>
-
+        <aside class="section section--stack leaderboard-side" id="leaderboardSideHost">
+          <div class="section__eyebrow">Live snapshot</div>
+          <h2>Roster check</h2>
           <div class="leaderboard-note">
-            <div class="leaderboard-note__title">Planned live categories</div>
-            <div class="leaderboard-note__text">Queue count, cops / EMS / civs, hot zones, restart countdown, and activity stats can feed this page once the live endpoint is connected.</div>
+            <div class="leaderboard-note__title">Loading</div>
+            <div class="leaderboard-note__text">Reading online players and leaderboard availability.</div>
           </div>
         </aside>
       </div>
     </div>
   `);
+
+  void hydrateLeaderboard(metric.key);
+}
+
+function normaliseLeaderboardRows(payload) {
+  const rowsSource = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.rows)
+      ? payload.rows
+      : Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload?.players)
+          ? payload.players
+          : Array.isArray(payload?.leaderboard)
+            ? payload.leaderboard
+            : [];
+
+  return rowsSource.map((row, index) => {
+    const name = pickFirstDefined(row, ["name", "playerName", "username", "displayName"]);
+    if (!name) return null;
+
+    return {
+      id: pickFirstDefined(row, ["id", "playerId"]) ?? index + 1,
+      name,
+      role: pickFirstDefined(row, ["role", "job", "faction", "type"]) || "Unknown",
+      crew: pickFirstDefined(row, ["crew", "group", "department", "unit"]) || "No crew set",
+      kd: toFiniteNumber(pickFirstDefined(row, ["kd", "kdr", "killDeathRatio"])) ?? 0,
+      netWorth: toFiniteNumber(pickFirstDefined(row, ["netWorth", "wealth", "money", "value"])) ?? 0,
+      playtimeHours: toFiniteNumber(pickFirstDefined(row, ["playtimeHours", "hours", "playtime"])) ?? 0,
+      kills: toFiniteNumber(pickFirstDefined(row, ["kills", "killCount"])) ?? 0,
+      arrests: toFiniteNumber(pickFirstDefined(row, ["arrests", "arrestCount"])) ?? 0,
+      robberies: toFiniteNumber(pickFirstDefined(row, ["robberies", "robberyCount", "heists"])) ?? 0,
+      revives: toFiniteNumber(pickFirstDefined(row, ["revives", "reviveCount"])) ?? 0,
+      exports: toFiniteNumber(pickFirstDefined(row, ["exports", "exportCount"])) ?? 0,
+      isOnline: Boolean(pickFirstDefined(row, ["isOnline", "online", "connected"])),
+      lastSeenAt: parseSnapshotDate(pickFirstDefined(row, ["lastSeenAt", "updatedAt", "timestamp", "refreshedAt"]))
+    };
+  }).filter(Boolean);
+}
+
+function renderLeaderboardRoster(players) {
+  if (!players.length) {
+    return `
+      <div class="leaderboard-note">
+        <div class="leaderboard-note__title">Online now</div>
+        <div class="leaderboard-note__text">No public roster is available right now.</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="leaderboard-roster">
+      <div class="leaderboard-note__title">Online now</div>
+      <div class="leaderboard-roster__list">
+        ${players.slice(0, 8).map((player) => `
+          <div class="leaderboard-roster__item">
+            <div class="leaderboard-roster__name">${escapeHtml(player.name)}</div>
+            <div class="leaderboard-roster__meta">ID ${escapeHtml(String(player.id))}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderLeaderboardSummary(metric, rows, snapshot) {
+  if (!rows.length) {
+    return `
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Feed</span>
+        <strong class="leaderboard-stat__value">${snapshot.feedConfigured ? "Waiting" : "Offline"}</strong>
+      </div>
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Online now</span>
+        <strong class="leaderboard-stat__value">${escapeHtml(String(snapshot.onlinePlayers.length))}</strong>
+      </div>
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Selected metric</span>
+        <strong class="leaderboard-stat__value">${escapeHtml(metric.label)}</strong>
+      </div>
+    `;
+  }
+
+  const leader = rows[0];
+  return `
+    <div class="leaderboard-stat">
+      <span class="leaderboard-stat__label">Top ${escapeHtml(metric.label)}</span>
+      <strong class="leaderboard-stat__value">${escapeHtml(metric.format(leader[metric.valueKey]))}</strong>
+    </div>
+    <div class="leaderboard-stat">
+      <span class="leaderboard-stat__label">Tracked players</span>
+      <strong class="leaderboard-stat__value">${escapeHtml(String(rows.length))}</strong>
+    </div>
+    <div class="leaderboard-stat">
+      <span class="leaderboard-stat__label">Online now</span>
+      <strong class="leaderboard-stat__value">${escapeHtml(String(snapshot.onlinePlayers.length))}</strong>
+    </div>
+  `;
+}
+
+function renderLeaderboardEmpty(metric, snapshot) {
+  const sourceText = snapshot.feedConfigured
+    ? "The website is waiting for real ranked data from your leaderboard feed."
+    : "Connect a leaderboard endpoint in server-config.js and real ranked entries will appear here.";
+
+  return `
+    <div class="leaderboard-empty">
+      <div class="leaderboard-empty__eyebrow">No placeholder players</div>
+      <h3>${escapeHtml(metric.label)} rankings are not live yet</h3>
+      <p>${escapeHtml(sourceText)} Until then, this page only keeps the real online roster visible on the side.</p>
+    </div>
+  `;
+}
+
+function renderLeaderboardPodium(metric, rows) {
+  const podium = rows.slice(0, 3);
+  if (!podium.length) return "";
+
+  return `
+    <div class="leaderboard-podium">
+      ${podium.map((row) => `
+        <div class="leaderboard-podium__card leaderboard-podium__card--rank${escapeHtml(String(row.rank))}">
+          <div class="leaderboard-podium__rank">#${escapeHtml(String(row.rank))}</div>
+          <div class="leaderboard-podium__name">${escapeHtml(row.name)}</div>
+          <div class="leaderboard-podium__value">${escapeHtml(metric.format(row[metric.valueKey]))}</div>
+          <div class="leaderboard-podium__meta">${escapeHtml(`${row.role} / ${row.crew}`)}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderLeaderboardTable(metric, rows) {
+  return `
+    ${renderLeaderboardPodium(metric, rows)}
+    <div class="leaderboard-tableWrap">
+      <div class="leaderboard-table">
+        <div class="leaderboard-row leaderboard-row--head">
+          <div>Rank</div>
+          <div>Player</div>
+          <div>Role</div>
+          <div>${escapeHtml(metric.label)}</div>
+          <div>Playtime</div>
+        </div>
+        ${rows.map((row) => `
+          <div class="leaderboard-row${row.rank <= 3 ? " leaderboard-row--top" : ""}">
+            <div class="leaderboard-rank">${escapeHtml(String(row.rank).padStart(2, "0"))}</div>
+            <div class="leaderboard-player">
+              <strong>${escapeHtml(row.name)}</strong>
+              <span>${escapeHtml(row.crew)}</span>
+            </div>
+            <div class="leaderboard-role">${escapeHtml(row.role)}</div>
+            <div class="leaderboard-value">${escapeHtml(metric.format(row[metric.valueKey]))}</div>
+            <div class="leaderboard-sub">${escapeHtml(`${Math.round(Number(row.playtimeHours) || 0)}h`)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderLeaderboardSidebar(metric, rows, snapshot) {
+  const updatedLabel = snapshot.updatedAt ? formatServerTimestamp(snapshot.updatedAt) : "Pending";
+
+  if (!rows.length) {
+    return `
+      <div class="section__eyebrow">Live snapshot</div>
+      <h2>Roster check</h2>
+      <div class="leaderboard-note">
+        <div class="leaderboard-note__title">Feed status</div>
+        <div class="leaderboard-note__text">${snapshot.feedConfigured ? "Leaderboard feed detected, but no ranked rows were returned yet." : "Leaderboard feed not connected yet. The page is ready for live stats."}</div>
+      </div>
+      <div class="leaderboard-stats">
+        <div class="leaderboard-stat">
+          <span class="leaderboard-stat__label">Selected metric</span>
+          <strong class="leaderboard-stat__value">${escapeHtml(metric.label)}</strong>
+        </div>
+        <div class="leaderboard-stat">
+          <span class="leaderboard-stat__label">Last checked</span>
+          <strong class="leaderboard-stat__value">${escapeHtml(updatedLabel)}</strong>
+        </div>
+      </div>
+      ${renderLeaderboardRoster(snapshot.onlinePlayers)}
+    `;
+  }
+
+  const leader = rows[0];
+  const totalPlaytime = rows.reduce((sum, row) => sum + (Number(row.playtimeHours) || 0), 0);
+  const totalNetWorth = rows.reduce((sum, row) => sum + (Number(row.netWorth) || 0), 0);
+
+  return `
+    <div class="section__eyebrow">Live snapshot</div>
+    <h2>Current leaders</h2>
+    <div class="leaderboard-highlight">
+      <div class="leaderboard-highlight__label">Top ${escapeHtml(metric.label)}</div>
+      <div class="leaderboard-highlight__name">${escapeHtml(leader.name)}</div>
+      <div class="leaderboard-highlight__value">${escapeHtml(metric.format(leader[metric.valueKey]))}</div>
+      <div class="leaderboard-highlight__meta">${escapeHtml(`${leader.role} / ${leader.crew}`)}</div>
+    </div>
+
+    <div class="leaderboard-stats">
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Combined playtime</span>
+        <strong class="leaderboard-stat__value">${escapeHtml(formatLeaderboardInteger(totalPlaytime))}h</strong>
+      </div>
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Combined net worth</span>
+        <strong class="leaderboard-stat__value">${escapeHtml(formatMoneyCompact(totalNetWorth))}</strong>
+      </div>
+      <div class="leaderboard-stat">
+        <span class="leaderboard-stat__label">Last checked</span>
+        <strong class="leaderboard-stat__value">${escapeHtml(updatedLabel)}</strong>
+      </div>
+    </div>
+
+    ${renderLeaderboardRoster(snapshot.onlinePlayers)}
+  `;
+}
+
+async function loadLeaderboardSnapshot() {
+  const [leaderboardResult, combinedResult, serverSnapshot] = await Promise.all([
+    fetchOptionalServerJson(SERVER_CONFIG.leaderboardUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.liveOpsUrl),
+    loadServerSnapshot()
+  ]);
+
+  const combined = combinedResult.data && typeof combinedResult.data === "object" ? combinedResult.data : {};
+  const leaderboardPayload =
+    leaderboardResult.data ||
+    combined.leaderboard ||
+    combined.leaderboards ||
+    combined.rankings ||
+    null;
+
+  const rows = getLeaderboardSortedRows(
+    normaliseLeaderboardRows(leaderboardPayload),
+    getLeaderboardMetricConfig(leaderboardPayload?.metric || leaderboardPayload?.selectedMetric || "").key
+  );
+  const updatedAt = parseSnapshotDate(pickFirstDefined(leaderboardPayload || {}, ["updatedAt", "timestamp", "refreshedAt"]));
+
+  return {
+    rows,
+    updatedAt,
+    feedConfigured: Boolean(SERVER_CONFIG.leaderboardUrl || leaderboardResult.configured || combined.leaderboard || combined.leaderboards || combined.rankings),
+    onlinePlayers: Array.isArray(serverSnapshot?.players) ? serverSnapshot.players : []
+  };
+}
+
+async function hydrateLeaderboard(metricKey) {
+  const requestId = ++leaderboardPageState.requestId;
+  const metric = getLeaderboardMetricConfig(metricKey);
+  const summaryHost = document.getElementById("leaderboardSummaryHost");
+  const bodyHost = document.getElementById("leaderboardBodyHost");
+  const sideHost = document.getElementById("leaderboardSideHost");
+
+  if (!summaryHost || !bodyHost || !sideHost) return;
+
+  try {
+    const snapshot = await loadLeaderboardSnapshot();
+    if (requestId !== leaderboardPageState.requestId) return;
+
+    const rows = getLeaderboardSortedRows(snapshot.rows, metric.key);
+    summaryHost.innerHTML = renderLeaderboardSummary(metric, rows, snapshot);
+    bodyHost.innerHTML = rows.length ? renderLeaderboardTable(metric, rows) : renderLeaderboardEmpty(metric, snapshot);
+    sideHost.innerHTML = renderLeaderboardSidebar(metric, rows, snapshot);
+  } catch (error) {
+    if (requestId !== leaderboardPageState.requestId) return;
+
+    const fallbackSnapshot = {
+      rows: [],
+      updatedAt: null,
+      feedConfigured: Boolean(SERVER_CONFIG.leaderboardUrl),
+      onlinePlayers: []
+    };
+
+    summaryHost.innerHTML = renderLeaderboardSummary(metric, [], fallbackSnapshot);
+    bodyHost.innerHTML = `
+      <div class="leaderboard-empty">
+        <div class="leaderboard-empty__eyebrow">Leaderboard unavailable</div>
+        <h3>Could not load rankings</h3>
+        <p>${escapeHtml(error?.message || "The leaderboard feed did not respond.")}</p>
+      </div>
+    `;
+    sideHost.innerHTML = renderLeaderboardSidebar(metric, [], fallbackSnapshot);
+  }
 }
 
 function getMapTypeMeta(type) {
@@ -4468,7 +4726,7 @@ function drawPointerFxFrame(now) {
         alpha: 0.10,
         lineWidth: 1.1,
         decay: 0.18,
-        tint: distance > 40 ? "red" : "blue"
+        tint: distance > 40 ? "red" : "gold"
       });
       state.lastTrailAt = now;
       state.lastTrailX = state.x;
@@ -4482,10 +4740,10 @@ function drawPointerFxFrame(now) {
 
   if (state.pointerVisible) {
     const glow = ctx.createRadialGradient(state.x, state.y, 0, state.x, state.y, 220);
-    glow.addColorStop(0, "rgba(214,233,255,0.07)");
-    glow.addColorStop(0.18, "rgba(120,178,255,0.06)");
-    glow.addColorStop(0.44, "rgba(83,138,255,0.045)");
-    glow.addColorStop(0.68, "rgba(255,108,108,0.028)");
+    glow.addColorStop(0, "rgba(255,232,196,0.075)");
+    glow.addColorStop(0.2, "rgba(214,166,91,0.06)");
+    glow.addColorStop(0.46, "rgba(186,140,84,0.045)");
+    glow.addColorStop(0.7, "rgba(160,82,68,0.028)");
     glow.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glow;
     ctx.beginPath();
