@@ -5096,3 +5096,58 @@ body.is-landing .footer{
     radial-gradient(circle at 12% 18%, rgba(191,143,88,.06), transparent 28%),
     linear-gradient(180deg, rgba(18,15,13,.92), rgba(9,9,11,.96)) !important;
 }
+
+/* 2026-04-03 landing stability hotfix */
+body.is-landing::before{
+  display: none !important;
+}
+
+body.is-landing{
+  background:
+    radial-gradient(circle at 14% 18%, rgba(186,137,80,.10), transparent 36%),
+    radial-gradient(circle at 86% 20%, rgba(145,72,60,.09), transparent 34%),
+    radial-gradient(circle at 50% 108%, rgba(110,69,37,.06), transparent 40%),
+    linear-gradient(180deg, #040506 0%, #060708 56%, #030304 100%) !important;
+}
+
+.landing-reboot{
+  min-height: auto !important;
+  padding-top: 6px !important;
+  align-content: start !important;
+}
+
+.landing-reboot::before{
+  inset: -4% -6% !important;
+  background:
+    radial-gradient(circle at 16% 42%, rgba(191,143,88,.10), transparent 34%),
+    radial-gradient(circle at 84% 40%, rgba(144,71,61,.09), transparent 32%) !important;
+  filter: blur(36px) !important;
+  opacity: .78 !important;
+}
+
+.landing-reboot::after{
+  display: none !important;
+}
+
+.landing-reboot__noise{
+  opacity: .04 !important;
+}
+
+.landing-reboot__hero{
+  width: min(100%, 980px) !important;
+  margin: 0 auto !important;
+}
+
+.landing-reboot__lead{
+  width: 100% !important;
+  margin: 0 auto !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(191,143,88,.06), transparent 32%),
+    radial-gradient(circle at 88% 78%, rgba(144,71,61,.05), transparent 30%),
+    linear-gradient(180deg, rgba(14,12,11,.94), rgba(8,8,10,.97)) !important;
+}
+
+.landing-reboot__lead::after{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0) 24%) !important;
+}
