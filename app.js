@@ -16,6 +16,13 @@ const DEFAULT_SERVER_CONFIG = {
   joinCode: "pbe6gy",
   joinUrl: "",
   discordUrl: "https://discord.gg/Y8HNFPtxkE",
+  discordGuildId: "",
+  discordWidgetUrl: "",
+  discordStatusUrl: "",
+  discordOAuthUrl: "",
+  discordBotInviteUrl: "",
+  discordSupportUrl: "",
+  backendApiUrl: "",
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
   region: "EU",
@@ -43,7 +50,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403h";
+const SITE_ASSET_VERSION = "20260403j";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -989,19 +996,52 @@ function renderHelp() {
           </div>
         </section>
 
-        <aside class="section section--stack">
-          <div class="section__eyebrow">Best practice</div>
-          <h2>Need help faster?</h2>
-          <div class="stack-list stack-list--compact">
-            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Open a Discord ticket.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Include your ID and screenshots.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Explain the issue clearly.</span></div>
-          </div>
-        </aside>
+          <aside class="section section--stack">
+            <div class="section__eyebrow">Best practice</div>
+            <h2>Need help faster?</h2>
+            <div class="stack-list stack-list--compact">
+              <div class="stack-list__item"><span class="stack-list__index">01</span><span>Open a Discord ticket.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">02</span><span>Include your ID and screenshots.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">03</span><span>Explain the issue clearly.</span></div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="content-grid content-grid--sidebar">
+          <section class="section">
+            <div class="section__eyebrow">Discord integration</div>
+            <h2>Website and bot connection</h2>
+            <div class="info-faq">
+              <div class="info-faq__item">
+                <div class="info-faq__q">Does the website already have a real database?</div>
+                <div class="info-faq__a">Not yet. The current website is a static frontend. Real account linking, ticket sync, punishments, and Discord role rewards need a backend API and database behind it.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">Can the website be connected to a Discord bot later?</div>
+                <div class="info-faq__a">Yes. The site is now prepared for Discord guild stats, bot status, account linking, support queues, announcement feeds, and role-based sync once those endpoints are connected.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">What is needed for real Discord linking?</div>
+                <div class="info-faq__a">You will need a backend service, a database, Discord OAuth, and bot endpoints the website can safely read from.</div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="section section--stack">
+            <div class="section__eyebrow">Good features</div>
+            <h2>What Discord can unlock</h2>
+            <div class="stack-list stack-list--compact">
+              <div class="stack-list__item"><span class="stack-list__index">01</span><span>Linked website accounts with Discord roles and verification.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">02</span><span>Live Discord bot status, guild member counts, and support queue panels.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">03</span><span>Application, appeal, and report dashboards shared between website and Discord.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">04</span><span>Automated server restart alerts, event posts, and leaderboard highlights.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">05</span><span>Claimable rewards or perks after Discord verification or supporter role checks.</span></div>
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
-  `);
-}
+    `);
+  }
 
 function getLeaderboardMetricConfig(metricKey) {
   return LEADERBOARD_METRICS.find((metric) => metric.key === normalize(metricKey)) || LEADERBOARD_METRICS[0];
@@ -3287,6 +3327,72 @@ function normaliseHotZonesPayload(payload) {
       name: pickFirstDefined(zone, ["name", "label", "title"]) || `Zone ${index + 1}`,
       heat: toFiniteNumber(pickFirstDefined(zone, ["heat", "score", "activity"])) ?? 0,
       type: pickFirstDefined(zone, ["type", "category"]) || "activity"
+      }))
+    };
+  }
+
+function normaliseDiscordOpsPayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {
+      configured: false,
+      botStatus: normaliseHealthPayload(null, "Discord Bot"),
+      guildName: `${SERVER_CONFIG.name} Discord`,
+      onlineMembers: null,
+      totalMembers: null,
+      verifiedMembers: null,
+      openTickets: null,
+      pendingReports: null,
+      pendingApplications: null,
+      linkedAccounts: null,
+      syncRoles: false,
+      linkingEnabled: Boolean(SERVER_CONFIG.discordOAuthUrl),
+      oauthUrl: SERVER_CONFIG.discordOAuthUrl || "",
+      supportUrl: SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL,
+      botInviteUrl: SERVER_CONFIG.discordBotInviteUrl || "",
+      announcements: []
+    };
+  }
+
+  const guild = payload.guild && typeof payload.guild === "object" ? payload.guild : payload;
+  const support = payload.support && typeof payload.support === "object" ? payload.support : {};
+  const linking = payload.linking && typeof payload.linking === "object" ? payload.linking : {};
+  const announcementSource = Array.isArray(payload.announcements)
+    ? payload.announcements
+    : Array.isArray(payload.feed)
+      ? payload.feed
+      : Array.isArray(payload.updates)
+        ? payload.updates
+        : [];
+
+  const syncRolesRaw = pickFirstDefined(linking, ["syncRoles", "roleSync", "rolesLinked"]);
+  const linkingEnabledRaw = pickFirstDefined(linking, ["enabled", "linkingEnabled", "oauthEnabled"]);
+  const botStatus = normaliseHealthPayload(payload.botStatus || payload.bot || payload.health, "Discord Bot");
+
+  return {
+    configured: true,
+    botStatus: {
+      ...botStatus,
+      label: "Discord Bot"
+    },
+    guildName: pickFirstDefined(guild, ["name", "guildName", "serverName"]) || `${SERVER_CONFIG.name} Discord`,
+    onlineMembers: toFiniteNumber(pickFirstDefined(guild, ["onlineMembers", "membersOnline", "presenceCount", "online"])),
+    totalMembers: toFiniteNumber(pickFirstDefined(guild, ["totalMembers", "members", "memberCount"])),
+    verifiedMembers: toFiniteNumber(pickFirstDefined(guild, ["verifiedMembers", "linkedMembers", "whitelistedMembers"])),
+    openTickets: toFiniteNumber(pickFirstDefined(support, ["openTickets", "ticketsOpen", "tickets"])),
+    pendingReports: toFiniteNumber(pickFirstDefined(support, ["pendingReports", "reportsOpen", "reports"])),
+    pendingApplications: toFiniteNumber(pickFirstDefined(support, ["pendingApplications", "applicationsOpen", "applications"])),
+    linkedAccounts: toFiniteNumber(pickFirstDefined(linking, ["linkedAccounts", "linkedUsers", "connections"])),
+    syncRoles: syncRolesRaw == null ? false : Boolean(syncRolesRaw),
+    linkingEnabled: linkingEnabledRaw == null ? Boolean(SERVER_CONFIG.discordOAuthUrl) : Boolean(linkingEnabledRaw),
+    oauthUrl: pickFirstDefined(linking, ["oauthUrl", "connectUrl", "linkUrl"]) || SERVER_CONFIG.discordOAuthUrl || "",
+    supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl"]) || SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL,
+    botInviteUrl: pickFirstDefined(payload, ["botInviteUrl", "inviteUrl"]) || SERVER_CONFIG.discordBotInviteUrl || "",
+    announcements: announcementSource.map((entry, index) => ({
+      id: pickFirstDefined(entry, ["id", "slug"]) || `discord-announcement-${index + 1}`,
+      title: pickFirstDefined(entry, ["title", "name"]) || `Discord update ${index + 1}`,
+      channel: pickFirstDefined(entry, ["channel", "source", "area"]) || "Announcements",
+      detail: pickFirstDefined(entry, ["detail", "description", "summary"]) || "",
+      createdAt: parseSnapshotDate(pickFirstDefined(entry, ["createdAt", "timestamp", "updatedAt"]))
     }))
   };
 }
@@ -3355,6 +3461,7 @@ async function loadLiveOpsSnapshot() {
     liveMapResult,
     uptimeResult,
     restartResult,
+    discordResult,
     serverHealthResult,
     websiteHealthResult
   ] = await Promise.all([
@@ -3362,6 +3469,7 @@ async function loadLiveOpsSnapshot() {
     fetchOptionalServerJson(SERVER_CONFIG.livePlayerMapUrl),
     fetchOptionalServerJson(SERVER_CONFIG.uptimeStatusUrl),
     fetchOptionalServerJson(SERVER_CONFIG.restartInfoUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.discordStatusUrl),
     fetchOptionalServerJson(SERVER_CONFIG.serverHealthUrl),
     fetchOptionalServerJson(SERVER_CONFIG.websiteHealthUrl)
   ]);
@@ -3375,6 +3483,7 @@ async function loadLiveOpsSnapshot() {
   const events = normaliseEventsPayload(combined.events || combined.activeEvents);
   const history = normaliseHistoryPayload(combined.history);
   const hotZones = normaliseHotZonesPayload(combined.hotZones || combined.zones || combined.heatmap);
+  const discord = normaliseDiscordOpsPayload(combined.discord || combined.community || discordResult.data);
   const serverHealth = normaliseHealthPayload(combined.serverHealth || combined.server || serverHealthResult.data, "Game Server");
   const websiteHealth = normaliseHealthPayload(combined.websiteHealth || combined.website || websiteHealthResult.data, SERVER_CONFIG.websiteName || "Website");
 
@@ -3386,18 +3495,20 @@ async function loadLiveOpsSnapshot() {
   events.configured = Boolean(events.configured || combined.events || combined.activeEvents || combinedResult.configured);
   history.configured = Boolean(history.configured || combined.history || combinedResult.configured);
   hotZones.configured = Boolean(hotZones.configured || combined.hotZones || combined.zones || combined.heatmap || combinedResult.configured);
+  discord.configured = Boolean(discord.configured || combined.discord || combined.community || combinedResult.configured || discordResult.configured);
   serverHealth.configured = Boolean(serverHealth.configured || combined.serverHealth || combined.server || combinedResult.configured || serverHealthResult.configured);
   websiteHealth.configured = Boolean(websiteHealth.configured || combined.websiteHealth || combined.website || combinedResult.configured || websiteHealthResult.configured);
 
   return {
     configured: Boolean(
       SERVER_CONFIG.liveOpsUrl ||
-      SERVER_CONFIG.livePlayerMapUrl ||
-      SERVER_CONFIG.uptimeStatusUrl ||
-      SERVER_CONFIG.restartInfoUrl ||
-      SERVER_CONFIG.serverHealthUrl ||
-      SERVER_CONFIG.websiteHealthUrl
-    ),
+        SERVER_CONFIG.livePlayerMapUrl ||
+        SERVER_CONFIG.uptimeStatusUrl ||
+        SERVER_CONFIG.restartInfoUrl ||
+        SERVER_CONFIG.discordStatusUrl ||
+        SERVER_CONFIG.serverHealthUrl ||
+        SERVER_CONFIG.websiteHealthUrl
+      ),
     source: SERVER_CONFIG.liveOpsUrl ? "Custom live ops API" : "Per-feature endpoints",
     publicStatusUrl: SERVER_CONFIG.publicStatusUrl || pickFirstDefined(combined, ["publicStatusUrl", "statusPageUrl", "statusUrl"]) || "",
     liveMap,
@@ -3405,21 +3516,23 @@ async function loadLiveOpsSnapshot() {
     restart,
     queue,
     counts,
-    events,
-    history,
-    hotZones,
-    serverHealth,
-    websiteHealth,
-    errors: [
-      combinedResult.error && `Live ops: ${combinedResult.error}`,
-      liveMapResult.error && `Live map: ${liveMapResult.error}`,
-      uptimeResult.error && `Uptime: ${uptimeResult.error}`,
-      restartResult.error && `Restart: ${restartResult.error}`,
-      serverHealthResult.error && `Server health: ${serverHealthResult.error}`,
-      websiteHealthResult.error && `Website health: ${websiteHealthResult.error}`
-    ].filter(Boolean)
-  };
-}
+      events,
+      history,
+      hotZones,
+      discord,
+      serverHealth,
+      websiteHealth,
+      errors: [
+        combinedResult.error && `Live ops: ${combinedResult.error}`,
+        liveMapResult.error && `Live map: ${liveMapResult.error}`,
+        uptimeResult.error && `Uptime: ${uptimeResult.error}`,
+        restartResult.error && `Restart: ${restartResult.error}`,
+        discordResult.error && `Discord: ${discordResult.error}`,
+        serverHealthResult.error && `Server health: ${serverHealthResult.error}`,
+        websiteHealthResult.error && `Website health: ${websiteHealthResult.error}`
+      ].filter(Boolean)
+    };
+  }
 
 function fetchServerJson(url, timeoutMs = 10000) {
   const controller = new AbortController();
@@ -3563,12 +3676,12 @@ function renderServerStatusShell() {
             <div class="status-live__value">FiveM API</div>
           </div>
           <div class="status-live__highlight">
-            <div class="status-live__label">Live Ops</div>
-            <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
+              <div class="status-live__label">Live Ops</div>
+              <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.discordStatusUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
+            </div>
           </div>
-        </div>
-      </section>
-      <div id="serverStatusMount">${renderServerStatusLoading()}</div>
+        </section>
+        <div id="serverStatusMount">${renderServerStatusLoading()}</div>
     </div>
   `;
 }
@@ -3590,11 +3703,11 @@ function renderServerStatusError(message) {
       <div class="status-empty status-empty--warning">
         <div class="status-empty__title">Live status is not available right now</div>
         <div class="status-empty__text">${escapeHtml(message || "The server API could not be reached from the website at the moment.")}</div>
-        <div class="status-note">
-          <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your bought server uses a different join code, Discord invite, or txAdmin endpoints.
+          <div class="status-note">
+            <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your bought server uses a different join code, Discord invite, txAdmin hooks, backend API, or Discord bot endpoints.
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
   `;
 }
 
@@ -3742,6 +3855,74 @@ function renderHotZonesList(hotZones) {
           <div class="status-hotzones__meta">${escapeHtml(zone.type)}</div>
         </div>
       `).join("")}
+      </div>
+    `;
+  }
+
+function renderDiscordOpsGrid(discord) {
+  const items = [
+    ["Bot Status", discord?.botStatus?.status === "online" ? "Online" : discord?.botStatus?.status === "offline" ? "Offline" : "Pending"],
+    ["Members Online", discord?.onlineMembers != null ? String(discord.onlineMembers) : "—"],
+    ["Total Members", discord?.totalMembers != null ? String(discord.totalMembers) : "—"],
+    ["Open Tickets", discord?.openTickets != null ? String(discord.openTickets) : "—"],
+    ["Linked Accounts", discord?.linkedAccounts != null ? String(discord.linkedAccounts) : "—"],
+    ["Role Sync", discord?.syncRoles ? "Enabled" : discord?.configured ? "Ready" : "Pending"]
+  ];
+
+  return `
+    <div class="status-miniGrid">
+      ${items.map(([label, value]) => `
+        <div class="status-miniStat">
+          <div class="status-miniStat__label">${escapeHtml(label)}</div>
+          <div class="status-miniStat__value">${escapeHtml(value)}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderDiscordAnnouncements(discord) {
+  const items = Array.isArray(discord?.announcements) ? discord.announcements.slice(0, 4) : [];
+  if (!items.length) {
+    return `<div class="status-empty__text">No Discord announcement feed is connected right now.</div>`;
+  }
+
+  return `
+    <div class="status-feed">
+      ${items.map((item) => `
+        <article class="status-feed__item">
+          <div class="status-feed__top">
+            <div class="status-feed__title">${escapeHtml(item.title)}</div>
+            <div class="status-feed__pill">${escapeHtml(item.channel)}</div>
+          </div>
+          <div class="status-feed__meta">${escapeHtml(item.createdAt ? formatServerTimestamp(item.createdAt) : "Discord feed")}</div>
+          ${item.detail ? `<div class="status-feed__text">${escapeHtml(item.detail)}</div>` : ""}
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderDiscordLinking(discord) {
+  const supportUrl = discord?.supportUrl || DISCORD_INVITE_URL;
+  const oauthUrl = discord?.oauthUrl || "";
+  const inviteUrl = discord?.botInviteUrl || "";
+
+  return `
+    <div class="stack-list stack-list--compact">
+      <div class="stack-list__item"><span class="stack-list__index">01</span><span>Discord guild: ${escapeHtml(discord?.guildName || `${SERVER_CONFIG.name} Discord`)}</span></div>
+      <div class="stack-list__item"><span class="stack-list__index">02</span><span>Account linking is ${discord?.linkingEnabled ? "enabled" : "prepared but not connected yet"}.</span></div>
+      <div class="stack-list__item"><span class="stack-list__index">03</span><span>Role sync is ${discord?.syncRoles ? "enabled" : "ready for backend control"}.</span></div>
+      <div class="stack-list__item"><span class="stack-list__index">04</span><span>Support queue: ${discord?.openTickets != null ? `${discord.openTickets} open tickets` : "waiting for ticket data"}.</span></div>
+      <div class="stack-list__item"><span class="stack-list__index">05</span><span>Verified members: ${discord?.verifiedMembers != null ? String(discord.verifiedMembers) : "pending data feed"}.</span></div>
+    </div>
+    <div class="status-note">
+      <strong>Backend requirement:</strong> Discord account linking, role rewards, ticket sync, punishments, verification, and bot automation need a real backend API and database behind this website.
+    </div>
+    <div class="status-actions">
+      <a class="info-link" href="${escapeHtml(supportUrl)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+      ${oauthUrl ? `<a class="info-link" href="${escapeHtml(oauthUrl)}" target="_blank" rel="noopener noreferrer">Connect Discord</a>` : ""}
+      ${inviteUrl ? `<a class="info-link" href="${escapeHtml(inviteUrl)}" target="_blank" rel="noopener noreferrer">Invite Bot</a>` : ""}
     </div>
   `;
 }
@@ -3752,6 +3933,7 @@ function renderServerStatusContent(snapshot) {
     ? `${snapshot.clients}/${snapshot.maxClients}`
     : `${snapshot.clients}`;
   const liveOps = snapshot.liveOps || {};
+  const discordOps = liveOps.discord || normaliseDiscordOpsPayload(null);
   const uptimeValue = liveOps.uptime?.uptimeSeconds != null
     ? formatDurationCompact(liveOps.uptime.uptimeSeconds)
     : "Pending";
@@ -3869,14 +4051,15 @@ function renderServerStatusContent(snapshot) {
           <div class="stack-list__item"><span class="stack-list__index">02</span><span>Public player count and server details are fetched automatically.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">04</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">05</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">06</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">07</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
-        </div>
-        <div class="status-note">
-          <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.
-        </div>
-      </aside>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">06</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">07</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">08</span><span>Discord operations are ${discordOps.configured ? "connected to live data" : "prepared for bot, guild, and support endpoints"}.</span></div>
+          </div>
+          <div class="status-note">
+            <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.
+          </div>
+        </aside>
     </div>
 
     <div class="content-grid content-grid--sidebar">
@@ -3900,14 +4083,48 @@ function renderServerStatusContent(snapshot) {
         ${renderHistoryList(liveOps.history)}
       </section>
 
-      <section class="section">
-        <div class="section__eyebrow">Heatmap</div>
-        <h2>Hottest zones</h2>
-        ${renderHotZonesList(liveOps.hotZones)}
-      </section>
-    </div>
-  `;
-}
+        <section class="section">
+          <div class="section__eyebrow">Heatmap</div>
+          <h2>Hottest zones</h2>
+          ${renderHotZonesList(liveOps.hotZones)}
+        </section>
+      </div>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">Discord operations</div>
+          <h2>Guild and bot snapshot</h2>
+          ${renderDiscordOpsGrid(discordOps)}
+        </section>
+
+        <section class="section">
+          <div class="section__eyebrow">Discord feed</div>
+          <h2>Announcements and updates</h2>
+          ${renderDiscordAnnouncements(discordOps)}
+        </section>
+      </div>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">Account linking</div>
+          <h2>Discord connection readiness</h2>
+          ${renderDiscordLinking(discordOps)}
+        </section>
+
+        <section class="section section--stack">
+          <div class="section__eyebrow">What this unlocks</div>
+          <h2>Website to Discord features</h2>
+          <div class="stack-list stack-list--compact">
+            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Discord account linking for website profiles, tickets, and role-based access.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Live bot status, guild activity, ticket counts, and announcement sync.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Role rewards and whitelisting that instantly sync between Discord and the website.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Staff dashboards for reports, support queues, punishments, and application review.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Automated event announcements, restart alerts, and leaderboard highlight posts.</span></div>
+          </div>
+        </section>
+      </div>
+    `;
+  }
 
 function filterStatusPlayers(query) {
   const list = document.getElementById("statusPlayersList");

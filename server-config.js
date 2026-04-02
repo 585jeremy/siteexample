@@ -3,6 +3,12 @@ window.SGCNR_SERVER_CONFIG = {
   joinCode: "pbe6gy",
   joinUrl: "",
   discordUrl: "https://discord.gg/Y8HNFPtxkE",
+  discordGuildId: "",
+  discordWidgetUrl: "",
+  discordOAuthUrl: "",
+  discordBotInviteUrl: "",
+  discordSupportUrl: "",
+  backendApiUrl: "",
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
   region: "EU",
@@ -38,6 +44,15 @@ window.SGCNR_SERVER_CONFIG = {
   //     "outages": [ { "label": "ISP issue", "startedAt": "...", "durationMinutes": 14 } ]
   //   },
   //   "hotZones": [ { "name": "Vinewood", "heat": 92, "type": "crime" } ],
+  //   "discord": {
+  //     "botStatus": { "status": "online", "message": "Stable", "latencyMs": 88 },
+  //     "guild": { "name": "SGCNR", "onlineMembers": 214, "totalMembers": 1820, "verifiedMembers": 906 },
+  //     "support": { "openTickets": 11, "pendingReports": 4, "pendingApplications": 3 },
+  //     "linking": { "enabled": true, "linkedAccounts": 682, "syncRoles": true, "oauthUrl": "https://..." },
+  //     "announcements": [
+  //       { "title": "Weekend event", "channel": "#announcements", "createdAt": "...", "detail": "Bonus payouts are live." }
+  //     ]
+  //   },
   //   "serverHealth": { "status": "online", "message": "Stable", "latencyMs": 42 },
   //   "websiteHealth": { "status": "online", "message": "Healthy", "latencyMs": 18 }
   // }
@@ -51,6 +66,7 @@ window.SGCNR_SERVER_CONFIG = {
   livePlayerMapUrl: "",
   uptimeStatusUrl: "",
   restartInfoUrl: "",
+  discordStatusUrl: "",
   serverHealthUrl: "",
   websiteHealthUrl: "",
 

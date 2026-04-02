@@ -3470,6 +3470,13 @@ body.is-standard .status-hotzones__score{
   text-align: right;
 }
 
+body.is-standard .status-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
 body.is-wiki .content{
   width: min(1420px, calc(100% - 28px));
   margin: 0 auto;
@@ -5150,4 +5157,90 @@ body.is-landing{
 .landing-reboot__lead::after{
   background:
     linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0) 24%) !important;
+}
+
+/* 2026-04-03 landing final override */
+body.is-landing{
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  background:
+    radial-gradient(1200px 820px at 14% 16%, rgba(186,137,80,.10), transparent 58%),
+    radial-gradient(1200px 820px at 86% 18%, rgba(145,72,60,.09), transparent 58%),
+    linear-gradient(180deg, #040506 0%, #060708 56%, #030304 100%) !important;
+}
+
+body.is-landing::before,
+.landing-reboot::before,
+.landing-reboot::after,
+.landing-reboot__noise,
+.landing-reboot__glow{
+  display: none !important;
+}
+
+body.is-landing #rules{
+  min-height: auto !important;
+}
+
+body.is-landing .content{
+  width: min(1180px, calc(100% - 28px)) !important;
+  max-width: none !important;
+  min-height: calc(100svh - 82px) !important;
+  height: calc(100svh - 82px) !important;
+  padding: 18px 0 104px !important;
+  overflow: hidden !important;
+}
+
+.landing-reboot{
+  min-height: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: 6px !important;
+}
+
+.landing-reboot__hero{
+  width: min(100%, 980px) !important;
+  max-width: 980px !important;
+  min-height: auto !important;
+  margin: 0 auto !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+}
+
+.landing-reboot__lead{
+  width: 100% !important;
+  max-width: 980px !important;
+  margin: 0 auto !important;
+  padding: 36px 38px !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(191,143,88,.05), transparent 34%),
+    radial-gradient(circle at 86% 78%, rgba(144,71,61,.05), transparent 32%),
+    linear-gradient(180deg, rgba(15,13,11,.95), rgba(8,8,10,.97)) !important;
+  border-color: rgba(183,137,85,.09) !important;
+  box-shadow:
+    0 28px 72px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+.landing-reboot__header{
+  gap: 14px !important;
+}
+
+.landing-reboot__title{
+  max-width: 7.4ch !important;
+}
+
+.landing-reboot__text{
+  max-width: 560px !important;
+}
+
+.landing-reboot__actions{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.landing-reboot__compactInfo{
+  width: min(100%, 360px) !important;
 }
