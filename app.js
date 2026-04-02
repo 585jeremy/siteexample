@@ -1030,11 +1030,11 @@ function renderCommands() {
           <div class="feature-grid feature-grid--compact">
             <div class="feature-card">
               <div class="feature-card__label">Starter Tip</div>
-              <div class="feature-card__value">Learn F1 & T first</div>
+              <div class="feature-card__value">Learn M & T first</div>
             </div>
             <div class="feature-card">
               <div class="feature-card__label">Navigation</div>
-                <div class="feature-card__value">Use map + Help</div>
+                <div class="feature-card__value">Use Navigation + Help</div>
             </div>
           </div>
         </aside>
@@ -1042,11 +1042,9 @@ function renderCommands() {
 
       <section class="section section--timeline">
         <div class="section__eyebrow">Control guide</div>
-        <h2>Keybinds (examples)</h2>
+        <h2>Current keybinds</h2>
         <div class="stack-list">
-          <div class="stack-list__item"><span class="stack-list__index">F1</span><span>Main menu (if your framework uses it)</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">F2</span><span>Phone (if enabled)</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">M</span><span>Map</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">M</span><span>Navigation menu</span></div>
           <div class="stack-list__item"><span class="stack-list__index">T</span><span>Chat</span></div>
         </div>
       </section>
