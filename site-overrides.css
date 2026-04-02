@@ -4153,3 +4153,404 @@ body.is-map .dock{
     width: 210px !important;
   }
 }
+
+/* 2026-04-03 dock, leaderboard, and mobile cleanup */
+.dock,
+body.is-landing .dock,
+body.is-standard .dock,
+body.is-wiki .dock,
+body.is-map .dock{
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+  z-index: 140 !important;
+}
+
+.leaderboard-shell{
+  align-items: start;
+}
+
+.leaderboard-main,
+.leaderboard-side{
+  display: grid;
+  gap: 16px;
+}
+
+.leaderboard-intro{
+  max-width: 760px;
+}
+
+.leaderboard-metrics{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.leaderboard-metric{
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(183,137,85,.14);
+  background: linear-gradient(180deg, rgba(30,24,20,.88), rgba(10,10,12,.92));
+  color: rgba(234,223,204,.78);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.leaderboard-metric:hover{
+  transform: translateY(-1px);
+  border-color: rgba(206,150,92,.24);
+  background: linear-gradient(180deg, rgba(40,30,23,.94), rgba(12,12,14,.96));
+}
+
+.leaderboard-metric.is-active{
+  border-color: rgba(210,156,92,.34);
+  background: linear-gradient(180deg, rgba(88,58,27,.28), rgba(49,25,25,.18));
+  color: rgba(245,232,208,.96);
+}
+
+.leaderboard-tableWrap{
+  border-radius: 20px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(22,18,15,.94), rgba(10,10,12,.96));
+  overflow: hidden;
+}
+
+.leaderboard-table{
+  display: grid;
+}
+
+.leaderboard-row{
+  display: grid;
+  grid-template-columns: 68px minmax(180px, 1.2fr) minmax(110px, .7fr) minmax(110px, .8fr) 92px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(183,137,85,.08);
+}
+
+.leaderboard-row:last-child{
+  border-bottom: none;
+}
+
+.leaderboard-row--head{
+  background: rgba(255,255,255,.03);
+  color: rgba(220,202,175,.56);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.leaderboard-row--top{
+  background: linear-gradient(180deg, rgba(74,50,26,.12), rgba(255,255,255,0));
+}
+
+.leaderboard-rank{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: rgba(245,232,208,.92);
+}
+
+.leaderboard-player{
+  display: grid;
+  gap: 4px;
+}
+
+.leaderboard-player strong{
+  color: rgba(247,239,224,.96);
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.leaderboard-player span,
+.leaderboard-role,
+.leaderboard-sub{
+  color: rgba(222,212,196,.68);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.leaderboard-value{
+  color: rgba(245,232,208,.96);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.leaderboard-highlight{
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(183,137,85,.12);
+  background:
+    radial-gradient(circle at top right, rgba(191,143,88,.10), transparent 34%),
+    linear-gradient(180deg, rgba(26,20,17,.96), rgba(10,10,12,.96));
+}
+
+.leaderboard-highlight__label,
+.leaderboard-stat__label,
+.leaderboard-note__title{
+  color: rgba(220,202,175,.56);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.leaderboard-highlight__name{
+  color: rgba(246,238,224,.96);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.leaderboard-highlight__value{
+  color: rgba(237,195,128,.96);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.leaderboard-highlight__meta,
+.leaderboard-note__text{
+  color: rgba(222,212,196,.74);
+  line-height: 1.6;
+}
+
+.leaderboard-stats{
+  display: grid;
+  gap: 10px;
+}
+
+.leaderboard-stat,
+.leaderboard-note{
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(24,20,18,.94), rgba(10,10,12,.96));
+}
+
+.leaderboard-stat__value{
+  color: rgba(246,238,224,.96);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+@media (max-width: 1080px){
+  .dock,
+  body.is-landing .dock,
+  body.is-standard .dock,
+  body.is-wiki .dock,
+  body.is-map .dock{
+    bottom: 14px !important;
+    width: min(calc(100vw - 16px), 940px) !important;
+    max-width: calc(100vw - 16px) !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    scrollbar-width: none;
+  }
+
+  .dock::-webkit-scrollbar{
+    display: none;
+  }
+
+  .dock__item{
+    flex: 0 0 auto !important;
+    min-width: 90px !important;
+    height: 44px !important;
+    padding: 0 12px !important;
+  }
+
+  .content-grid--sidebar,
+  .leaderboard-shell{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot{
+    min-height: auto !important;
+  }
+
+  .landing-reboot__hero{
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+
+  .landing-reboot__header{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__stack{
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .landing-reboot__actions{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__miniGrid,
+  .landing-reboot__rail,
+  .wiki-grid{
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-hero__row{
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .wiki-layout{
+    grid-template-columns: 1fr !important;
+  }
+
+  .wiki-sidebar{
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .wiki-facts{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .leaderboard-row{
+    grid-template-columns: 58px minmax(0, 1fr) 96px !important;
+  }
+
+  .leaderboard-row > :nth-child(3),
+  .leaderboard-row > :nth-child(5){
+    justify-self: end;
+  }
+
+  .leaderboard-row--head > :nth-child(3),
+  .leaderboard-row--head > :nth-child(5){
+    display: none;
+  }
+
+  .leaderboard-row > :nth-child(3),
+  .leaderboard-row > :nth-child(5){
+    display: none;
+  }
+}
+
+@media (max-width: 760px){
+  .topbar{
+    min-height: 74px !important;
+    padding: 12px 12px 10px !important;
+    justify-content: center !important;
+  }
+
+  .brandmark{
+    min-width: 0 !important;
+  }
+
+  .brandmark__badge{
+    min-width: 196px !important;
+    min-height: 50px !important;
+  }
+
+  .brandmark__logo--badge{
+    max-width: 124px !important;
+    max-height: 38px !important;
+  }
+
+  .meta,
+  .auth{
+    display: none !important;
+  }
+
+  body.is-landing .content,
+  body.is-standard .content,
+  body.is-wiki .content,
+  body.is-map .content{
+    width: min(100%, calc(100% - 16px)) !important;
+    padding: 10px 0 94px !important;
+  }
+
+  .landing-reboot__lead,
+  .landing-reboot__info,
+  .landing-reboot__railCard,
+  .section,
+  .wiki-sidebar,
+  .wiki-article,
+  .map-panel,
+  .service-map-shell{
+    border-radius: 18px !important;
+  }
+
+  .landing-reboot__stack{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__title{
+    font-size: clamp(2.2rem, 12vw, 3.4rem) !important;
+    line-height: .94 !important;
+  }
+
+  .landing-reboot__text{
+    font-size: 15px !important;
+  }
+
+  .map-layout{
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .map-panel{
+    order: 2;
+    overflow: visible !important;
+  }
+
+  .map-stage{
+    order: 1;
+  }
+
+  .service-map{
+    min-height: 420px !important;
+    height: auto !important;
+  }
+
+  .service-map__canvas{
+    padding: 12px !important;
+  }
+
+  .service-map__stage{
+    width: min(100%, calc(100vw - 40px)) !important;
+  }
+
+  .map-stage__aside{
+    display: none !important;
+  }
+
+  .leaderboard-row{
+    grid-template-columns: 48px minmax(0, 1fr) 84px !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .leaderboard-row--head > :nth-child(2){
+    text-align: left;
+  }
+
+  .leaderboard-value{
+    font-size: 14px !important;
+  }
+
+  .wiki-facts,
+  .wiki-sidebar__stats{
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -42,7 +42,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260402e";
+const SITE_ASSET_VERSION = "20260403a";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -128,6 +128,28 @@ const MAP_TYPE_META = {
     glow: "rgba(255, 155, 84, .24)"
   }
 };
+const LEADERBOARD_METRICS = [
+  { key: "kd", label: "K/D", valueKey: "kd", description: "Kill to death ratio for combat-heavy players.", format: (value) => `${Number(value).toFixed(2)}` },
+  { key: "networth", label: "Net worth", valueKey: "netWorth", description: "Combined money, stash value, and owned assets.", format: (value) => formatMoneyCompact(value) },
+  { key: "playtime", label: "Playtime", valueKey: "playtimeHours", description: "Tracked total playtime in hours.", format: (value) => `${Math.round(Number(value) || 0)}h` },
+  { key: "kills", label: "Kills", valueKey: "kills", description: "Confirmed total player eliminations.", format: (value) => formatLeaderboardInteger(value) },
+  { key: "arrests", label: "Arrests", valueKey: "arrests", description: "Successful police detains and processed arrests.", format: (value) => formatLeaderboardInteger(value) },
+  { key: "robberies", label: "Robberies", valueKey: "robberies", description: "Completed robberies, takeovers, and major hits.", format: (value) => formatLeaderboardInteger(value) },
+  { key: "revives", label: "Revives", valueKey: "revives", description: "Completed EMS revives and medical saves.", format: (value) => formatLeaderboardInteger(value) },
+  { key: "exports", label: "Exports", valueKey: "exports", description: "Vehicle exports and high-value recovery runs.", format: (value) => formatLeaderboardInteger(value) }
+];
+const LEADERBOARD_ROWS = [
+  { name: "Kane Mercer", role: "Police", crew: "Mission Row", kd: 4.82, netWorth: 18800000, playtimeHours: 512, kills: 931, arrests: 402, robberies: 44, revives: 12, exports: 18 },
+  { name: "Luca Reyes", role: "Civilian", crew: "East Side", kd: 3.94, netWorth: 24600000, playtimeHours: 468, kills: 804, arrests: 36, robberies: 89, revives: 2, exports: 42 },
+  { name: "Mia Hart", role: "EMS", crew: "Pillbox", kd: 1.12, netWorth: 12100000, playtimeHours: 596, kills: 114, arrests: 4, robberies: 12, revives: 338, exports: 5 },
+  { name: "Noah Pierce", role: "Gang", crew: "La Mesa", kd: 5.16, netWorth: 16400000, playtimeHours: 438, kills: 1012, arrests: 18, robberies: 102, revives: 0, exports: 21 },
+  { name: "Jade Collins", role: "Mechanic", crew: "LS Customs", kd: 2.41, netWorth: 14800000, playtimeHours: 387, kills: 421, arrests: 9, robberies: 26, revives: 8, exports: 96 },
+  { name: "Elias Ward", role: "Police", crew: "Vespucci", kd: 3.27, netWorth: 13900000, playtimeHours: 442, kills: 628, arrests: 351, robberies: 21, revives: 0, exports: 12 },
+  { name: "Ivy Brooks", role: "Civilian", crew: "Downtown", kd: 2.73, netWorth: 22900000, playtimeHours: 655, kills: 544, arrests: 7, robberies: 77, revives: 4, exports: 55 },
+  { name: "Roman Voss", role: "Gang", crew: "Davis", kd: 4.41, netWorth: 17200000, playtimeHours: 404, kills: 868, arrests: 14, robberies: 108, revives: 1, exports: 28 },
+  { name: "Skye Monroe", role: "EMS", crew: "Central LS", kd: 1.34, netWorth: 11700000, playtimeHours: 523, kills: 146, arrests: 2, robberies: 11, revives: 301, exports: 6 },
+  { name: "Tyson Vale", role: "Civilian", crew: "Rockford", kd: 2.98, netWorth: 27100000, playtimeHours: 721, kills: 492, arrests: 5, robberies: 63, revives: 3, exports: 87 }
+];
 const MAP_LOCATIONS = [
   {
     id: "beaver-bush-ranger-station-13325",
@@ -906,6 +928,12 @@ function renderLandingHome() {
           <div class="landing-reboot__railText">Connection state, live player info, and server-side status details.</div>
         </a>
 
+        <a class="landing-reboot__railCard" href="#/leaderboard">
+          <div class="landing-reboot__railLabel">Leaderboard</div>
+          <div class="landing-reboot__railTitle">Top player stats</div>
+          <div class="landing-reboot__railText">K/D, net worth, playtime, arrests, robberies, and more in one ranked page.</div>
+        </a>
+
         <a class="landing-reboot__railCard" href="#/wiki">
           <div class="landing-reboot__railLabel">Wiki</div>
           <div class="landing-reboot__railTitle">Player handbook</div>
@@ -1069,6 +1097,101 @@ function renderHelp() {
             <div class="stack-list__item"><span class="stack-list__index">01</span><span>Open a Discord ticket.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">02</span><span>Include your ID and screenshots.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">03</span><span>Explain the issue clearly.</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  `);
+}
+
+function getLeaderboardMetricConfig(metricKey) {
+  return LEADERBOARD_METRICS.find((metric) => metric.key === normalize(metricKey)) || LEADERBOARD_METRICS[0];
+}
+
+function getLeaderboardSortedRows(metricKey) {
+  const metric = getLeaderboardMetricConfig(metricKey);
+  return [...LEADERBOARD_ROWS]
+    .sort((left, right) => (Number(right[metric.valueKey]) || 0) - (Number(left[metric.valueKey]) || 0))
+    .map((row, index) => ({ ...row, rank: index + 1 }));
+}
+
+function renderLeaderboard(metricKey) {
+  const metric = getLeaderboardMetricConfig(metricKey);
+  const rows = getLeaderboardSortedRows(metric.key);
+  const leader = rows[0];
+  const totalPlaytime = LEADERBOARD_ROWS.reduce((sum, row) => sum + (Number(row.playtimeHours) || 0), 0);
+  const totalNetWorth = LEADERBOARD_ROWS.reduce((sum, row) => sum + (Number(row.netWorth) || 0), 0);
+
+  setView(`
+    <div>
+      ${renderHeader("Leaderboard", [{ label: "Leaderboard" }])}
+      <div class="content-grid content-grid--sidebar leaderboard-shell">
+        <section class="section section--hero leaderboard-main">
+          <div class="section__eyebrow">City rankings</div>
+          <h2>${escapeHtml(metric.label)} leaderboard</h2>
+          <p class="doc-p leaderboard-intro">${escapeHtml(metric.description)}</p>
+
+          <div class="leaderboard-metrics">
+            ${LEADERBOARD_METRICS.map((entry) => `
+              <a class="leaderboard-metric${entry.key === metric.key ? " is-active" : ""}" href="#/leaderboard/${escapeHtml(entry.key)}">
+                <span class="leaderboard-metric__label">${escapeHtml(entry.label)}</span>
+              </a>
+            `).join("")}
+          </div>
+
+          <div class="leaderboard-tableWrap">
+            <div class="leaderboard-table">
+              <div class="leaderboard-row leaderboard-row--head">
+                <div>Rank</div>
+                <div>Player</div>
+                <div>Role</div>
+                <div>${escapeHtml(metric.label)}</div>
+                <div>Playtime</div>
+              </div>
+              ${rows.map((row) => `
+                <div class="leaderboard-row${row.rank <= 3 ? " leaderboard-row--top" : ""}">
+                  <div class="leaderboard-rank">${escapeHtml(String(row.rank).padStart(2, "0"))}</div>
+                  <div class="leaderboard-player">
+                    <strong>${escapeHtml(row.name)}</strong>
+                    <span>${escapeHtml(row.crew)}</span>
+                  </div>
+                  <div class="leaderboard-role">${escapeHtml(row.role)}</div>
+                  <div class="leaderboard-value">${escapeHtml(metric.format(row[metric.valueKey]))}</div>
+                  <div class="leaderboard-sub">${escapeHtml(`${Math.round(Number(row.playtimeHours) || 0)}h`)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </section>
+
+        <aside class="section section--stack leaderboard-side">
+          <div class="section__eyebrow">Snapshot</div>
+          <h2>Current leaders</h2>
+          <div class="leaderboard-highlight">
+            <div class="leaderboard-highlight__label">Top ${escapeHtml(metric.label)}</div>
+            <div class="leaderboard-highlight__name">${escapeHtml(leader.name)}</div>
+            <div class="leaderboard-highlight__value">${escapeHtml(metric.format(leader[metric.valueKey]))}</div>
+            <div class="leaderboard-highlight__meta">${escapeHtml(`${leader.role} / ${leader.crew}`)}</div>
+          </div>
+
+          <div class="leaderboard-stats">
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Tracked players</span>
+              <strong class="leaderboard-stat__value">${escapeHtml(String(LEADERBOARD_ROWS.length))}</strong>
+            </div>
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Combined playtime</span>
+              <strong class="leaderboard-stat__value">${escapeHtml(formatLeaderboardInteger(totalPlaytime))}h</strong>
+            </div>
+            <div class="leaderboard-stat">
+              <span class="leaderboard-stat__label">Combined net worth</span>
+              <strong class="leaderboard-stat__value">${escapeHtml(formatMoneyCompact(totalNetWorth))}</strong>
+            </div>
+          </div>
+
+          <div class="leaderboard-note">
+            <div class="leaderboard-note__title">Planned live categories</div>
+            <div class="leaderboard-note__text">Queue count, cops / EMS / civs, hot zones, restart countdown, and activity stats can feed this page once the live endpoint is connected.</div>
           </div>
         </aside>
       </div>
@@ -2791,6 +2914,17 @@ function formatDurationCompact(totalSeconds) {
   return `${Math.max(1, minutes)}m`;
 }
 
+function formatLeaderboardInteger(value) {
+  return new Intl.NumberFormat().format(Math.round(Number(value) || 0));
+}
+
+function formatMoneyCompact(value) {
+  return new Intl.NumberFormat(undefined, {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(Number(value) || 0);
+}
+
 function formatRestartCountdown(dateValue) {
   const date = parseSnapshotDate(dateValue);
   if (!date) return "Pending";
@@ -4140,6 +4274,7 @@ function parseRoute() {
   if (parts[0] === "rules") return { name: "rules" };
   if (parts[0] === "commands") return { name: "commands" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
+  if (parts[0] === "leaderboard") return { name: "leaderboard", metric: parts[1] || "" };
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
   if (parts[0] === "status") return { name: "status" };
@@ -4205,6 +4340,11 @@ function route() {
   if (r.name === "help") {
     renderHelp();
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
+    return;
+  }
+  if (r.name === "leaderboard") {
+    renderLeaderboard(r.metric);
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> · Rankings`;
     return;
   }
   if (r.name === "wiki") {
