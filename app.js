@@ -43,7 +43,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403e";
+const SITE_ASSET_VERSION = "20260403f";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -811,8 +811,6 @@ function renderLanding() {
 
 function renderLandingHome() {
   const joinLinkLabel = "Coming soon";
-  const discordLabel = escapeHtml(DISCORD_INVITE_URL.replace(/^https?:\/\//, ""));
-  const regionLabel = escapeHtml(SERVER_CONFIG.region || "EU");
 
   setView(`
     <div class="landing-reboot">
@@ -822,28 +820,11 @@ function renderLandingHome() {
 
       <section class="landing-reboot__hero" aria-label="Welcome">
         <div class="landing-reboot__lead">
-          <div class="landing-reboot__header">
-            <div class="landing-reboot__intro">
-              <div class="landing-reboot__kicker">Official Server Portal</div>
-              <div class="landing-reboot__line" aria-hidden="true"></div>
-              <h1 class="landing-reboot__title">Step into SGCNR.</h1>
-              <p class="landing-reboot__text">Fast entry for joining the server, opening Discord, and getting to the core city tools without wasting space.</p>
-            </div>
-
-            <div class="landing-reboot__stack">
-              <div class="landing-reboot__stackCard landing-reboot__stackCard--blue">
-                <div class="landing-reboot__stackLabel">Mode</div>
-                <div class="landing-reboot__stackValue">FiveM CnR</div>
-              </div>
-              <div class="landing-reboot__stackCard landing-reboot__stackCard--red">
-                <div class="landing-reboot__stackLabel">City</div>
-                <div class="landing-reboot__stackValue">Los Santos</div>
-              </div>
-              <div class="landing-reboot__stackCard">
-                <div class="landing-reboot__stackLabel">Region</div>
-                <div class="landing-reboot__stackValue">${regionLabel}</div>
-              </div>
-            </div>
+          <div class="landing-reboot__intro">
+            <div class="landing-reboot__kicker">Official Server Portal</div>
+            <div class="landing-reboot__line" aria-hidden="true"></div>
+            <h1 class="landing-reboot__title">Step into SGCNR.</h1>
+            <p class="landing-reboot__text">Fast entry for joining the server and getting into the city without extra clutter.</p>
           </div>
 
           <div class="landing-reboot__actions">
@@ -852,70 +833,13 @@ function renderLandingHome() {
             <a class="landing-reboot__action" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
           </div>
 
-          <div class="landing-reboot__miniGrid">
-            <div class="landing-reboot__miniCard">
-              <div class="landing-reboot__miniLabel">Portal</div>
-              <div class="landing-reboot__miniTitle">Rules, map, status</div>
-              <div class="landing-reboot__miniText">Everything important stays one click away in the floating bar.</div>
-            </div>
-
-            <div class="landing-reboot__miniCard">
-              <div class="landing-reboot__miniLabel">Access</div>
-              <div class="landing-reboot__miniTitle">Quick join flow</div>
-              <div class="landing-reboot__miniText">Join fast, copy the link, or move straight into community support.</div>
-            </div>
-
-            <div class="landing-reboot__miniCard">
-              <div class="landing-reboot__miniLabel">Community</div>
-              <div class="landing-reboot__miniTitle">Discord ready</div>
-              <div class="landing-reboot__miniText">Tickets, updates, announcements, and staff access live in one place.</div>
+          <div class="landing-reboot__compactInfo">
+            <div class="landing-reboot__compactCard">
+              <div class="landing-reboot__label">Direct Link</div>
+              <div class="landing-reboot__value landing-reboot__value--small">${joinLinkLabel}</div>
             </div>
           </div>
         </div>
-
-        <aside class="landing-reboot__info">
-          <div class="landing-reboot__card landing-reboot__card--link">
-            <div class="landing-reboot__label">Direct Link</div>
-            <div class="landing-reboot__value landing-reboot__value--small">${joinLinkLabel}</div>
-          </div>
-
-          <div class="landing-reboot__card landing-reboot__card--community">
-            <div class="landing-reboot__label">Community</div>
-            <div class="landing-reboot__value landing-reboot__value--small">${discordLabel}</div>
-          </div>
-        </aside>
-      </section>
-
-      <section class="landing-reboot__rail" aria-label="Portal shortcuts">
-        <a class="landing-reboot__railCard" href="#/rules">
-          <div class="landing-reboot__railLabel">Rules</div>
-          <div class="landing-reboot__railTitle">Server standards</div>
-          <div class="landing-reboot__railText">Core behavior, combat rules, zone rules, and staff guidance.</div>
-        </a>
-
-        <a class="landing-reboot__railCard" href="#/map">
-          <div class="landing-reboot__railLabel">Map</div>
-          <div class="landing-reboot__railTitle">City services</div>
-          <div class="landing-reboot__railText">Los Santos service map with police, medical, and utility locations.</div>
-        </a>
-
-        <a class="landing-reboot__railCard" href="#/status">
-          <div class="landing-reboot__railLabel">Status</div>
-          <div class="landing-reboot__railTitle">Live server page</div>
-          <div class="landing-reboot__railText">Connection state, live player info, and server-side status details.</div>
-        </a>
-
-        <a class="landing-reboot__railCard" href="#/leaderboard">
-          <div class="landing-reboot__railLabel">Leaderboard</div>
-          <div class="landing-reboot__railTitle">Top player stats</div>
-          <div class="landing-reboot__railText">K/D, net worth, playtime, arrests, robberies, and more in one ranked page.</div>
-        </a>
-
-        <a class="landing-reboot__railCard" href="#/wiki">
-          <div class="landing-reboot__railLabel">Wiki</div>
-          <div class="landing-reboot__railTitle">Player handbook</div>
-          <div class="landing-reboot__railText">Jobs, mechanics, robberies, systems, and getting-started guidance.</div>
-        </a>
       </section>
     </div>
   `);
