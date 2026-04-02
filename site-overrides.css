@@ -4998,3 +4998,101 @@ body.is-map .map-tool:focus-visible{
     font-size: 22px;
   }
 }
+
+/* 2026-04-03 landing ambient smoothing */
+body.is-landing{
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(186,137,80,.12), transparent 34%),
+    radial-gradient(circle at 88% 20%, rgba(145,72,60,.11), transparent 32%),
+    radial-gradient(circle at 50% 112%, rgba(110,69,37,.07), transparent 38%),
+    linear-gradient(180deg, #040506 0%, #050607 38%, #060708 64%, #030304 100%) !important;
+}
+
+body.is-landing::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 12% 46%, rgba(191,143,88,.11), transparent 30%),
+    radial-gradient(circle at 88% 44%, rgba(144,71,61,.10), transparent 28%),
+    linear-gradient(90deg, rgba(191,143,88,.04), transparent 26%, transparent 74%, rgba(144,71,61,.04));
+  filter: blur(42px);
+  opacity: .85;
+}
+
+body.is-landing .topbar,
+body.is-landing .content,
+body.is-landing .dock,
+body.is-landing .footer{
+  position: relative;
+  z-index: 1;
+}
+
+.landing-reboot{
+  overflow: hidden;
+}
+
+.landing-reboot::before{
+  content: "";
+  position: absolute;
+  inset: -8% -14%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 16% 48%, rgba(191,143,88,.14), transparent 30%),
+    radial-gradient(circle at 84% 44%, rgba(144,71,61,.12), transparent 28%),
+    linear-gradient(90deg, rgba(191,143,88,.035), transparent 30%, transparent 70%, rgba(144,71,61,.035));
+  filter: blur(34px);
+  opacity: .92;
+}
+
+.landing-reboot::after{
+  content: "";
+  position: absolute;
+  inset: 8% 10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 50%, rgba(191,143,88,.06), transparent 38%),
+    radial-gradient(circle at 76% 52%, rgba(144,71,61,.05), transparent 36%);
+  filter: blur(54px);
+  opacity: .9;
+}
+
+.landing-reboot__noise,
+.landing-reboot__glow,
+.landing-reboot__hero{
+  position: relative;
+  z-index: 1;
+}
+
+.landing-reboot__lead{
+  background:
+    radial-gradient(circle at 10% 18%, rgba(191,143,88,.08), transparent 30%),
+    radial-gradient(circle at 92% 82%, rgba(144,71,61,.07), transparent 28%),
+    linear-gradient(180deg, rgba(15,13,11,.82), rgba(8,8,10,.90)) !important;
+  border-color: rgba(183,137,85,.09) !important;
+  box-shadow:
+    0 32px 96px rgba(0,0,0,.34),
+    0 0 110px rgba(191,143,88,.05),
+    inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+.landing-reboot__lead::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(191,143,88,.03), transparent 20%, transparent 80%, rgba(144,71,61,.03)),
+    linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0) 24%);
+}
+
+.landing-reboot__compactCard{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(191,143,88,.06), transparent 28%),
+    linear-gradient(180deg, rgba(18,15,13,.92), rgba(9,9,11,.96)) !important;
+}
