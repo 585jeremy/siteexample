@@ -43,7 +43,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403c";
+const SITE_ASSET_VERSION = "20260403e";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -475,21 +475,6 @@ function escapeHtml(s) {
 }
 
 function setView(html) {
-  const existing = rulesRoot.firstElementChild;
-  if (existing && existing.classList.contains("view")) {
-    existing.classList.remove("view--in");
-    existing.classList.add("view--out");
-    window.setTimeout(() => {
-      rulesRoot.innerHTML = html;
-      const el = rulesRoot.firstElementChild;
-      if (el) {
-        el.classList.add("view");
-        requestAnimationFrame(() => el.classList.add("view--in"));
-      }
-    }, 220);
-    return;
-  }
-
   rulesRoot.innerHTML = html;
   const el = rulesRoot.firstElementChild;
   if (el) {

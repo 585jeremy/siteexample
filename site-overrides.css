@@ -4560,6 +4560,12 @@ body.is-map .dock{
   background: linear-gradient(90deg, rgba(214,166,91,.82), rgba(255,255,255,.08)) !important;
 }
 
+.landing-reboot__lead::before{
+  background:
+    linear-gradient(120deg, rgba(168,121,68,.08), transparent 34%),
+    linear-gradient(300deg, rgba(129,64,54,.08), transparent 30%) !important;
+}
+
 .landing-reboot__stackCard{
   border-color: rgba(183,137,85,.12) !important;
   background:
@@ -4624,6 +4630,70 @@ body.is-map .dock{
 .landing-reboot__railCard{
   border-color: rgba(183,137,85,.10) !important;
   background: linear-gradient(180deg, rgba(22,18,15,.94), rgba(10,10,12,.96)) !important;
+}
+
+.landing-reboot__card--link{
+  background:
+    radial-gradient(circle at top left, rgba(191,143,88,.08), transparent 32%),
+    linear-gradient(180deg, rgba(22,18,15,.94), rgba(10,10,12,.96)) !important;
+}
+
+.landing-reboot__hero{
+  grid-template-columns: minmax(0, 1.24fr) minmax(260px, .76fr) !important;
+  gap: 14px !important;
+}
+
+.landing-reboot__lead{
+  gap: 16px !important;
+  padding: 34px 36px !important;
+}
+
+.landing-reboot__header{
+  align-items: start !important;
+  gap: 18px !important;
+}
+
+.landing-reboot__intro{
+  gap: 12px !important;
+}
+
+.landing-reboot__title{
+  max-width: 8.2ch !important;
+}
+
+.landing-reboot__stack{
+  gap: 10px !important;
+}
+
+.landing-reboot__stackCard{
+  min-height: 96px !important;
+}
+
+.landing-reboot__actions{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.landing-reboot__action{
+  min-width: 0 !important;
+}
+
+.landing-reboot__miniGrid{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.landing-reboot__miniCard{
+  min-height: 132px !important;
+}
+
+.landing-reboot__info{
+  gap: 10px !important;
+  padding: 16px !important;
+}
+
+.landing-reboot__card{
+  min-height: 138px !important;
 }
 
 .landing-reboot__railCard:hover{
@@ -4871,6 +4941,15 @@ body.is-map .map-tool:focus-visible{
   }
 
   .leaderboard-podium{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__hero{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__actions,
+  .landing-reboot__miniGrid{
     grid-template-columns: 1fr !important;
   }
 }
