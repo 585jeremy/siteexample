@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SGCNR Rules</title>
     <link rel="stylesheet" href="./styles.css?v=20260403m" />
-    <link rel="stylesheet" href="./site-overrides.css?v=20260403m" />
+    <link rel="stylesheet" href="./site-overrides.css?v=20260403n" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -15,7 +15,10 @@
 
   <body>
     <header class="topbar" aria-label="Top bar">
-      <div class="clock" id="localTime" title="Your local time">--:--</div>
+      <div class="topbar__status" aria-label="Site status">
+        <div class="clock" id="localTime" title="Your local time">--:--</div>
+        <div class="meta" id="meta"></div>
+      </div>
       <div class="brandmark" aria-label="SGCNR">
         <div class="brandmark__badge">
           <span class="brandmark__light brandmark__light--blue" aria-hidden="true"></span>
@@ -31,7 +34,6 @@
           <span class="brandmark__title">SGCNR</span>
         </div>
       </div>
-      <div class="meta" id="meta"></div>
       <div class="auth" id="authArea" aria-label="Account">
         <button class="auth__btn auth__btn--primary" id="loginBtn" type="button">Discord Login</button>
         <button class="auth__btn" id="registerBtn" type="button" style="display:none">Register</button>

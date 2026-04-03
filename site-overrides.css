@@ -5441,3 +5441,89 @@ body.is-auth-open{
     border-radius: 22px;
   }
 }
+
+/* 2026-04-03 unified topbar status group across all tabs */
+.topbar{
+  display: grid !important;
+  grid-template-areas: "status brand auth";
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center !important;
+  gap: 18px;
+}
+
+.topbar__status{
+  grid-area: status;
+  justify-self: start;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.topbar__status .clock,
+.topbar__status .meta{
+  position: static !important;
+  display: inline-flex !important;
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 !important;
+}
+
+.topbar__status .meta:empty{
+  display: none !important;
+}
+
+.brandmark{
+  grid-area: brand;
+  justify-self: center;
+  margin: 0 auto !important;
+}
+
+.auth{
+  grid-area: auth;
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  justify-self: end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1180px){
+  .topbar{
+    grid-template-areas:
+      "brand auth"
+      "status status";
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 10px;
+  }
+
+  .brandmark{
+    justify-self: start;
+    margin: 0 !important;
+  }
+
+  .topbar__status{
+    gap: 8px;
+  }
+}
+
+@media (max-width: 680px){
+  .topbar{
+    grid-template-areas:
+      "brand"
+      "status"
+      "auth";
+    grid-template-columns: 1fr;
+  }
+
+  .brandmark,
+  .topbar__status,
+  .auth{
+    justify-self: stretch;
+  }
+
+  .auth{
+    justify-content: flex-start;
+  }
+}
