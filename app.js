@@ -953,13 +953,14 @@ function updateAuthUi() {
     loginBtn.style.display = isIn ? "none" : "inline-flex";
     loginBtn.textContent = "Discord Login";
   }
-  if (registerBtn) registerBtn.style.display = "none";
-  if (accountBtn) {
-    accountBtn.style.display = isIn ? "inline-flex" : "none";
-    if (isIn) {
-      const displayName = getAccountDisplayName(account);
-      const avatarUrl = getAccountAvatarUrl(account, 64);
-      const fallbackChar = escapeHtml((displayName || "A").charAt(0).toUpperCase());
+    if (registerBtn) registerBtn.style.display = "none";
+    if (accountBtn) {
+      accountBtn.style.display = isIn ? "inline-flex" : "none";
+      accountBtn.classList.toggle("auth__btn--account", isIn);
+      if (isIn) {
+        const displayName = getAccountDisplayName(account);
+        const avatarUrl = getAccountAvatarUrl(account, 64);
+        const fallbackChar = escapeHtml((displayName || "A").charAt(0).toUpperCase());
       accountBtn.innerHTML = `
         ${avatarUrl
           ? `<img class="auth__avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" />`

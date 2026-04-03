@@ -5445,10 +5445,35 @@ body.is-auth-open{
 }
 
 .auth__accountName{
-  max-width: 140px;
+  max-width: min(42vw, 420px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.auth__btn--account{
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  max-width: min(46vw, 520px);
+  padding: 8px 14px 8px 10px !important;
+  text-transform: none !important;
+  letter-spacing: .02em !important;
+}
+
+.auth__btn--account .auth__accountName{
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth__btn--account .auth__avatar,
+.auth__btn--account .auth__avatar--fallback{
+  flex: 0 0 auto;
 }
 
 .account-identity{
@@ -5517,6 +5542,14 @@ body.is-auth-open{
   .auth-modal__panel{
     padding: 22px 18px;
     border-radius: 22px;
+  }
+
+  .auth__btn--account{
+    max-width: min(72vw, 320px);
+  }
+
+  .auth__btn--account .auth__accountName{
+    font-size: 12px;
   }
 }
 
