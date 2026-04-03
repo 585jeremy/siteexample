@@ -5244,3 +5244,200 @@ body.is-landing .content{
 .landing-reboot__compactInfo{
   width: min(100%, 360px) !important;
 }
+
+body.is-auth-open{
+  overflow: hidden !important;
+}
+
+#authModalRoot{
+  position: relative;
+  z-index: 140;
+}
+
+.auth-modal{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-modal__backdrop{
+  position: absolute;
+  inset: 0;
+  border: none;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(162,117,68,.14), transparent 36%),
+    radial-gradient(circle at 76% 26%, rgba(130,54,46,.12), transparent 32%),
+    rgba(8,8,10,.74);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.auth-modal__panel{
+  position: relative;
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(88vh, 920px);
+  overflow: auto;
+  padding: 28px;
+  border-radius: 26px;
+  border: 1px solid rgba(183,137,85,.16);
+  background:
+    radial-gradient(circle at top left, rgba(168,126,72,.08), transparent 44%),
+    radial-gradient(circle at top right, rgba(123,47,43,.08), transparent 38%),
+    rgba(12,13,15,.96);
+  box-shadow: 0 30px 120px rgba(0,0,0,.42);
+}
+
+.auth-modal__close{
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(183,137,85,.14);
+  background: rgba(255,255,255,.03);
+  color: rgba(244,236,221,.92);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-modal__close:hover{
+  border-color: rgba(206,150,92,.22);
+  background: rgba(255,255,255,.05);
+}
+
+.auth-modal__intro{
+  margin: 0 0 18px;
+  max-width: 640px;
+}
+
+.auth-modal__actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.auth-form{
+  display: grid;
+  gap: 18px;
+}
+
+.account-shell,
+.account-hero{
+  display: grid;
+  gap: 18px;
+}
+
+.account-summary{
+  margin-top: 6px;
+}
+
+.account-form{
+  display: grid;
+  gap: 16px;
+}
+
+.account-form__grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.account-field{
+  display: grid;
+  gap: 8px;
+}
+
+.account-field--wide{
+  grid-column: 1 / -1;
+}
+
+.account-field__label{
+  color: rgba(220,202,175,.62);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.account-field__input{
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(183,137,85,.12);
+  background: rgba(255,255,255,.03);
+  color: rgba(247,239,224,.96);
+  font: inherit;
+  outline: none;
+}
+
+.account-field__input::placeholder{
+  color: rgba(220,202,175,.32);
+}
+
+.account-field__input:focus{
+  border-color: rgba(210,156,92,.26);
+  box-shadow: 0 0 0 3px rgba(210,156,92,.10);
+}
+
+.account-field__input--textarea{
+  min-height: 116px;
+  padding: 14px;
+  resize: vertical;
+}
+
+.account-toggle{
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: rgba(255,255,255,.02);
+  color: rgba(240,232,218,.86);
+}
+
+.account-toggle input{
+  margin-top: 2px;
+}
+
+.account-feedback{
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: rgba(255,255,255,.03);
+  color: rgba(245,236,221,.9);
+}
+
+.account-feedback--success{
+  border-color: rgba(166,128,82,.22);
+  background: linear-gradient(180deg, rgba(81,58,29,.24), rgba(18,15,13,.92));
+}
+
+.account-feedback--error{
+  border-color: rgba(170,78,69,.28);
+  background: linear-gradient(180deg, rgba(68,24,21,.30), rgba(18,15,13,.92));
+}
+
+@media (max-width: 900px){
+  .account-form__grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px){
+  .auth-modal{
+    padding: 16px;
+  }
+
+  .auth-modal__panel{
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+}

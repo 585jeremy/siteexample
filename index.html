@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SGCNR Rules</title>
-    <link rel="stylesheet" href="./styles.css?v=20260403j" />
-    <link rel="stylesheet" href="./site-overrides.css?v=20260403j" />
+    <link rel="stylesheet" href="./styles.css?v=20260403l" />
+    <link rel="stylesheet" href="./site-overrides.css?v=20260403l" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -35,6 +35,7 @@
       <div class="auth" id="authArea" aria-label="Account">
         <button class="auth__btn" id="loginBtn" type="button">Login</button>
         <button class="auth__btn auth__btn--primary" id="registerBtn" type="button">Register</button>
+        <button class="auth__btn" id="accountBtn" type="button" style="display:none">Account</button>
         <button class="auth__btn" id="logoutBtn" type="button" style="display:none">Logout</button>
       </div>
     </header>
@@ -45,6 +46,8 @@
       </div>
       <div id="rules"></div>
     </main>
+
+    <div id="authModalRoot"></div>
 
     <nav class="dock" aria-label="Navigation">
       <a class="dock__item" href="#/" data-dock="home" aria-label="Homepage">
@@ -104,9 +107,9 @@
     </footer>
 
     <script src="./rules.js?v=20260403d"></script>
-    <script src="./server-config.js?v=20260403j"></script>
+    <script src="./server-config.js?v=20260403l"></script>
     <script src="./wiki-data.js?v=20260402e"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="./app.js?v=20260403j"></script>
+    <script src="./app.js?v=20260403l"></script>
   </body>
 </html>

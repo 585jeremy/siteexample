@@ -6,7 +6,9 @@ const localTimeEl = document.getElementById("localTime");
 const authArea = document.getElementById("authArea");
 const loginBtn = document.getElementById("loginBtn");
 const registerBtn = document.getElementById("registerBtn");
+const accountBtn = document.getElementById("accountBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const authModalRoot = document.getElementById("authModalRoot");
 
 const AUTH_ACCOUNTS_KEY = "sgcnr_demo_accounts_v1";
 const AUTH_SESSION_KEY = "sgcnr_demo_session_v1";
@@ -23,6 +25,10 @@ const DEFAULT_SERVER_CONFIG = {
   discordBotInviteUrl: "",
   discordSupportUrl: "",
   backendApiUrl: "",
+  authApiUrl: "",
+  authLoginUrl: "",
+  authRegisterUrl: "",
+  authProfileUrl: "",
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
   region: "EU",
@@ -50,7 +56,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403j";
+const SITE_ASSET_VERSION = "20260403l";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -586,10 +592,71 @@ function readAccounts() {
     const raw = localStorage.getItem(AUTH_ACCOUNTS_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
     if (!parsed || typeof parsed !== "object") return {};
-    return parsed;
+
+    return Object.entries(parsed).reduce((acc, [key, value]) => {
+      const account = normaliseAccountRecord(key, value);
+      if (!account) return acc;
+      acc[account.username] = account;
+      return acc;
+    }, {});
   } catch {
     return {};
   }
+}
+
+function sanitisePhoneNumber(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  return raw.replace(/(?!^\+)[^\d]/g, "");
+}
+
+function getPhoneLookupKey(value) {
+  return sanitisePhoneNumber(value).replace(/\D/g, "");
+}
+
+function normaliseDiscordHandle(value) {
+  return String(value || "").trim().replace(/^@+/, "");
+}
+
+function normaliseAccountRecord(key, record) {
+  const username = String(record?.username || key || "").trim();
+  if (!username) return null;
+
+  if (typeof record === "string") {
+    return {
+      username,
+      displayName: username,
+      email: "",
+      phone: "",
+      discord: "",
+      bio: "",
+      region: SERVER_CONFIG.region || "EU",
+      password: record,
+      trackingOptIn: false,
+      emailUpdates: false,
+      createdAt: "",
+      updatedAt: "",
+      lastLoginAt: "",
+      discordLinked: false
+    };
+  }
+
+  return {
+    username,
+    displayName: String(record?.displayName || username).trim(),
+    email: String(record?.email || "").trim().toLowerCase(),
+    phone: sanitisePhoneNumber(record?.phone || ""),
+    discord: normaliseDiscordHandle(record?.discord || ""),
+    bio: String(record?.bio || "").trim(),
+    region: String(record?.region || SERVER_CONFIG.region || "EU").trim(),
+    password: String(record?.password || ""),
+    trackingOptIn: Boolean(record?.trackingOptIn),
+    emailUpdates: Boolean(record?.emailUpdates),
+    createdAt: String(record?.createdAt || ""),
+    updatedAt: String(record?.updatedAt || ""),
+    lastLoginAt: String(record?.lastLoginAt || ""),
+    discordLinked: Boolean(record?.discordLinked)
+  };
 }
 
 function writeAccounts(accounts) {
@@ -628,53 +695,293 @@ function clearSession() {
   }
 }
 
-function promptForCredentials(title) {
-  const username = (window.prompt(`${title}\n\nUsername:`) || "").trim();
-  if (!username) return null;
-  const password = window.prompt(`${title}\n\nPassword:`) || "";
-  if (!password) return null;
-  return { username, password };
+function getCurrentAccount() {
+  const session = getSession();
+  if (!session?.username) return null;
+  const accounts = readAccounts();
+  return accounts[session.username] || null;
+}
+
+function getAccountDisplayName(account) {
+  return String(account?.displayName || account?.username || "Account").trim();
+}
+
+function findAccountByIdentifier(accounts, identifier) {
+  const normalisedIdentifier = normalize(identifier);
+  const phoneIdentifier = getPhoneLookupKey(identifier);
+  const allAccounts = Object.values(accounts || {});
+
+  return allAccounts.find((account) => {
+    if (!account) return false;
+
+    const directMatches = [
+      normalize(account.username),
+      normalize(account.displayName),
+      normalize(account.email),
+      normalize(account.discord)
+    ].filter(Boolean);
+
+    if (directMatches.includes(normalisedIdentifier)) return true;
+    if (phoneIdentifier && phoneIdentifier === getPhoneLookupKey(account.phone)) return true;
+    return false;
+  }) || null;
+}
+
+function renderAuthModal(mode, values = {}, error = "") {
+  const isRegister = mode === "register";
+  const title = isRegister ? "Create your account" : "Sign in";
+  const intro = isRegister
+    ? "Create a website account with your core details now. The same structure can later sync to a real backend, Discord roles, tickets, and linked game features."
+    : "Use your username, email, phone number, or Discord handle to sign in to your website account.";
+
+  return `
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
+      <button class="auth-modal__backdrop" type="button" data-auth-close aria-label="Close"></button>
+      <div class="auth-modal__panel">
+        <button class="auth-modal__close" type="button" data-auth-close aria-label="Close">×</button>
+        <div class="section__eyebrow">${escapeHtml(isRegister ? "Website account" : "Welcome back")}</div>
+        <h2>${escapeHtml(title)}</h2>
+        <p class="doc-p auth-modal__intro">${escapeHtml(intro)}</p>
+        ${error ? `<div class="account-feedback account-feedback--error">${escapeHtml(error)}</div>` : ""}
+
+        <form class="account-form auth-form" id="authForm" data-auth-mode="${escapeHtml(mode)}">
+          ${isRegister ? `
+            <div class="account-form__grid">
+              <label class="account-field">
+                <span class="account-field__label">Username</span>
+                <input class="account-field__input" name="username" value="${escapeHtml(values.username || "")}" autocomplete="username" required />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Display name</span>
+                <input class="account-field__input" name="displayName" value="${escapeHtml(values.displayName || "")}" autocomplete="nickname" required />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Email</span>
+                <input class="account-field__input" type="email" name="email" value="${escapeHtml(values.email || "")}" autocomplete="email" placeholder="Optional if phone or Discord is used" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Phone number</span>
+                <input class="account-field__input" name="phone" value="${escapeHtml(values.phone || "")}" autocomplete="tel" placeholder="+49..." />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Discord</span>
+                <input class="account-field__input" name="discord" value="${escapeHtml(values.discord || "")}" autocomplete="username" placeholder="name#0001 or @name" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Region</span>
+                <input class="account-field__input" name="region" value="${escapeHtml(values.region || SERVER_CONFIG.region || "EU")}" />
+              </label>
+            </div>
+          ` : `
+            <label class="account-field">
+              <span class="account-field__label">Username, email, phone, or Discord</span>
+              <input class="account-field__input" name="identifier" value="${escapeHtml(values.identifier || "")}" autocomplete="username" required />
+            </label>
+          `}
+
+          <div class="account-form__grid">
+            <label class="account-field">
+              <span class="account-field__label">Password</span>
+              <input class="account-field__input" type="password" name="password" autocomplete="${isRegister ? "new-password" : "current-password"}" required />
+            </label>
+            ${isRegister ? `
+              <label class="account-field">
+                <span class="account-field__label">Confirm password</span>
+                <input class="account-field__input" type="password" name="confirmPassword" autocomplete="new-password" required />
+              </label>
+            ` : ""}
+          </div>
+
+          <div class="auth-modal__actions">
+            <button class="auth__btn auth__btn--primary" type="submit">${escapeHtml(isRegister ? "Create account" : "Login")}</button>
+            <button class="auth__btn" type="button" data-auth-switch="${escapeHtml(isRegister ? "login" : "register")}">${escapeHtml(isRegister ? "Already have an account?" : "Need an account?")}</button>
+            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : ""}
+          </div>
+        </form>
+
+        <div class="status-note">
+          <strong>Backend note:</strong> browser-side account registration, login, and profile management are now in place. Real multi-device accounts, email verification, password resets, secure Discord OAuth, and synced staff data still need a backend API and database.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function closeAuthModal() {
+  if (authModalRoot) authModalRoot.innerHTML = "";
+  document.body.classList.remove("is-auth-open");
+}
+
+function openAuthModal(mode, values = {}, error = "") {
+  if (!authModalRoot) return;
+  authModalRoot.innerHTML = renderAuthModal(mode, values, error);
+  document.body.classList.add("is-auth-open");
+  bindAuthModalControls();
+}
+
+function handleRegister(values) {
+  const accounts = readAccounts();
+  const username = String(values.username || "").trim();
+  const displayName = String(values.displayName || "").trim();
+  const email = String(values.email || "").trim().toLowerCase();
+  const phone = sanitisePhoneNumber(values.phone || "");
+  const discord = normaliseDiscordHandle(values.discord || "");
+  const region = String(values.region || SERVER_CONFIG.region || "EU").trim();
+  const password = String(values.password || "");
+  const confirmPassword = String(values.confirmPassword || "");
+
+  if (username.length < 3) {
+    openAuthModal("register", values, "Choose a username with at least 3 characters.");
+    return;
+  }
+  if (displayName.length < 2) {
+    openAuthModal("register", values, "Choose a display name with at least 2 characters.");
+    return;
+  }
+  if (!email && !phone && !discord) {
+    openAuthModal("register", values, "Add at least one login method: email, phone number, or Discord handle.");
+    return;
+  }
+  if (email && !email.includes("@")) {
+    openAuthModal("register", values, "Enter a valid email address or leave it blank.");
+    return;
+  }
+  if (password.length < 6) {
+    openAuthModal("register", values, "Use a password with at least 6 characters.");
+    return;
+  }
+  if (password !== confirmPassword) {
+    openAuthModal("register", values, "The password confirmation does not match.");
+    return;
+  }
+
+  const duplicate = Object.values(accounts).find((account) => {
+    if (!account) return false;
+    if (normalize(account.username) === normalize(username)) return true;
+    if (account.email && normalize(account.email) === normalize(email)) return true;
+    if (phone && getPhoneLookupKey(account.phone) === getPhoneLookupKey(phone)) return true;
+    if (discord && normalize(account.discord) === normalize(discord)) return true;
+    return false;
+  });
+
+  if (duplicate) {
+    openAuthModal("register", values, "That username, email, phone number, or Discord handle is already in use.");
+    return;
+  }
+
+  const now = new Date().toISOString();
+  accounts[username] = normaliseAccountRecord(username, {
+    username,
+    displayName,
+    email,
+    phone,
+    discord,
+    region,
+    password,
+    trackingOptIn: false,
+    emailUpdates: true,
+    createdAt: now,
+    updatedAt: now,
+    lastLoginAt: now,
+    discordLinked: false
+  });
+
+  writeAccounts(accounts);
+  setSession(username);
+  updateAuthUi();
+  closeAuthModal();
+  location.hash = "#/account";
+}
+
+function handleLogin(values) {
+  const identifier = String(values.identifier || "").trim();
+  const password = String(values.password || "");
+  const accounts = readAccounts();
+  const account = findAccountByIdentifier(accounts, identifier);
+
+  if (!identifier || !password) {
+    openAuthModal("login", values, "Enter your login and password.");
+    return;
+  }
+
+  if (!account || account.password !== password) {
+    openAuthModal("login", values, "Invalid login details.");
+    return;
+  }
+
+  const updatedAccount = {
+    ...account,
+    lastLoginAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  accounts[updatedAccount.username] = updatedAccount;
+  writeAccounts(accounts);
+  setSession(updatedAccount.username);
+  updateAuthUi();
+  closeAuthModal();
+  location.hash = "#/account";
+}
+
+function bindAuthModalControls() {
+  const modal = authModalRoot?.querySelector(".auth-modal");
+  if (!modal) return;
+
+  modal.querySelectorAll("[data-auth-close]").forEach((button) => {
+    button.addEventListener("click", () => closeAuthModal());
+  });
+
+  modal.querySelectorAll("[data-auth-switch]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openAuthModal(button.getAttribute("data-auth-switch") || "login");
+    });
+  });
+
+  const form = modal.querySelector("#authForm");
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const values = Object.fromEntries(formData.entries());
+      const mode = form.getAttribute("data-auth-mode");
+      if (mode === "register") {
+        handleRegister(values);
+        return;
+      }
+      handleLogin(values);
+    });
+  }
 }
 
 function updateAuthUi() {
   const session = getSession();
-  const isIn = !!session;
+  const account = getCurrentAccount();
+  const isIn = Boolean(session && account);
+
   if (loginBtn) loginBtn.style.display = isIn ? "none" : "inline-flex";
   if (registerBtn) registerBtn.style.display = isIn ? "none" : "inline-flex";
+  if (accountBtn) {
+    accountBtn.style.display = isIn ? "inline-flex" : "none";
+    accountBtn.textContent = "Account";
+    accountBtn.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
+  }
   if (logoutBtn) logoutBtn.style.display = isIn ? "inline-flex" : "none";
-  if (authArea) authArea.title = isIn ? `Signed in as ${session.username}` : "Account";
+  if (authArea) authArea.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
 }
 
 function initAuth() {
   updateAuthUi();
 
   if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      const creds = promptForCredentials("Login");
-      if (!creds) return;
-      const accounts = readAccounts();
-      if (!accounts[creds.username] || accounts[creds.username] !== creds.password) {
-        window.alert("Invalid username or password.");
-        return;
-      }
-      setSession(creds.username);
-      updateAuthUi();
-    });
+    loginBtn.addEventListener("click", () => openAuthModal("login"));
   }
 
   if (registerBtn) {
-    registerBtn.addEventListener("click", () => {
-      const creds = promptForCredentials("Register");
-      if (!creds) return;
-      const accounts = readAccounts();
-      if (accounts[creds.username]) {
-        window.alert("Username already exists.");
-        return;
-      }
-      accounts[creds.username] = creds.password;
-      writeAccounts(accounts);
-      setSession(creds.username);
-      updateAuthUi();
+    registerBtn.addEventListener("click", () => openAuthModal("register"));
+  }
+
+  if (accountBtn) {
+    accountBtn.addEventListener("click", () => {
+      location.hash = "#/account";
     });
   }
 
@@ -682,6 +989,8 @@ function initAuth() {
     logoutBtn.addEventListener("click", () => {
       clearSession();
       updateAuthUi();
+      closeAuthModal();
+      route();
     });
   }
 }
@@ -1014,7 +1323,7 @@ function renderHelp() {
             <div class="info-faq">
               <div class="info-faq__item">
                 <div class="info-faq__q">Does the website already have a real database?</div>
-                <div class="info-faq__a">Not yet. The current website is a static frontend. Real account linking, ticket sync, punishments, and Discord role rewards need a backend API and database behind it.</div>
+                <div class="info-faq__a">The website now has a real frontend account layer for registration, login, and account management. Real synced accounts across devices, ticket sync, punishments, and Discord role rewards still need a backend API and database behind it.</div>
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">Can the website be connected to a Discord bot later?</div>
@@ -1022,7 +1331,7 @@ function renderHelp() {
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">What is needed for real Discord linking?</div>
-                <div class="info-faq__a">You will need a backend service, a database, Discord OAuth, and bot endpoints the website can safely read from.</div>
+                <div class="info-faq__a">You will need Discord OAuth on the website, a backend service that verifies the Discord login token, a database for linked accounts, and bot or Discord API access so roles can be confirmed safely.</div>
               </div>
             </div>
           </section>
@@ -1042,6 +1351,357 @@ function renderHelp() {
       </div>
     `);
   }
+
+function setAccountFeedback(element, tone, text) {
+  if (!element) return;
+  if (!text) {
+    element.hidden = true;
+    element.textContent = "";
+    element.className = "account-feedback";
+    return;
+  }
+
+  element.hidden = false;
+  element.textContent = text;
+  element.className = `account-feedback account-feedback--${tone}`;
+}
+
+function renderAccountLoginMethods(account) {
+  const methods = [
+    ["Username", account?.username || "Not set"],
+    ["Email", account?.email || "Not set"],
+    ["Phone", account?.phone || "Not connected"],
+    ["Discord", account?.discord ? `@${account.discord}` : "Not connected"],
+    ["Discord OAuth", SERVER_CONFIG.discordOAuthUrl ? (account?.discordLinked ? "Linked" : "Ready to connect") : "Backend required"]
+  ];
+
+  return `
+    <div class="stack-list stack-list--compact">
+      ${methods.map(([label, value], index) => `
+        <div class="stack-list__item">
+          <span class="stack-list__index">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+          <span><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAccountGuest() {
+  return `
+    <div>
+      ${renderHeader("Account", [{ label: "Account" }])}
+      <div class="content-grid content-grid--sidebar">
+        <section class="section section--hero account-hero">
+          <div class="section__eyebrow">Website account</div>
+          <h2>Sign in or create your profile</h2>
+          <p class="doc-p">Create your own website account now so the portal is ready for Discord linking, tickets, staff tools, and future live account features once the backend is connected.</p>
+          <div class="status-actions">
+            <button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Login</button>
+            <button class="auth__btn" id="accountRegisterCta" type="button">Register</button>
+            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : ""}
+          </div>
+          <div class="status-note">
+            <strong>Current state:</strong> players can already register, sign in, and manage a browser-side website account. Real cross-device accounts, password recovery, and secure Discord linking still need a backend API and database.
+          </div>
+        </section>
+
+        <aside class="section section--stack">
+          <div class="section__eyebrow">Login methods</div>
+          <h2>What you can use</h2>
+          <div class="stack-list stack-list--compact">
+            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Username</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Email address</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Phone number</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Discord handle</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Discord OAuth once the backend is connected</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  `;
+}
+
+function renderAccountDashboard(account) {
+  const createdLabel = account?.createdAt ? formatServerTimestamp(account.createdAt) : "Not recorded";
+  const lastLoginLabel = account?.lastLoginAt ? formatServerTimestamp(account.lastLoginAt) : "No login yet";
+
+  return `
+    <div>
+      ${renderHeader("Account", [{ label: "Account" }])}
+
+      <section class="section section--hero account-hero">
+        <div class="section__eyebrow">Website profile</div>
+        <h2>${escapeHtml(getAccountDisplayName(account))}</h2>
+        <p class="doc-p">Manage your contact details, security, and privacy settings from one place. This account page is already prepared for Discord linking, tickets, live tracking preferences, and future synced website features.</p>
+
+        <div class="status-grid account-summary">
+          <div class="status-card">
+            <div class="status-card__label">Username</div>
+            <div class="status-card__value">${escapeHtml(account.username)}</div>
+            <div class="status-card__meta">Primary login name</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Email</div>
+            <div class="status-card__value">${escapeHtml(account.email || "Not set")}</div>
+            <div class="status-card__meta">Email login and updates</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Phone</div>
+            <div class="status-card__value">${escapeHtml(account.phone || "Not set")}</div>
+            <div class="status-card__meta">Optional alternate login</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Discord</div>
+            <div class="status-card__value">${escapeHtml(account.discord ? `@${account.discord}` : "Not linked")}</div>
+            <div class="status-card__meta">${escapeHtml(account.discordLinked ? "Linked" : "Handle saved for future linking")}</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Created</div>
+            <div class="status-card__value">${escapeHtml(createdLabel)}</div>
+            <div class="status-card__meta">${escapeHtml(account.region || SERVER_CONFIG.region || "EU")}</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Last Login</div>
+            <div class="status-card__value">${escapeHtml(lastLoginLabel)}</div>
+            <div class="status-card__meta">${escapeHtml(account.trackingOptIn ? "Live tracking opt-in enabled" : "Live tracking opt-in disabled")}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">Profile</div>
+          <h2>Edit details</h2>
+          <form class="account-form" id="accountProfileForm">
+            <div class="account-form__grid">
+              <label class="account-field">
+                <span class="account-field__label">Display name</span>
+                <input class="account-field__input" name="displayName" value="${escapeHtml(account.displayName || "")}" required />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Email</span>
+                <input class="account-field__input" type="email" name="email" value="${escapeHtml(account.email || "")}" placeholder="Optional if phone or Discord is used" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Phone</span>
+                <input class="account-field__input" name="phone" value="${escapeHtml(account.phone || "")}" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Discord</span>
+                <input class="account-field__input" name="discord" value="${escapeHtml(account.discord || "")}" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Region</span>
+                <input class="account-field__input" name="region" value="${escapeHtml(account.region || SERVER_CONFIG.region || "EU")}" />
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Bio</span>
+                <textarea class="account-field__input account-field__input--textarea" name="bio" rows="4">${escapeHtml(account.bio || "")}</textarea>
+              </label>
+            </div>
+            <div class="auth-modal__actions">
+              <button class="auth__btn auth__btn--primary" type="submit">Save profile</button>
+            </div>
+            <div class="account-feedback" id="accountProfileFeedback" hidden></div>
+          </form>
+        </section>
+
+        <aside class="section section--stack">
+          <div class="section__eyebrow">Access</div>
+          <h2>Connected methods</h2>
+          ${renderAccountLoginMethods(account)}
+          <div class="status-note">
+            <strong>Discord linking:</strong> once a backend and Discord OAuth are connected, this account page can link roles, verification status, tickets, and other community features.
+          </div>
+        </aside>
+      </div>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">Privacy</div>
+          <h2>Website settings</h2>
+          <form class="account-form" id="accountSettingsForm">
+            <label class="account-toggle">
+              <input type="checkbox" name="trackingOptIn" ${account.trackingOptIn ? "checked" : ""} />
+              <span>Allow live website tracking once the in-game opt-in system is connected</span>
+            </label>
+            <label class="account-toggle">
+              <input type="checkbox" name="emailUpdates" ${account.emailUpdates ? "checked" : ""} />
+              <span>Receive future website-related account updates by email</span>
+            </label>
+            <div class="auth-modal__actions">
+              <button class="auth__btn auth__btn--primary" type="submit">Save settings</button>
+            </div>
+            <div class="account-feedback" id="accountSettingsFeedback" hidden></div>
+          </form>
+        </section>
+
+        <section class="section">
+          <div class="section__eyebrow">Security</div>
+          <h2>Change password</h2>
+          <form class="account-form" id="accountPasswordForm">
+            <label class="account-field">
+              <span class="account-field__label">Current password</span>
+              <input class="account-field__input" type="password" name="currentPassword" autocomplete="current-password" required />
+            </label>
+            <label class="account-field">
+              <span class="account-field__label">New password</span>
+              <input class="account-field__input" type="password" name="newPassword" autocomplete="new-password" required />
+            </label>
+            <label class="account-field">
+              <span class="account-field__label">Confirm new password</span>
+              <input class="account-field__input" type="password" name="confirmPassword" autocomplete="new-password" required />
+            </label>
+            <div class="auth-modal__actions">
+              <button class="auth__btn auth__btn--primary" type="submit">Update password</button>
+            </div>
+            <div class="account-feedback" id="accountPasswordFeedback" hidden></div>
+          </form>
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+function bindAccountPageControls() {
+  const loginCta = document.getElementById("accountLoginCta");
+  if (loginCta) {
+    loginCta.addEventListener("click", () => openAuthModal("login"));
+  }
+
+  const registerCta = document.getElementById("accountRegisterCta");
+  if (registerCta) {
+    registerCta.addEventListener("click", () => openAuthModal("register"));
+  }
+
+  const profileForm = document.getElementById("accountProfileForm");
+  if (profileForm) {
+    profileForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const account = getCurrentAccount();
+      if (!account) return;
+
+      const accounts = readAccounts();
+      const formData = new FormData(profileForm);
+      const updatedAccount = normaliseAccountRecord(account.username, {
+        ...account,
+        displayName: formData.get("displayName"),
+        email: formData.get("email"),
+        phone: formData.get("phone"),
+        discord: formData.get("discord"),
+        region: formData.get("region"),
+        bio: formData.get("bio"),
+        updatedAt: new Date().toISOString()
+      });
+      const feedback = document.getElementById("accountProfileFeedback");
+
+      if (!updatedAccount.email && !updatedAccount.phone && !updatedAccount.discord) {
+        setAccountFeedback(feedback, "error", "Keep at least one login method saved: email, phone number, or Discord handle.");
+        return;
+      }
+
+      if (updatedAccount.email && !updatedAccount.email.includes("@")) {
+        setAccountFeedback(feedback, "error", "Enter a valid email address or leave it blank.");
+        return;
+      }
+
+      const duplicate = Object.values(accounts).find((entry) => {
+        if (!entry || entry.username === account.username) return false;
+        if (updatedAccount.email && normalize(entry.email) === normalize(updatedAccount.email)) return true;
+        if (updatedAccount.phone && getPhoneLookupKey(entry.phone) === getPhoneLookupKey(updatedAccount.phone)) return true;
+        if (updatedAccount.discord && normalize(entry.discord) === normalize(updatedAccount.discord)) return true;
+        return false;
+      });
+
+      if (duplicate) {
+        setAccountFeedback(feedback, "error", "That email, phone number, or Discord handle is already used by another account.");
+        return;
+      }
+
+      accounts[account.username] = updatedAccount;
+      writeAccounts(accounts);
+      updateAuthUi();
+      route();
+      window.requestAnimationFrame(() => {
+        setAccountFeedback(document.getElementById("accountProfileFeedback"), "success", "Profile updated.");
+      });
+    });
+  }
+
+  const settingsForm = document.getElementById("accountSettingsForm");
+  if (settingsForm) {
+    settingsForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const account = getCurrentAccount();
+      if (!account) return;
+
+      const accounts = readAccounts();
+      const formData = new FormData(settingsForm);
+      accounts[account.username] = normaliseAccountRecord(account.username, {
+        ...account,
+        trackingOptIn: formData.get("trackingOptIn") === "on",
+        emailUpdates: formData.get("emailUpdates") === "on",
+        updatedAt: new Date().toISOString()
+      });
+      writeAccounts(accounts);
+      route();
+      window.requestAnimationFrame(() => {
+        setAccountFeedback(document.getElementById("accountSettingsFeedback"), "success", "Settings updated.");
+      });
+    });
+  }
+
+  const passwordForm = document.getElementById("accountPasswordForm");
+  if (passwordForm) {
+    passwordForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const account = getCurrentAccount();
+      if (!account) return;
+
+      const formData = new FormData(passwordForm);
+      const currentPassword = String(formData.get("currentPassword") || "");
+      const newPassword = String(formData.get("newPassword") || "");
+      const confirmPassword = String(formData.get("confirmPassword") || "");
+      const feedback = document.getElementById("accountPasswordFeedback");
+
+      if (currentPassword !== account.password) {
+        setAccountFeedback(feedback, "error", "Current password does not match.");
+        return;
+      }
+      if (newPassword.length < 6) {
+        setAccountFeedback(feedback, "error", "Use a password with at least 6 characters.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setAccountFeedback(feedback, "error", "The new password confirmation does not match.");
+        return;
+      }
+
+      const accounts = readAccounts();
+      accounts[account.username] = normaliseAccountRecord(account.username, {
+        ...account,
+        password: newPassword,
+        updatedAt: new Date().toISOString()
+      });
+      writeAccounts(accounts);
+      passwordForm.reset();
+      setAccountFeedback(feedback, "success", "Password updated.");
+    });
+  }
+}
+
+function renderAccount() {
+  const account = getCurrentAccount();
+  if (!account) {
+    setView(renderAccountGuest());
+    bindAccountPageControls();
+    return;
+  }
+
+  setView(renderAccountDashboard(account));
+  bindAccountPageControls();
+}
 
 function getLeaderboardMetricConfig(metricKey) {
   return LEADERBOARD_METRICS.find((metric) => metric.key === normalize(metricKey)) || LEADERBOARD_METRICS[0];
@@ -3504,6 +4164,7 @@ async function loadLiveOpsSnapshot() {
   const [
     combinedResult,
     liveMapResult,
+    leaderboardResult,
     uptimeResult,
     restartResult,
     discordResult,
@@ -3512,6 +4173,7 @@ async function loadLiveOpsSnapshot() {
   ] = await Promise.all([
     fetchOptionalServerJson(SERVER_CONFIG.liveOpsUrl),
     fetchOptionalServerJson(SERVER_CONFIG.livePlayerMapUrl),
+    fetchOptionalServerJson(SERVER_CONFIG.leaderboardUrl),
     fetchOptionalServerJson(SERVER_CONFIG.uptimeStatusUrl),
     fetchOptionalServerJson(SERVER_CONFIG.restartInfoUrl),
     fetchOptionalServerJson(SERVER_CONFIG.discordStatusUrl),
@@ -3521,6 +4183,31 @@ async function loadLiveOpsSnapshot() {
 
   const combined = combinedResult.data && typeof combinedResult.data === "object" ? combinedResult.data : {};
   const liveMap = normaliseLiveMapPlayers(combined.liveMap || combined.map || liveMapResult.data);
+  const leaderboardPayload =
+    leaderboardResult.data ||
+    combined.leaderboard ||
+    combined.leaderboards ||
+    combined.rankings ||
+    null;
+  const leaderboardMetric = getLeaderboardMetricConfig(
+    pickFirstDefined(leaderboardPayload || {}, ["metric", "selectedMetric"]) || "kd"
+  ).key;
+  const leaderboardRows = getLeaderboardSortedRows(
+    normaliseLeaderboardRows(leaderboardPayload),
+    leaderboardMetric
+  );
+  const leaderboard = {
+    configured: Boolean(
+      SERVER_CONFIG.leaderboardUrl ||
+      leaderboardResult.configured ||
+      combined.leaderboard ||
+      combined.leaderboards ||
+      combined.rankings
+    ),
+    metric: leaderboardMetric,
+    updatedAt: parseSnapshotDate(pickFirstDefined(leaderboardPayload || {}, ["updatedAt", "timestamp", "refreshedAt"])),
+    rows: leaderboardRows
+  };
   const uptime = normaliseUptimePayload(combined.uptime || combined.runtime || uptimeResult.data);
   const restart = normaliseRestartPayload(combined.restart || combined.restartInfo || restartResult.data);
   const queue = normaliseQueuePayload(combined.queue);
@@ -3548,6 +4235,7 @@ async function loadLiveOpsSnapshot() {
     configured: Boolean(
       SERVER_CONFIG.liveOpsUrl ||
         SERVER_CONFIG.livePlayerMapUrl ||
+        SERVER_CONFIG.leaderboardUrl ||
         SERVER_CONFIG.uptimeStatusUrl ||
         SERVER_CONFIG.restartInfoUrl ||
         SERVER_CONFIG.discordStatusUrl ||
@@ -3557,6 +4245,7 @@ async function loadLiveOpsSnapshot() {
     source: SERVER_CONFIG.liveOpsUrl ? "Custom live ops API" : "Per-feature endpoints",
     publicStatusUrl: SERVER_CONFIG.publicStatusUrl || pickFirstDefined(combined, ["publicStatusUrl", "statusPageUrl", "statusUrl"]) || "",
     liveMap,
+    leaderboard,
     uptime,
     restart,
     queue,
@@ -3570,6 +4259,7 @@ async function loadLiveOpsSnapshot() {
       errors: [
         combinedResult.error && `Live ops: ${combinedResult.error}`,
         liveMapResult.error && `Live map: ${liveMapResult.error}`,
+        leaderboardResult.error && `Leaderboard: ${leaderboardResult.error}`,
         uptimeResult.error && `Uptime: ${uptimeResult.error}`,
         restartResult.error && `Restart: ${restartResult.error}`,
         discordResult.error && `Discord: ${discordResult.error}`,
@@ -3693,13 +4383,13 @@ async function loadServerSnapshot() {
 function renderServerStatusShell() {
   return `
     <div class="status-page">
-      ${renderHeader("Server Status", [{ label: "Server Status" }])}
+      ${renderHeader("Live", [{ label: "Live" }])}
       <section class="section status-live status-live--hero">
         <div class="status-live__head">
           <div class="status-live__copy">
-            <div class="section__eyebrow">Live server hub</div>
+            <div class="section__eyebrow">Live operations hub</div>
             <h2>${escapeHtml(SERVER_CONFIG.name)}</h2>
-            <p class="status-live__text">Track player count, uptime, restarts, live map readiness, and health checks from one page. This status panel is prepared for your real bought server setup.</p>
+            <p class="status-live__text">Track player count, queue, uptime, restarts, rankings, active events, Discord operations, and server health from one page. The map stays separate, but everything else live belongs here.</p>
           </div>
           <div class="status-live__actions">
             <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
@@ -3718,11 +4408,11 @@ function renderServerStatusShell() {
           </div>
           <div class="status-live__highlight">
             <div class="status-live__label">Live Source</div>
-            <div class="status-live__value">FiveM API</div>
+            <div class="status-live__value">FiveM + Ops</div>
           </div>
           <div class="status-live__highlight">
               <div class="status-live__label">Live Ops</div>
-              <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.discordStatusUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
+              <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.leaderboardUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.discordStatusUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
             </div>
           </div>
         </section>
@@ -3978,6 +4668,7 @@ function renderServerStatusContent(snapshot) {
     ? `${snapshot.clients}/${snapshot.maxClients}`
     : `${snapshot.clients}`;
   const liveOps = snapshot.liveOps || {};
+  const leaderboardMetric = parseRoute().metric || liveOps.leaderboard?.metric || "kd";
   const discordOps = liveOps.discord || normaliseDiscordOpsPayload(null);
   const uptimeValue = liveOps.uptime?.uptimeSeconds != null
     ? formatDurationCompact(liveOps.uptime.uptimeSeconds)
@@ -4106,6 +4797,12 @@ function renderServerStatusContent(snapshot) {
           </div>
         </aside>
     </div>
+
+    <section class="section">
+      <div class="section__eyebrow">Live rankings</div>
+      <h2>Leaderboard</h2>
+      ${renderLiveLeaderboardSection(leaderboardMetric, liveOps.leaderboard || { configured: false, rows: [] }, snapshot.players)}
+    </section>
 
     <div class="content-grid content-grid--sidebar">
       <section class="section">
@@ -4701,6 +5398,7 @@ function parseRoute() {
   if (parts[0] === "rules") return { name: "rules" };
   if (parts[0] === "commands") return { name: "commands" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
+  if (parts[0] === "account") return { name: "account" };
   if (parts[0] === "leaderboard") return { name: "live", metric: parts[1] || "kd" };
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
@@ -4723,7 +5421,7 @@ function updateDockActive(routeName) {
   let key = routeName;
   if (routeName === "section" || routeName === "rule") key = "rules";
   if (routeName === "status" || routeName === "leaderboard" || routeName === "live") key = "live";
-  if (routeName === "discord") return;
+  if (routeName === "discord" || routeName === "account") return;
 
   const active = document.querySelector(`.dock__item[data-dock="${key}"]`);
   if (active) active.classList.add("is-active");
@@ -4771,9 +5469,9 @@ function route() {
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
-  if (r.name === "leaderboard") {
-    renderLeaderboard(r.metric);
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> · Rankings`;
+  if (r.name === "account") {
+    renderAccount();
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Account`;
     return;
   }
   if (r.name === "wiki") {
@@ -4786,9 +5484,9 @@ function route() {
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
-  if (r.name === "status") {
+  if (r.name === "live") {
     renderStatus();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Live`;
     return;
   }
   if (r.name === "definitions") {
@@ -5105,6 +5803,7 @@ document.addEventListener("click", (e) => {
 });
 
 window.addEventListener("hashchange", () => {
+  closeAuthModal();
   route();
   window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   const contentEl = document.querySelector(".content");
