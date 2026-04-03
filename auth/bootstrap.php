@@ -1,0 +1,99 @@
+<?php
+
+$configPath = __DIR__ . '/config.php';
+if (!file_exists($configPath)) {
+    http_response_code(500);
+    die('Missing auth/config.php');
+}
+
+$config = require $configPath;
+
+$defaultSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+$sessionCookiePath = $config['session_cookie_path'] ?? '/';
+$sessionCookieDomain = $config['session_cookie_domain'] ?? '';
+$sessionCookieSecure = array_key_exists('session_cookie_secure', $config)
+    ? (bool) $config['session_cookie_secure']
+    : $defaultSecure;
+$sessionCookieSameSite = $config['session_cookie_samesite'] ?? 'Lax';
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => $sessionCookiePath,
+        'domain' => $sessionCookieDomain,
+        'secure' => $sessionCookieSecure,
+        'httponly' => true,
+        'samesite' => $sessionCookieSameSite,
+    ]);
+    session_start();
+}
+
+function auth_config(string $key, $default = null)
+{
+    global $config;
+    return $config[$key] ?? $default;
+}
+
+function auth_origin_header(): ?string
+{
+    $allowedOrigin = auth_config('allowed_origin', '');
+    if ($allowedOrigin) {
+        return (string) $allowedOrigin;
+    }
+
+    $siteHomeUrl = auth_config('site_home_url', '');
+    if ($siteHomeUrl) {
+        $parts = parse_url($siteHomeUrl);
+        if (!empty($parts['scheme']) && !empty($parts['host'])) {
+            return $parts['scheme'] . '://' . $parts['host'];
+        }
+    }
+
+    return null;
+}
+
+function auth_send_json(array $payload, int $statusCode = 200): void
+{
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+
+    $origin = auth_origin_header();
+    if ($origin) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    }
+    header('Access-Control-Allow-Credentials: true');
+
+    echo json_encode($payload);
+    exit;
+}
+
+function auth_discord_request(string $url, string $method = 'GET', ?array $data = null, ?string $token = null): array
+{
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+
+    if ($data) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    }
+
+    $headers = ['Content-Type: application/x-www-form-urlencoded'];
+    if ($token) {
+        $headers[] = 'Authorization: Bearer ' . $token;
+    }
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    if (!$response) {
+        return [];
+    }
+
+    $decoded = json_decode($response, true);
+    return is_array($decoded) ? $decoded : [];
+}
+

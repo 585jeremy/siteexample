@@ -59,7 +59,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403n";
+const SITE_ASSET_VERSION = "20260403q";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -788,11 +788,11 @@ function renderAuthModal(mode, values = {}, error = "") {
         </div>
 
         <div class="auth-modal__actions">
-          ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" type="button" disabled>Discord login not connected yet</button>`}
+          ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" type="button" disabled>Discord login not connected yet</button>`}
         </div>
 
         <div class="status-note">
-          <strong>Backend note:</strong> the website is now prepared for Discord-only login. Real account creation, sessions, verified names, avatars, and synced roles still need Discord OAuth, a backend API, and a database.
+          <strong>Backend note:</strong> Discord-only website auth is wired in. The visible name, avatar, and roles appear once the PHP auth session and Discord callback are configured correctly on the server.
         </div>
       </div>
     </div>
@@ -1412,10 +1412,10 @@ function renderAccountGuest() {
           <h2>Login with Discord only</h2>
           <p class="doc-p">The website should use Discord as the only account source, so the same verified Discord name and Discord profile picture can later match your in-game identity, role sync, and community access.</p>
           <div class="status-actions">
-            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
+            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
           </div>
           <div class="status-note">
-            <strong>Current state:</strong> the website is prepared for Discord-only account access. Real login, account creation, and role sync still need Discord OAuth, backend verification, and a database.
+            <strong>Current state:</strong> the website uses Discord-only account access. The final avatar, visible name, and role sync depend on the live PHP auth endpoints and Discord callback configuration.
           </div>
         </section>
 
