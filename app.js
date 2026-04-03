@@ -1336,6 +1336,51 @@ function renderLeaderboardSidebar(metric, rows, snapshot) {
   `;
 }
 
+function renderLiveLeaderboardSection(metricKey, leaderboard, onlinePlayers) {
+  const metric = getLeaderboardMetricConfig(metricKey);
+  const rows = getLeaderboardSortedRows(Array.isArray(leaderboard?.rows) ? leaderboard.rows : [], metric.key);
+  const snapshot = {
+    feedConfigured: Boolean(leaderboard?.configured),
+    updatedAt: leaderboard?.updatedAt || null,
+    onlinePlayers: Array.isArray(onlinePlayers) ? onlinePlayers : []
+  };
+
+  return `
+    <div class="content-grid content-grid--sidebar leaderboard-shell">
+      <section class="section section--hero leaderboard-main">
+        <div class="section__eyebrow">Live rankings</div>
+        <div class="leaderboard-head">
+          <div class="leaderboard-head__copy">
+            <h2>${escapeHtml(metric.label)} board</h2>
+            <p class="doc-p leaderboard-intro">${escapeHtml(metric.description)} This live board only shows real tracked data once a leaderboard feed is connected.</p>
+          </div>
+          <div class="leaderboard-badge">${leaderboard?.configured ? "Live-ready" : "Waiting"}</div>
+        </div>
+
+        <div class="leaderboard-metrics">
+          ${LEADERBOARD_METRICS.map((entry) => `
+            <a class="leaderboard-metric${entry.key === metric.key ? " is-active" : ""}" href="#/live/${escapeHtml(entry.key)}">
+              <span class="leaderboard-metric__label">${escapeHtml(entry.label)}</span>
+            </a>
+          `).join("")}
+        </div>
+
+        <div class="leaderboard-summary">
+          ${renderLeaderboardSummary(metric, rows, snapshot)}
+        </div>
+
+        <div class="leaderboard-bodyHost">
+          ${rows.length ? renderLeaderboardTable(metric, rows) : renderLeaderboardEmpty(metric, snapshot)}
+        </div>
+      </section>
+
+      <aside class="section section--stack leaderboard-side">
+        ${renderLeaderboardSidebar(metric, rows, snapshot)}
+      </aside>
+    </div>
+  `;
+}
+
 async function loadLeaderboardSnapshot() {
   const [leaderboardResult, combinedResult, serverSnapshot] = await Promise.all([
     fetchOptionalServerJson(SERVER_CONFIG.leaderboardUrl),
@@ -3048,7 +3093,7 @@ function clearServerStatusPageState() {
 }
 
 function getServerStatusRouteActive() {
-  return parseRoute().name === "status";
+  return parseRoute().name === "live";
 }
 
 function formatServerTimestamp(value) {
@@ -4656,10 +4701,11 @@ function parseRoute() {
   if (parts[0] === "rules") return { name: "rules" };
   if (parts[0] === "commands") return { name: "commands" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
-  if (parts[0] === "leaderboard") return { name: "leaderboard", metric: parts[1] || "" };
+  if (parts[0] === "leaderboard") return { name: "live", metric: parts[1] || "kd" };
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
-  if (parts[0] === "status") return { name: "status" };
+  if (parts[0] === "status") return { name: "live", metric: parts[1] || "kd" };
+  if (parts[0] === "live") return { name: "live", metric: parts[1] || "kd" };
   if (parts[0] === "info") return { name: "info" };
   if (parts[0] === "definitions") return { name: "definitions" };
   if (parts[0] === "section" && parts[1]) return { name: "section", sectionId: parts[1] };
@@ -4676,6 +4722,7 @@ function updateDockActive(routeName) {
 
   let key = routeName;
   if (routeName === "section" || routeName === "rule") key = "rules";
+  if (routeName === "status" || routeName === "leaderboard" || routeName === "live") key = "live";
   if (routeName === "discord") return;
 
   const active = document.querySelector(`.dock__item[data-dock="${key}"]`);
@@ -4687,7 +4734,7 @@ function route() {
   const sections = Array.isArray(data?.sections) ? data.sections : [];
 
   const r = parseRoute();
-  if (r.name !== "status") {
+  if (r.name !== "live") {
     clearServerStatusPageState();
   }
   if (r.name !== "map") {
