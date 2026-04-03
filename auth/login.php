@@ -4,7 +4,7 @@ require __DIR__ . '/bootstrap.php';
 $clientId = auth_config('discord_client_id', '');
 $redirectUri = auth_config('discord_redirect_uri', '');
 
-if (!$clientId || !$redirectUri) {
+if (!auth_has_minimum_config() || !$clientId || !$redirectUri) {
     http_response_code(500);
     die('Discord auth config is incomplete.');
 }

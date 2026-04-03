@@ -7,6 +7,10 @@ if (!file_exists($configPath)) {
 }
 
 $config = require $configPath;
+if (!is_array($config)) {
+    http_response_code(500);
+    die('Invalid auth/config.php');
+}
 
 $defaultSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
 $sessionCookiePath = $config['session_cookie_path'] ?? '/';
@@ -32,6 +36,15 @@ function auth_config(string $key, $default = null)
 {
     global $config;
     return $config[$key] ?? $default;
+}
+
+function auth_has_minimum_config(): bool
+{
+    return (bool) (
+        auth_config('discord_client_id', '') &&
+        auth_config('discord_client_secret', '') &&
+        auth_config('discord_redirect_uri', '')
+    );
 }
 
 function auth_origin_header(): ?string
@@ -96,4 +109,3 @@ function auth_discord_request(string $url, string $method = 'GET', ?array $data 
     $decoded = json_decode($response, true);
     return is_array($decoded) ? $decoded : [];
 }
-

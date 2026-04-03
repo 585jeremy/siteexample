@@ -7,6 +7,11 @@ $redirectUri = auth_config('discord_redirect_uri', '');
 $guildId = auth_config('discord_guild_id', '');
 $siteHomeUrl = auth_config('site_home_url', 'https://sgcnr.net/#/');
 
+if (!auth_has_minimum_config() || !$clientId || !$clientSecret || !$redirectUri) {
+    http_response_code(500);
+    die('Discord auth config is incomplete.');
+}
+
 if (!isset($_GET['code']) || !isset($_GET['state']) || $_GET['state'] !== ($_SESSION['oauth_state'] ?? '')) {
     http_response_code(400);
     die('Invalid OAuth state.');
