@@ -5425,6 +5425,84 @@ body.is-auth-open{
   background: linear-gradient(180deg, rgba(68,24,21,.30), rgba(18,15,13,.92));
 }
 
+.auth__avatar{
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(183,137,85,.18);
+  background: rgba(26,20,16,.92);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.22) inset;
+}
+
+.auth__avatar--fallback{
+  display: inline-grid;
+  place-items: center;
+  color: rgba(246,236,220,.92);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.auth__accountName{
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-identity{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.account-identity__avatar{
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  object-fit: cover;
+  border: 1px solid rgba(183,137,85,.18);
+  background: rgba(23,18,15,.92);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.22),
+    0 0 0 1px rgba(255,255,255,.03) inset;
+}
+
+.account-identity__avatar--fallback{
+  display: grid;
+  place-items: center;
+  color: rgba(246,236,220,.92);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.account-identity__copy{
+  display: grid;
+  gap: 4px;
+}
+
+.account-identity__label{
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(192,170,142,.58);
+}
+
+.account-identity__name{
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+  font-weight: 800;
+  color: rgba(248,241,230,.96);
+}
+
+.account-identity__meta{
+  color: rgba(219,205,184,.72);
+  font-size: 14px;
+}
+
 @media (max-width: 900px){
   .account-form__grid{
     grid-template-columns: 1fr;

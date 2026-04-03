@@ -59,7 +59,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403m";
+const SITE_ASSET_VERSION = "20260403n";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -629,9 +629,17 @@ function normaliseAccountRecord(key, record) {
     return {
       username,
       displayName: username,
+      websiteDisplayName: username,
+      verifiedIdentity: "",
       email: "",
       phone: "",
       discord: "",
+      discordId: "",
+      discordUsername: "",
+      discordDisplayName: "",
+      guildNickname: "",
+      discordAvatarHash: "",
+      discordAvatarUrl: "",
       bio: "",
       region: SERVER_CONFIG.region || "EU",
       password: record,
@@ -647,9 +655,17 @@ function normaliseAccountRecord(key, record) {
   return {
     username,
     displayName: String(record?.displayName || username).trim(),
+    websiteDisplayName: String(record?.websiteDisplayName || record?.displayName || username).trim(),
+    verifiedIdentity: String(record?.verifiedIdentity || "").trim(),
     email: String(record?.email || "").trim().toLowerCase(),
     phone: sanitisePhoneNumber(record?.phone || ""),
     discord: normaliseDiscordHandle(record?.discord || ""),
+    discordId: String(record?.discordId || "").trim(),
+    discordUsername: String(record?.discordUsername || "").trim(),
+    discordDisplayName: String(record?.discordDisplayName || "").trim(),
+    guildNickname: String(record?.guildNickname || "").trim(),
+    discordAvatarHash: String(record?.discordAvatarHash || record?.avatarHash || "").trim(),
+    discordAvatarUrl: String(record?.discordAvatarUrl || record?.avatarUrl || "").trim(),
     bio: String(record?.bio || "").trim(),
     region: String(record?.region || SERVER_CONFIG.region || "EU").trim(),
     password: String(record?.password || ""),
@@ -709,7 +725,24 @@ function getCurrentAccount() {
 }
 
 function getAccountDisplayName(account) {
-  return String(account?.displayName || account?.username || "Account").trim();
+  return String(
+    account?.discordDisplayName ||
+    account?.guildNickname ||
+    account?.discordUsername ||
+    account?.verifiedIdentity ||
+    account?.websiteDisplayName ||
+    account?.displayName ||
+    account?.username ||
+    "Account"
+  ).trim();
+}
+
+function getAccountAvatarUrl(account, size = 96) {
+  if (account?.discordAvatarUrl) return String(account.discordAvatarUrl).trim();
+  if (account?.discordId && account?.discordAvatarHash) {
+    return `https://cdn.discordapp.com/avatars/${encodeURIComponent(account.discordId)}/${encodeURIComponent(account.discordAvatarHash)}.png?size=${size}`;
+  }
+  return "";
 }
 
 function findAccountByIdentifier(accounts, identifier) {
@@ -735,7 +768,7 @@ function findAccountByIdentifier(accounts, identifier) {
 
 function renderAuthModal(mode, values = {}, error = "") {
   const title = "Continue with Discord";
-  const intro = "Discord is the only website login method. Your website identity should come from Discord OAuth, backend verification, and your verified Discord / in-game identity sync.";
+  const intro = "Discord is the only website login method. Your website identity, avatar, and visible name should come from Discord OAuth, backend verification, and your verified Discord / in-game identity sync.";
 
   return `
     <div class="auth-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
@@ -751,7 +784,7 @@ function renderAuthModal(mode, values = {}, error = "") {
           <div class="stack-list__item"><span class="stack-list__index">01</span><span>User selects <strong>Continue with Discord</strong> on the website.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">02</span><span>Discord OAuth returns the user identity to your backend.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>Your backend verifies the Discord token and checks guild roles safely.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">04</span><span>The website account uses the verified Discord identity as the source of truth.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">04</span><span>The website account uses the verified Discord identity and Discord avatar as the source of truth.</span></div>
         </div>
 
         <div class="auth-modal__actions">
@@ -759,7 +792,7 @@ function renderAuthModal(mode, values = {}, error = "") {
         </div>
 
         <div class="status-note">
-          <strong>Backend note:</strong> the website is now prepared for Discord-only login. Real account creation, sessions, verified names, and synced roles still need Discord OAuth, a backend API, and a database.
+          <strong>Backend note:</strong> the website is now prepared for Discord-only login. Real account creation, sessions, verified names, avatars, and synced roles still need Discord OAuth, a backend API, and a database.
         </div>
       </div>
     </div>
@@ -923,7 +956,19 @@ function updateAuthUi() {
   if (registerBtn) registerBtn.style.display = "none";
   if (accountBtn) {
     accountBtn.style.display = isIn ? "inline-flex" : "none";
-    accountBtn.textContent = "Account";
+    if (isIn) {
+      const displayName = getAccountDisplayName(account);
+      const avatarUrl = getAccountAvatarUrl(account, 64);
+      const fallbackChar = escapeHtml((displayName || "A").charAt(0).toUpperCase());
+      accountBtn.innerHTML = `
+        ${avatarUrl
+          ? `<img class="auth__avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" />`
+          : `<span class="auth__avatar auth__avatar--fallback">${fallbackChar}</span>`}
+        <span class="auth__accountName">${escapeHtml(displayName)}</span>
+      `;
+    } else {
+      accountBtn.textContent = "Account";
+    }
     accountBtn.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
   }
   if (logoutBtn) logoutBtn.style.display = isIn ? "inline-flex" : "none";
@@ -1335,13 +1380,13 @@ function setAccountFeedback(element, tone, text) {
 
 function renderAccountLoginMethods(account) {
   const methods = [
-    ["Username", account?.username || "Not set"],
-    ["Email", account?.email || "Not set"],
-    ["Phone", account?.phone || "Not connected"],
-    ["Discord", account?.discord ? `@${account.discord}` : "Not connected"],
+    ["Website Name", getAccountDisplayName(account)],
+    ["Discord Name", account?.guildNickname || account?.discordDisplayName || account?.discordUsername || (account?.discord ? `@${account.discord}` : "Pending sync")],
+    ["Discord ID", account?.discordId || "Pending OAuth"],
     ["Discord OAuth", SERVER_CONFIG.discordOAuthUrl ? (account?.discordLinked ? "Linked" : "Ready to connect") : "Backend required"],
     ["Backend Verification", SERVER_CONFIG.discordRoleVerifyUrl ? "Prepared" : "Pending backend"],
-    ["Role Sync", SERVER_CONFIG.discordRoleSyncUrl ? "Prepared" : "Pending bot/backend"]
+    ["Role Sync", SERVER_CONFIG.discordRoleSyncUrl ? "Prepared" : "Pending bot/backend"],
+    ["FiveM Identity", account?.verifiedIdentity || "Pending game sync"]
   ];
 
   return `
@@ -1364,7 +1409,7 @@ function renderAccountGuest() {
         <section class="section section--hero account-hero">
           <div class="section__eyebrow">Discord account</div>
           <h2>Login with Discord only</h2>
-          <p class="doc-p">The website should use Discord as the only account source, so the same verified Discord identity can later match your in-game identity, role sync, and community access.</p>
+          <p class="doc-p">The website should use Discord as the only account source, so the same verified Discord name and Discord profile picture can later match your in-game identity, role sync, and community access.</p>
           <div class="status-actions">
             ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
           </div>
@@ -1380,7 +1425,7 @@ function renderAccountGuest() {
             <div class="stack-list__item"><span class="stack-list__index">01</span><span>Player selects Discord login on the website.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">02</span><span>Backend verifies the Discord OAuth token securely.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">03</span><span>Bot or Discord API confirms the player roles inside SGCNR.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>The verified Discord identity becomes the website account name and role source.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>The verified Discord identity becomes the website account name, avatar source, and role source.</span></div>
           </div>
         </aside>
       </div>
@@ -1391,6 +1436,9 @@ function renderAccountGuest() {
 function renderAccountDashboard(account) {
   const createdLabel = account?.createdAt ? formatServerTimestamp(account.createdAt) : "Not recorded";
   const lastLoginLabel = account?.lastLoginAt ? formatServerTimestamp(account.lastLoginAt) : "No login yet";
+  const avatarUrl = getAccountAvatarUrl(account, 128);
+  const discordName = account?.guildNickname || account?.discordDisplayName || account?.discordUsername || (account?.discord ? `@${account.discord}` : "Not linked");
+  const verifiedIdentity = account?.verifiedIdentity || "Pending FiveM sync";
 
   return `
     <div>
@@ -1398,29 +1446,39 @@ function renderAccountDashboard(account) {
 
       <section class="section section--hero account-hero">
         <div class="section__eyebrow">Website profile</div>
+        <div class="account-identity">
+          ${avatarUrl
+            ? `<img class="account-identity__avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(getAccountDisplayName(account))}" />`
+            : `<div class="account-identity__avatar account-identity__avatar--fallback">${escapeHtml((getAccountDisplayName(account) || "A").charAt(0).toUpperCase())}</div>`}
+          <div class="account-identity__copy">
+            <div class="account-identity__label">Discord identity</div>
+            <div class="account-identity__name">${escapeHtml(getAccountDisplayName(account))}</div>
+            <div class="account-identity__meta">${escapeHtml(discordName)} · ${escapeHtml(verifiedIdentity)}</div>
+          </div>
+        </div>
         <h2>${escapeHtml(getAccountDisplayName(account))}</h2>
-        <p class="doc-p">Manage your contact details, security, and privacy settings from one place. This account page is already prepared for Discord linking, tickets, live tracking preferences, and future synced website features.</p>
+        <p class="doc-p">Manage your Discord-linked website identity, privacy settings, and future synced features from one place. The visible website name and avatar are ready to come from the linked Discord account.</p>
 
         <div class="status-grid account-summary">
           <div class="status-card">
-            <div class="status-card__label">Username</div>
-            <div class="status-card__value">${escapeHtml(account.username)}</div>
-            <div class="status-card__meta">Primary login name</div>
+            <div class="status-card__label">Website Name</div>
+            <div class="status-card__value">${escapeHtml(getAccountDisplayName(account))}</div>
+            <div class="status-card__meta">Current website identity</div>
           </div>
           <div class="status-card">
-            <div class="status-card__label">Email</div>
-            <div class="status-card__value">${escapeHtml(account.email || "Not set")}</div>
-            <div class="status-card__meta">Email login and updates</div>
+            <div class="status-card__label">Discord Name</div>
+            <div class="status-card__value">${escapeHtml(discordName)}</div>
+            <div class="status-card__meta">Taken from Discord / guild sync</div>
           </div>
           <div class="status-card">
-            <div class="status-card__label">Phone</div>
-            <div class="status-card__value">${escapeHtml(account.phone || "Not set")}</div>
-            <div class="status-card__meta">Optional alternate login</div>
+            <div class="status-card__label">Ingame Identity</div>
+            <div class="status-card__value">${escapeHtml(verifiedIdentity)}</div>
+            <div class="status-card__meta">Trusted FiveM-linked name</div>
           </div>
           <div class="status-card">
-            <div class="status-card__label">Discord</div>
-            <div class="status-card__value">${escapeHtml(account.discord ? `@${account.discord}` : "Not linked")}</div>
-            <div class="status-card__meta">${escapeHtml(account.discordLinked ? "Linked" : "Handle saved for future linking")}</div>
+            <div class="status-card__label">Discord ID</div>
+            <div class="status-card__value">${escapeHtml(account.discordId || "Pending OAuth")}</div>
+            <div class="status-card__meta">${escapeHtml(account.discordLinked ? "Linked and verified" : "Waiting for Discord auth")}</div>
           </div>
           <div class="status-card">
             <div class="status-card__label">Created</div>

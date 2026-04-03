@@ -62,6 +62,7 @@ Your current requirement is:
 - website login should be Discord only
 - the website account should use Discord identity as the source of truth
 - the ingame/FiveM name should be resolved from your trusted backend or bot bridge
+- the Discord profile picture should show on the website account UI
 
 That means:
 - no email registration
@@ -109,4 +110,3 @@ After that, the website can already:
 - save accounts permanently
 - show verified identity
 - prepare role-based access
-

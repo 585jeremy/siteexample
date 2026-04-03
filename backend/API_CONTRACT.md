@@ -38,6 +38,8 @@ Example:
     "discordUsername": "Jeremy",
     "discordDisplayName": "Jeremy",
     "guildNickname": "Jeremy",
+    "discordAvatarHash": "a_1234567890abcdef",
+    "discordAvatarUrl": "https://cdn.discordapp.com/avatars/123456789012345678/a_1234567890abcdef.png?size=128",
     "websiteDisplayName": "Jeremy",
     "fivemName": "Jeremy",
     "verifiedIdentity": "Jeremy",
@@ -49,6 +51,10 @@ Example:
   }
 }
 ```
+
+The frontend is now prepared to:
+- show the Discord avatar on the website
+- use the Discord / guild / verified ingame identity as the visible website name
 
 ## Account
 
@@ -124,4 +130,3 @@ Combined endpoint for:
 - leaderboard
 
 The website is already prepared for this.
-
