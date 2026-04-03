@@ -5460,6 +5460,7 @@ body.is-auth-open{
   padding: 8px 14px 8px 10px !important;
   text-transform: none !important;
   letter-spacing: .02em !important;
+  color: rgba(244,236,221,.94) !important;
 }
 
 .auth__btn--account .auth__accountName{
@@ -5469,11 +5470,26 @@ body.is-auth-open{
   white-space: nowrap;
   font-size: 13px;
   font-weight: 650;
+  color: rgba(244,236,221,.94) !important;
 }
 
 .auth__btn--account .auth__avatar,
 .auth__btn--account .auth__avatar--fallback{
   flex: 0 0 auto;
+}
+
+body.is-landing .auth__btn--account,
+body.is-standard .auth__btn--account,
+body.is-wiki .auth__btn--account,
+body.is-map .auth__btn--account{
+  color: rgba(244,236,221,.94) !important;
+}
+
+body.is-landing .auth__btn--account .auth__accountName,
+body.is-standard .auth__btn--account .auth__accountName,
+body.is-wiki .auth__btn--account .auth__accountName,
+body.is-map .auth__btn--account .auth__accountName{
+  color: rgba(244,236,221,.94) !important;
 }
 
 .account-identity{
