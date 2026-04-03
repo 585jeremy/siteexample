@@ -22,8 +22,11 @@ const DEFAULT_SERVER_CONFIG = {
   discordWidgetUrl: "",
   discordStatusUrl: "",
   discordOAuthUrl: "",
+  discordOAuthCallbackUrl: "",
   discordBotInviteUrl: "",
   discordSupportUrl: "",
+  discordRoleVerifyUrl: "",
+  discordRoleSyncUrl: "",
   backendApiUrl: "",
   authApiUrl: "",
   authLoginUrl: "",
@@ -56,7 +59,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_J
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403l";
+const SITE_ASSET_VERSION = "20260403m";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : "./";
@@ -699,7 +702,10 @@ function getCurrentAccount() {
   const session = getSession();
   if (!session?.username) return null;
   const accounts = readAccounts();
-  return accounts[session.username] || null;
+  const account = accounts[session.username] || null;
+  if (!account) return null;
+  if (!account.discordLinked) return null;
+  return account;
 }
 
 function getAccountDisplayName(account) {
@@ -728,79 +734,32 @@ function findAccountByIdentifier(accounts, identifier) {
 }
 
 function renderAuthModal(mode, values = {}, error = "") {
-  const isRegister = mode === "register";
-  const title = isRegister ? "Create your account" : "Sign in";
-  const intro = isRegister
-    ? "Create a website account with your core details now. The same structure can later sync to a real backend, Discord roles, tickets, and linked game features."
-    : "Use your username, email, phone number, or Discord handle to sign in to your website account.";
+  const title = "Continue with Discord";
+  const intro = "Discord is the only website login method. Your website identity should come from Discord OAuth, backend verification, and your verified Discord / in-game identity sync.";
 
   return `
     <div class="auth-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
       <button class="auth-modal__backdrop" type="button" data-auth-close aria-label="Close"></button>
       <div class="auth-modal__panel">
         <button class="auth-modal__close" type="button" data-auth-close aria-label="Close">×</button>
-        <div class="section__eyebrow">${escapeHtml(isRegister ? "Website account" : "Welcome back")}</div>
+        <div class="section__eyebrow">Discord account</div>
         <h2>${escapeHtml(title)}</h2>
         <p class="doc-p auth-modal__intro">${escapeHtml(intro)}</p>
         ${error ? `<div class="account-feedback account-feedback--error">${escapeHtml(error)}</div>` : ""}
 
-        <form class="account-form auth-form" id="authForm" data-auth-mode="${escapeHtml(mode)}">
-          ${isRegister ? `
-            <div class="account-form__grid">
-              <label class="account-field">
-                <span class="account-field__label">Username</span>
-                <input class="account-field__input" name="username" value="${escapeHtml(values.username || "")}" autocomplete="username" required />
-              </label>
-              <label class="account-field">
-                <span class="account-field__label">Display name</span>
-                <input class="account-field__input" name="displayName" value="${escapeHtml(values.displayName || "")}" autocomplete="nickname" required />
-              </label>
-              <label class="account-field">
-                <span class="account-field__label">Email</span>
-                <input class="account-field__input" type="email" name="email" value="${escapeHtml(values.email || "")}" autocomplete="email" placeholder="Optional if phone or Discord is used" />
-              </label>
-              <label class="account-field">
-                <span class="account-field__label">Phone number</span>
-                <input class="account-field__input" name="phone" value="${escapeHtml(values.phone || "")}" autocomplete="tel" placeholder="+49..." />
-              </label>
-              <label class="account-field">
-                <span class="account-field__label">Discord</span>
-                <input class="account-field__input" name="discord" value="${escapeHtml(values.discord || "")}" autocomplete="username" placeholder="name#0001 or @name" />
-              </label>
-              <label class="account-field">
-                <span class="account-field__label">Region</span>
-                <input class="account-field__input" name="region" value="${escapeHtml(values.region || SERVER_CONFIG.region || "EU")}" />
-              </label>
-            </div>
-          ` : `
-            <label class="account-field">
-              <span class="account-field__label">Username, email, phone, or Discord</span>
-              <input class="account-field__input" name="identifier" value="${escapeHtml(values.identifier || "")}" autocomplete="username" required />
-            </label>
-          `}
+        <div class="stack-list stack-list--compact">
+          <div class="stack-list__item"><span class="stack-list__index">01</span><span>User selects <strong>Continue with Discord</strong> on the website.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Discord OAuth returns the user identity to your backend.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Your backend verifies the Discord token and checks guild roles safely.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">04</span><span>The website account uses the verified Discord identity as the source of truth.</span></div>
+        </div>
 
-          <div class="account-form__grid">
-            <label class="account-field">
-              <span class="account-field__label">Password</span>
-              <input class="account-field__input" type="password" name="password" autocomplete="${isRegister ? "new-password" : "current-password"}" required />
-            </label>
-            ${isRegister ? `
-              <label class="account-field">
-                <span class="account-field__label">Confirm password</span>
-                <input class="account-field__input" type="password" name="confirmPassword" autocomplete="new-password" required />
-              </label>
-            ` : ""}
-          </div>
-
-          <div class="auth-modal__actions">
-            <button class="auth__btn auth__btn--primary" type="submit">${escapeHtml(isRegister ? "Create account" : "Login")}</button>
-            <button class="auth__btn" type="button" data-auth-switch="${escapeHtml(isRegister ? "login" : "register")}">${escapeHtml(isRegister ? "Already have an account?" : "Need an account?")}</button>
-            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : ""}
-          </div>
-        </form>
+        <div class="auth-modal__actions">
+          ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" type="button" disabled>Discord login not connected yet</button>`}
+        </div>
 
         <div class="status-note">
-          <strong>Backend note:</strong> browser-side account registration, login, and profile management are now in place. Real multi-device accounts, email verification, password resets, secure Discord OAuth, and synced staff data still need a backend API and database.
+          <strong>Backend note:</strong> the website is now prepared for Discord-only login. Real account creation, sessions, verified names, and synced roles still need Discord OAuth, a backend API, and a database.
         </div>
       </div>
     </div>
@@ -957,8 +916,11 @@ function updateAuthUi() {
   const account = getCurrentAccount();
   const isIn = Boolean(session && account);
 
-  if (loginBtn) loginBtn.style.display = isIn ? "none" : "inline-flex";
-  if (registerBtn) registerBtn.style.display = isIn ? "none" : "inline-flex";
+  if (loginBtn) {
+    loginBtn.style.display = isIn ? "none" : "inline-flex";
+    loginBtn.textContent = "Discord Login";
+  }
+  if (registerBtn) registerBtn.style.display = "none";
   if (accountBtn) {
     accountBtn.style.display = isIn ? "inline-flex" : "none";
     accountBtn.textContent = "Account";
@@ -976,7 +938,7 @@ function initAuth() {
   }
 
   if (registerBtn) {
-    registerBtn.addEventListener("click", () => openAuthModal("register"));
+    registerBtn.addEventListener("click", () => openAuthModal("login"));
   }
 
   if (accountBtn) {
@@ -1323,7 +1285,7 @@ function renderHelp() {
             <div class="info-faq">
               <div class="info-faq__item">
                 <div class="info-faq__q">Does the website already have a real database?</div>
-                <div class="info-faq__a">The website now has a real frontend account layer for registration, login, and account management. Real synced accounts across devices, ticket sync, punishments, and Discord role rewards still need a backend API and database behind it.</div>
+                <div class="info-faq__a">The website is now prepared for Discord-only account access. Real synced accounts across devices, ticket sync, punishments, and Discord role rewards still need a backend API and database behind it.</div>
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">Can the website be connected to a Discord bot later?</div>
@@ -1332,6 +1294,10 @@ function renderHelp() {
               <div class="info-faq__item">
                 <div class="info-faq__q">What is needed for real Discord linking?</div>
                 <div class="info-faq__a">You will need Discord OAuth on the website, a backend service that verifies the Discord login token, a database for linked accounts, and bot or Discord API access so roles can be confirmed safely.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">How would Discord role sync actually work?</div>
+                <div class="info-faq__a">The user starts with a Discord OAuth login button on the website. After login, the backend verifies the returned Discord token, checks the player's roles in your SGCNR Discord, and stores that link in the database so the verified Discord identity or guild nickname can become the website and in-game reference safely.</div>
               </div>
             </div>
           </section>
@@ -1345,6 +1311,7 @@ function renderHelp() {
               <div class="stack-list__item"><span class="stack-list__index">03</span><span>Application, appeal, and report dashboards shared between website and Discord.</span></div>
               <div class="stack-list__item"><span class="stack-list__index">04</span><span>Automated server restart alerts, event posts, and leaderboard highlights.</span></div>
               <div class="stack-list__item"><span class="stack-list__index">05</span><span>Claimable rewards or perks after Discord verification or supporter role checks.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">06</span><span>Role-locked website features that only open after backend verification confirms Discord membership.</span></div>
             </div>
           </aside>
         </div>
@@ -1372,7 +1339,9 @@ function renderAccountLoginMethods(account) {
     ["Email", account?.email || "Not set"],
     ["Phone", account?.phone || "Not connected"],
     ["Discord", account?.discord ? `@${account.discord}` : "Not connected"],
-    ["Discord OAuth", SERVER_CONFIG.discordOAuthUrl ? (account?.discordLinked ? "Linked" : "Ready to connect") : "Backend required"]
+    ["Discord OAuth", SERVER_CONFIG.discordOAuthUrl ? (account?.discordLinked ? "Linked" : "Ready to connect") : "Backend required"],
+    ["Backend Verification", SERVER_CONFIG.discordRoleVerifyUrl ? "Prepared" : "Pending backend"],
+    ["Role Sync", SERVER_CONFIG.discordRoleSyncUrl ? "Prepared" : "Pending bot/backend"]
   ];
 
   return `
@@ -1393,28 +1362,25 @@ function renderAccountGuest() {
       ${renderHeader("Account", [{ label: "Account" }])}
       <div class="content-grid content-grid--sidebar">
         <section class="section section--hero account-hero">
-          <div class="section__eyebrow">Website account</div>
-          <h2>Sign in or create your profile</h2>
-          <p class="doc-p">Create your own website account now so the portal is ready for Discord linking, tickets, staff tools, and future live account features once the backend is connected.</p>
+          <div class="section__eyebrow">Discord account</div>
+          <h2>Login with Discord only</h2>
+          <p class="doc-p">The website should use Discord as the only account source, so the same verified Discord identity can later match your in-game identity, role sync, and community access.</p>
           <div class="status-actions">
-            <button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Login</button>
-            <button class="auth__btn" id="accountRegisterCta" type="button">Register</button>
-            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : ""}
+            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}" target="_blank" rel="noopener noreferrer">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
           </div>
           <div class="status-note">
-            <strong>Current state:</strong> players can already register, sign in, and manage a browser-side website account. Real cross-device accounts, password recovery, and secure Discord linking still need a backend API and database.
+            <strong>Current state:</strong> the website is prepared for Discord-only account access. Real login, account creation, and role sync still need Discord OAuth, backend verification, and a database.
           </div>
         </section>
 
         <aside class="section section--stack">
-          <div class="section__eyebrow">Login methods</div>
-          <h2>What you can use</h2>
+          <div class="section__eyebrow">Identity flow</div>
+          <h2>How it should work</h2>
           <div class="stack-list stack-list--compact">
-            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Username</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Email address</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Phone number</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Discord handle</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Discord OAuth once the backend is connected</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Player selects Discord login on the website.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Backend verifies the Discord OAuth token securely.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Bot or Discord API confirms the player roles inside SGCNR.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>The verified Discord identity becomes the website account name and role source.</span></div>
           </div>
         </aside>
       </div>
@@ -1512,7 +1478,7 @@ function renderAccountDashboard(account) {
           <h2>Connected methods</h2>
           ${renderAccountLoginMethods(account)}
           <div class="status-note">
-            <strong>Discord linking:</strong> once a backend and Discord OAuth are connected, this account page can link roles, verification status, tickets, and other community features.
+            <strong>Discord linking:</strong> the intended flow is Discord OAuth on the website, backend token verification, then a role check through your bot or the Discord API. Once those endpoints exist, this account page can link roles, verification status, tickets, and other community features.
           </div>
         </aside>
       </div>

@@ -6,8 +6,11 @@ window.SGCNR_SERVER_CONFIG = {
   discordGuildId: "",
   discordWidgetUrl: "",
   discordOAuthUrl: "",
+  discordOAuthCallbackUrl: "",
   discordBotInviteUrl: "",
   discordSupportUrl: "",
+  discordRoleVerifyUrl: "",
+  discordRoleSyncUrl: "",
   backendApiUrl: "",
   authApiUrl: "",
   authLoginUrl: "",
@@ -67,6 +70,13 @@ window.SGCNR_SERVER_CONFIG = {
   // For live map players, the website accepts either:
   // - mapX/mapY in percent (0-100), or
   // - lat/lng if your endpoint already uses the same map projection.
+  // For Discord account linking / role sync, the expected flow is:
+  // 1. discordOAuthUrl starts the website login with Discord
+  // 2. discordOAuthCallbackUrl receives the OAuth return and hands it to your backend
+  // 3. discordRoleVerifyUrl lets the backend confirm guild roles securely
+  // 4. discordRoleSyncUrl can expose linked role-sync state back to the website
+  // The verified Discord user / guild nickname should become the source of truth
+  // for the website account name if you want website and ingame identity to match.
   livePlayerMapUrl: "",
   uptimeStatusUrl: "",
   restartInfoUrl: "",
