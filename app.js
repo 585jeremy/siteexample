@@ -728,8 +728,22 @@ function getCurrentAccount() {
 }
 
 function getDiscordRoleList(account) {
-  if (!Array.isArray(account?.discordRoles)) return [];
-  return account.discordRoles
+  if (!account?.discordRoles) return [];
+
+  const source = Array.isArray(account.discordRoles)
+    ? account.discordRoles
+    : String(account.discordRoles)
+        .split(",")
+        .map((role) => role.trim())
+        .filter(Boolean);
+
+  return source
+    .flatMap((role) => {
+      if (role && typeof role === "object") {
+        return [role.id, role.name].filter(Boolean);
+      }
+      return [role];
+    })
     .map((role) => String(role || "").trim())
     .filter(Boolean);
 }
@@ -5525,9 +5539,9 @@ function renderSearch(sections) {
 }
 
 function parseRoute() {
-  const raw = (location.hash || "#/ ").replace(/^#/, "");
+  const raw = (location.hash || "#/").replace(/^#/, "");
   const path = raw.startsWith("/") ? raw : `/${raw}`;
-  const clean = path.replace(/\/+/, "/");
+  const clean = path.replace(/\/+/g, "/");
   const parts = clean.split("/").filter(Boolean);
   if (!parts.length) return { name: "home" };
 
@@ -5639,7 +5653,7 @@ function route() {
   }
   if (r.name === "definitions") {
     renderDefinitions();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> · Reference`;
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Reference`;
     return;
   }
   if (r.name === "info") {
@@ -5654,14 +5668,14 @@ function route() {
       (acc, s) => acc + (Array.isArray(s?.rules) ? s.rules.length : 0),
       0
     );
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> · <kbd>${totalRules}</kbd> rules`;
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${totalRules}</kbd> rules`;
     return;
   }
   if (r.name === "section") {
     renderSection(r.sectionId);
     const section = findSectionById(r.sectionId);
     const total = Array.isArray(section?.rules) ? section.rules.length : 0;
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> · <kbd>${total}</kbd> rules`;
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${total}</kbd> rules`;
     return;
   }
   if (r.name === "rule") {

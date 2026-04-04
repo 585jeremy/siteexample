@@ -20,6 +20,33 @@ $sessionCookieSecure = array_key_exists('session_cookie_secure', $config)
     : $defaultSecure;
 $sessionCookieSameSite = $config['session_cookie_samesite'] ?? 'Lax';
 
+$origin = null;
+$allowedOrigin = $config['allowed_origin'] ?? '';
+if ($allowedOrigin) {
+    $origin = (string) $allowedOrigin;
+} else {
+    $siteHomeUrl = $config['site_home_url'] ?? '';
+    if ($siteHomeUrl) {
+        $parts = parse_url($siteHomeUrl);
+        if (!empty($parts['scheme']) && !empty($parts['host'])) {
+            $origin = $parts['scheme'] . '://' . $parts['host'];
+        }
+    }
+}
+
+if ($origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
         'lifetime' => 0,
