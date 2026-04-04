@@ -27,15 +27,14 @@ It is now prepared for automatic deployment through the repo workflow.
 
 The GitHub workflow can deploy this folder automatically to `staff.sgcnr.net`.
 
-Required repository secret:
+Required repository secrets:
 
-- `ZAP_STAFF_SERVER_DIR`
+- `ZAP_STAFF_FTP_USER`
+- `ZAP_STAFF_FTP_PASS`
 
-That secret should point to the FTP directory used by the `staff.sgcnr.net` document root.
+Recommended setup:
 
-Example values depend on the hosting setup, such as:
+- create an additional FTP account in Plesk that is rooted directly to `staff.sgcnr.net`
+- use that account only for the staff portal workflow
 
-- `./staff.sgcnr.net/`
-- `./subdomains/staff/httpdocs/`
-
-If that secret is missing, the staff deploy job is skipped and only the public website is deployed.
+If those staff FTP secrets are missing, the staff deploy job is skipped and only the public website is deployed.

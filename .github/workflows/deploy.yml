@@ -41,27 +41,27 @@ jobs:
         id: staff-config
         shell: bash
         run: |
-          if [ -n "${{ secrets.ZAP_STAFF_SERVER_DIR }}" ]; then
+          if [ -n "${{ secrets.ZAP_STAFF_FTP_USER }}" ] && [ -n "${{ secrets.ZAP_STAFF_FTP_PASS }}" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Skip staff deploy when no target directory is configured
+      - name: Skip staff deploy when no staff FTP account is configured
         if: ${{ steps.staff-config.outputs.enabled != 'true' }}
-        run: echo "ZAP_STAFF_SERVER_DIR is not set. Skipping staff portal deploy."
+        run: echo "ZAP_STAFF_FTP_USER / ZAP_STAFF_FTP_PASS are not set. Skipping staff portal deploy."
 
       - name: Deploy staff portal to staff.sgcnr.net
         if: ${{ steps.staff-config.outputs.enabled == 'true' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.ZAP_FTP_HOST }}
-          username: ${{ secrets.ZAP_FTP_USER }}
-          password: ${{ secrets.ZAP_FTP_PASS }}
+          username: ${{ secrets.ZAP_STAFF_FTP_USER }}
+          password: ${{ secrets.ZAP_STAFF_FTP_PASS }}
           port: ${{ secrets.ZAP_FTP_PORT }}
           protocol: ftp
           local-dir: ./staff-site/
-          server-dir: ${{ secrets.ZAP_STAFF_SERVER_DIR }}
+          server-dir: ./
           exclude: |
             **/.git*
             **/.git*/**
