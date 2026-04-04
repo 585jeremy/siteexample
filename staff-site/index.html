@@ -4,28 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SGCNR Staff Portal</title>
-    <link rel="stylesheet" href="./staff.css?v=20260404d" />
+    <link rel="stylesheet" href="./staff.css?v=20260404g" />
   </head>
   <body>
     <div class="staff-shell" id="staffShell">
       <header class="staff-topbar" aria-label="Staff top bar">
-        <div class="staff-topbar__status">
-          <div class="staff-chip" id="staffModeChip">Staff access gateway</div>
-          <div class="staff-chip staff-chip--soft" id="staffUpdated">Updated just now</div>
-        </div>
         <a class="staff-brand" href="#/dashboard" aria-label="SGCNR Staff">
-          <span class="staff-brand__glow staff-brand__glow--left" aria-hidden="true"></span>
-          <span class="staff-brand__glow staff-brand__glow--right" aria-hidden="true"></span>
-          <img class="staff-brand__badge" src="./assets/sgcnr-badge.png?v=20260404d" alt="SGCNR badge" />
+          <img class="staff-brand__badge" src="./assets/sgcnr-badge.png?v=20260404g" alt="SGCNR badge" />
           <div class="staff-brand__copy">
-            <span class="staff-brand__eyebrow">SGCNR Internal</span>
+            <span class="staff-brand__eyebrow">SGCNR Internal Access</span>
             <strong class="staff-brand__title">Staff Portal</strong>
           </div>
         </a>
-        <div class="staff-topbar__actions" id="staffAuthActions">
-          <button class="staff-action" type="button">Discord Sync Ready</button>
-          <button class="staff-action staff-action--primary" type="button">Role-gated Access</button>
-        </div>
+        <div class="staff-topbar__actions" id="staffAuthActions"></div>
       </header>
 
       <main class="staff-content" id="staffApp" aria-label="Staff portal content"></main>
@@ -45,6 +36,7 @@
       </nav>
     </div>
 
-    <script src="./staff.js?v=20260404d"></script>
+    <script src="./staff-gate-config.js?v=20260404g"></script>
+    <script src="./staff.js?v=20260404g"></script>
   </body>
 </html>
