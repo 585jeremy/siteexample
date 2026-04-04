@@ -38,7 +38,7 @@ body::before {
     linear-gradient(180deg, rgba(5, 6, 8, 0.5), rgba(5, 6, 8, 0.9)),
     radial-gradient(circle at 20% 20%, rgba(201, 154, 95, 0.14), transparent 28%),
     radial-gradient(circle at 82% 16%, rgba(156, 95, 68, 0.15), transparent 26%),
-    url("./assets/sg-cops-and-robbers.png?v=20260404g") center center / cover no-repeat;
+    url("./assets/sg-cops-and-robbers.png?v=20260404h") center center / cover no-repeat;
   opacity: 0.33;
   filter: saturate(0.92) contrast(1.02) blur(2px);
   transform: scale(1.03);
@@ -233,14 +233,6 @@ body::after {
   line-height: 1.68;
 }
 
-.staff-inline-notes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.staff-inline-note,
 .staff-mini-pill,
 .staff-state-pill,
 .workspace-row__status {
