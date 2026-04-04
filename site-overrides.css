@@ -5249,6 +5249,357 @@ body.is-auth-open{
   overflow: hidden !important;
 }
 
+/* 2026-04-04 focused final pass for Home, Wiki, Map, and Live */
+body.is-landing .auth__btn--primary,
+body.is-standard .auth__btn--primary,
+body.is-wiki .auth__btn--primary,
+body.is-map .auth__btn--primary{
+  border-color: rgba(206,150,92,.34) !important;
+  background: linear-gradient(180deg, rgba(184,133,73,.96), rgba(99,61,31,.96)) !important;
+  color: rgba(251,245,233,.98) !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,245,225,.16) !important;
+}
+
+body.is-landing .auth__btn--primary:hover,
+body.is-standard .auth__btn--primary:hover,
+body.is-wiki .auth__btn--primary:hover,
+body.is-map .auth__btn--primary:hover{
+  border-color: rgba(223,169,104,.42) !important;
+  background: linear-gradient(180deg, rgba(201,146,83,.98), rgba(110,68,35,.98)) !important;
+}
+
+body.is-landing{
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  background:
+    radial-gradient(1200px 720px at 14% 16%, rgba(186,137,80,.10), transparent 58%),
+    radial-gradient(1100px 680px at 86% 18%, rgba(145,72,60,.09), transparent 56%),
+    linear-gradient(180deg, #040506 0%, #060708 58%, #030304 100%) !important;
+}
+
+body.is-landing .content{
+  width: min(1120px, calc(100% - 28px)) !important;
+  min-height: calc(100svh - 84px) !important;
+  height: calc(100svh - 84px) !important;
+  padding: 18px 0 104px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+body.is-landing #rules{
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.landing-reboot::before,
+.landing-reboot::after,
+.landing-reboot__noise,
+.landing-reboot__glow{
+  display: none !important;
+}
+
+.landing-reboot{
+  width: 100%;
+  min-height: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: 6px !important;
+  overflow: visible !important;
+}
+
+.landing-reboot__hero{
+  width: min(100%, 720px) !important;
+  max-width: 720px !important;
+  min-height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.landing-reboot__lead{
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 34px 34px 26px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(183,137,85,.10) !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(191,143,88,.06), transparent 32%),
+    radial-gradient(circle at 88% 78%, rgba(144,71,61,.05), transparent 30%),
+    linear-gradient(180deg, rgba(15,13,11,.94), rgba(8,8,10,.97)) !important;
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+.landing-reboot__lead::before,
+.landing-reboot__lead::after{
+  display: none !important;
+}
+
+.landing-reboot__line{
+  background: linear-gradient(90deg, rgba(214,166,91,.82), rgba(255,255,255,.08)) !important;
+}
+
+.landing-reboot__title{
+  max-width: 7.2ch !important;
+}
+
+.landing-reboot__text{
+  max-width: 560px !important;
+  color: rgba(222,212,196,.78) !important;
+}
+
+.landing-reboot__actions{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.landing-reboot__action{
+  min-width: 0 !important;
+  border-color: rgba(183,137,85,.12) !important;
+  background: linear-gradient(180deg, rgba(24,20,18,.92), rgba(10,10,12,.94)) !important;
+  color: rgba(244,238,224,.90) !important;
+}
+
+.landing-reboot__action:hover{
+  border-color: rgba(206,150,92,.22) !important;
+  background: linear-gradient(180deg, rgba(36,28,23,.96), rgba(12,12,14,.96)) !important;
+}
+
+.landing-reboot__action--primary{
+  border-color: rgba(206,150,92,.34) !important;
+  background: linear-gradient(180deg, rgba(184,133,73,.96), rgba(99,61,31,.96)) !important;
+  color: rgba(251,245,233,.98) !important;
+}
+
+.landing-reboot__compactInfo{
+  width: min(100%, 320px) !important;
+}
+
+.landing-reboot__compactCard{
+  border-color: rgba(183,137,85,.10) !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(191,143,88,.06), transparent 28%),
+    linear-gradient(180deg, rgba(18,15,13,.92), rgba(9,9,11,.96)) !important;
+}
+
+.landing-reboot__label{
+  color: rgba(220,202,175,.56) !important;
+}
+
+.landing-reboot__value{
+  color: rgba(246,238,224,.96) !important;
+}
+
+body.is-wiki .content{
+  width: min(1450px, calc(100% - 24px)) !important;
+  min-height: calc(100svh - 84px) !important;
+  padding: 14px 0 118px !important;
+}
+
+.wiki-shell{
+  width: 100%;
+  min-height: calc(100svh - 214px);
+}
+
+.wiki-layout{
+  grid-template-columns: 280px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  padding-bottom: 8px;
+}
+
+.wiki-nav{
+  max-height: calc(100svh - 292px);
+  overflow: auto;
+  padding-right: 6px;
+  padding-bottom: 96px;
+}
+
+.wiki-sidebar,
+.wiki-article{
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(16,13,12,.97), rgba(7,8,10,.98)) !important;
+}
+
+.wiki-article{
+  min-height: calc(100svh - 292px);
+}
+
+body.is-map .content{
+  width: min(1450px, calc(100% - 24px)) !important;
+  min-height: calc(100svh - 84px) !important;
+  padding: 10px 0 112px !important;
+}
+
+.map-page{
+  min-height: calc(100svh - 198px) !important;
+}
+
+.map-layout{
+  grid-template-columns: 300px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  height: calc(100svh - 198px) !important;
+  min-height: calc(100svh - 198px) !important;
+}
+
+.map-panel{
+  height: 100% !important;
+  overflow: auto !important;
+  padding-bottom: 22px !important;
+}
+
+.service-map-shell{
+  min-height: calc(100svh - 198px) !important;
+  height: calc(100svh - 198px) !important;
+}
+
+.service-map{
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.map-stage__aside{
+  top: 84px !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  width: 240px !important;
+}
+
+body.is-standard .content{
+  width: min(1450px, calc(100% - 24px)) !important;
+  padding: 14px 0 118px !important;
+}
+
+.status-page{
+  display: grid;
+  gap: 16px;
+}
+
+.status-live--hero,
+.status-banner,
+.status-card,
+.status-note,
+.status-miniStat,
+.status-feed__item,
+.status-history__group,
+.status-hotzones__item,
+.status-live__highlight{
+  border-color: rgba(183,137,85,.10) !important;
+  background: linear-gradient(180deg, rgba(24,20,18,.94), rgba(10,10,12,.96)) !important;
+}
+
+.status-live__label,
+.status-banner__kicker,
+.status-history__title,
+.status-miniStat__label,
+.status-feed__meta,
+.status-hotzones__meta,
+.status-card__label{
+  color: rgba(220,202,175,.56) !important;
+}
+
+.status-live__value,
+.status-card__value{
+  color: rgba(246,238,224,.96) !important;
+}
+
+@media (max-width: 1180px){
+  body.is-map .content,
+  body.is-wiki .content,
+  body.is-landing .content,
+  body.is-standard .content{
+    width: min(100%, calc(100% - 20px)) !important;
+  }
+
+  .map-layout,
+  .wiki-layout{
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .map-panel{
+    order: 2;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .map-stage{
+    order: 1;
+  }
+
+  .service-map-shell{
+    height: auto !important;
+    min-height: clamp(520px, 70svh, 760px) !important;
+  }
+
+  .service-map{
+    min-height: clamp(520px, 70svh, 760px) !important;
+    height: clamp(520px, 70svh, 760px) !important;
+  }
+
+  .map-stage__aside{
+    display: none !important;
+  }
+
+  .wiki-nav{
+    max-height: none;
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 760px){
+  body.is-landing{
+    overflow-y: auto !important;
+  }
+
+  body.is-landing .content{
+    min-height: calc(100svh - 84px) !important;
+    height: auto !important;
+    padding: 12px 0 96px !important;
+    overflow: visible !important;
+  }
+
+  .landing-reboot{
+    min-height: auto !important;
+    height: auto !important;
+    padding-top: 0 !important;
+  }
+
+  .landing-reboot__lead{
+    padding: 24px 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .landing-reboot__title{
+    max-width: 7.6ch !important;
+    font-size: clamp(2.35rem, 13vw, 3.8rem) !important;
+    line-height: .94 !important;
+  }
+
+  .landing-reboot__actions{
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-reboot__compactInfo{
+    width: 100% !important;
+  }
+
+  .wiki-article{
+    min-height: 0;
+  }
+}
+
 #authModalRoot{
   position: relative;
   z-index: 140;
