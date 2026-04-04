@@ -17,6 +17,11 @@ window.SGCNR_SERVER_CONFIG = {
   authLogoutUrl: "https://sgcnr.net/auth/logout.php",
   authRegisterUrl: "",
   authProfileUrl: "https://sgcnr.net/auth/api.php",
+  adminPanelLabel: "Manager",
+  adminPanelRoles: [
+    // Add your Discord manager/admin role IDs here, for example:
+    // "123456789012345678"
+  ],
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
   region: "EU",

@@ -30,8 +30,11 @@ const DEFAULT_SERVER_CONFIG = {
   backendApiUrl: "",
   authApiUrl: "",
   authLoginUrl: "",
+  authLogoutUrl: "",
   authRegisterUrl: "",
   authProfileUrl: "",
+  adminPanelLabel: "Manager",
+  adminPanelRoles: [],
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
   region: "EU",
@@ -724,6 +727,29 @@ function getCurrentAccount() {
   return account;
 }
 
+function getDiscordRoleList(account) {
+  if (!Array.isArray(account?.discordRoles)) return [];
+  return account.discordRoles
+    .map((role) => String(role || "").trim())
+    .filter(Boolean);
+}
+
+function hasAdminAccess(account = getCurrentAccount()) {
+  const requiredRoles = Array.isArray(SERVER_CONFIG.adminPanelRoles)
+    ? SERVER_CONFIG.adminPanelRoles.map((role) => normalize(role)).filter(Boolean)
+    : [];
+
+  if (!account || !requiredRoles.length) return false;
+
+  return getDiscordRoleList(account).some((role) => requiredRoles.includes(normalize(role)));
+}
+
+function updateAdminDockVisibility(account = getCurrentAccount()) {
+  const adminDock = document.querySelector('.dock__item[data-dock="admin"]');
+  if (!adminDock) return;
+  adminDock.style.display = hasAdminAccess(account) ? "inline-flex" : "none";
+}
+
 function getAccountDisplayName(account) {
   return String(
     account?.discordDisplayName ||
@@ -974,6 +1000,7 @@ function updateAuthUi() {
   }
   if (logoutBtn) logoutBtn.style.display = isIn ? "inline-flex" : "none";
   if (authArea) authArea.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
+  updateAdminDockVisibility(account);
 }
 
 function initAuth() {
@@ -1587,6 +1614,91 @@ function renderAccountDashboard(account) {
       </div>
     </div>
   `;
+}
+
+function renderAdminLockedPage() {
+  const label = SERVER_CONFIG.adminPanelLabel || "Manager";
+  return `
+    <div>
+      ${renderHeader(`${label} Mode`, [{ label: label }])}
+      <section class="section section--hero">
+        <div class="section__eyebrow">Restricted access</div>
+        <h2>${escapeHtml(label)} role required</h2>
+        <p class="doc-p">This tab is reserved for Discord accounts with one of the configured manager/admin role IDs. Once your manager role is listed in <code>adminPanelRoles</code>, the website will unlock this tab automatically for that Discord account.</p>
+        <div class="status-note">
+          <strong>Next step:</strong> add the real Discord manager role ID to <code>server-config.js</code> so the website can match your synced Discord roles against the admin access rule.
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function renderAdminDashboard(account) {
+  const label = SERVER_CONFIG.adminPanelLabel || "Manager";
+  const roleMarkup = getDiscordRoleList(account).length
+    ? getDiscordRoleList(account).map((role) => `<span class="leaderboard-badge">${escapeHtml(role)}</span>`).join("")
+    : `<span class="leaderboard-badge">No synced roles</span>`;
+
+  setView(`
+    <div class="admin-page">
+      ${renderHeader(`${label} Mode`, [{ label: label }])}
+
+      <section class="section section--hero">
+        <div class="section__eyebrow">Discord synced access</div>
+        <h2>${escapeHtml(label)} control panel</h2>
+        <p class="doc-p">This area is ideal for staff-side website control, live server coordination, and private community operations. It is unlocked only for Discord accounts that match the configured manager/admin roles.</p>
+
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-card__label">Access source</div>
+            <div class="status-card__value">Discord role sync</div>
+            <div class="status-card__meta">Protected by the synced Discord role list</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Website identity</div>
+            <div class="status-card__value">${escapeHtml(getAccountDisplayName(account))}</div>
+            <div class="status-card__meta">Current signed-in manager account</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Verified identity</div>
+            <div class="status-card__value">${escapeHtml(account?.verifiedIdentity || "Pending game sync")}</div>
+            <div class="status-card__meta">Trusted display for staff-side tools</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Role gate</div>
+            <div class="status-card__value">${escapeHtml(label)}</div>
+            <div class="status-card__meta">Configured in <code>server-config.js</code></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section">
+          <div class="section__eyebrow">Suggested tools</div>
+          <h2>What should live here</h2>
+          <div class="stack-list stack-list--compact">
+            <div class="stack-list__item"><span class="stack-list__index">01</span><span><strong>Announcements:</strong> homepage alerts, restart banners, maintenance notices, and event callouts.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span><strong>Applications & appeals:</strong> review queues for staff applications, ban appeals, and player reports.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span><strong>Live ops controls:</strong> toggle active events, hottest zones, and manager-side notices shown on the Live page.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span><strong>Account oversight:</strong> inspect Discord-linked accounts, verification status, and identity mismatches.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span><strong>Support overview:</strong> open tickets, pending reviews, website health, and backend sync checks.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">06</span><span><strong>Private notes:</strong> internal rollout reminders, changelog notes, and staff-only operational tasks.</span></div>
+          </div>
+        </section>
+
+        <aside class="section section--stack">
+          <div class="section__eyebrow">Current Discord roles</div>
+          <h2>Role check</h2>
+          <div class="admin-role-list">
+            ${roleMarkup}
+          </div>
+          <div class="status-note">
+            <strong>Setup note:</strong> the tab only appears when your synced Discord role list contains a role ID from <code>adminPanelRoles</code> in <code>server-config.js</code>.
+          </div>
+        </aside>
+      </div>
+    </div>
+  `);
 }
 
 function bindAccountPageControls() {
@@ -5409,7 +5521,7 @@ function renderSearch(sections) {
     </div>
   `);
 
-  meta.innerHTML = `Updated: <kbd>${getData().updatedAt}</kbd> · Matches <kbd>${results.length}</kbd> / <kbd>${totalRules}</kbd> rules`;
+  meta.innerHTML = `Updated: <kbd>${getData().updatedAt}</kbd> &middot; Matches <kbd>${results.length}</kbd> / <kbd>${totalRules}</kbd> rules`;
 }
 
 function parseRoute() {
@@ -5424,6 +5536,7 @@ function parseRoute() {
   if (parts[0] === "commands") return { name: "commands" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
   if (parts[0] === "account") return { name: "account" };
+  if (parts[0] === "admin") return { name: "admin" };
   if (parts[0] === "leaderboard") return { name: "live", metric: parts[1] || "kd" };
   if (parts[0] === "wiki") return { name: "wiki", wikiPage: parts[1] || "" };
   if (parts[0] === "map") return { name: "map" };
@@ -5497,6 +5610,16 @@ function route() {
   if (r.name === "account") {
     renderAccount();
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Account`;
+    return;
+  }
+  if (r.name === "admin") {
+    if (hasAdminAccess()) {
+      renderAdminDashboard(getCurrentAccount());
+      meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; ${escapeHtml(SERVER_CONFIG.adminPanelLabel || "Manager")} mode`;
+    } else {
+      setView(renderAdminLockedPage());
+      meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Restricted`;
+    }
     return;
   }
   if (r.name === "wiki") {

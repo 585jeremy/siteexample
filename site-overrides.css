@@ -5595,16 +5595,42 @@ body.is-map .auth__btn--account .auth__accountName{
   width: auto !important;
   max-width: 100%;
   margin: 0 !important;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(183,137,85,.16) !important;
+  background:
+    linear-gradient(180deg, rgba(23,18,16,.92), rgba(9,10,12,.94)) !important;
+  color: rgba(240,229,210,.84) !important;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.03);
 }
 
 .topbar__status .meta:empty{
   display: none !important;
 }
 
+.topbar__status .meta kbd,
+.topbar__status .clock kbd{
+  color: rgba(249,238,219,.96) !important;
+  border-color: rgba(191,145,88,.18) !important;
+  background: rgba(49,34,24,.58) !important;
+}
+
 .brandmark{
   grid-area: brand;
   justify-self: center;
   margin: 0 auto !important;
+}
+
+.admin-role-list{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.admin-role-list .leaderboard-badge{
+  margin: 0 8px 8px 0;
 }
 
 .auth{
