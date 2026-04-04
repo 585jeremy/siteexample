@@ -493,6 +493,53 @@ function escapeHtml(s) {
   });
 }
 
+function normalizeRouteTarget(target) {
+  let value = String(target || "/").trim();
+  if (!value) return "/";
+  value = value.replace(/^#/, "");
+  if (!value.startsWith("/")) value = `/${value}`;
+  value = value.replace(/\/+/g, "/");
+  if (value === "/home" || value === "/index.html") return "/";
+  return value;
+}
+
+function getCurrentRoutePath() {
+  if (location.hash && location.hash.startsWith("#/")) {
+    return normalizeRouteTarget(location.hash);
+  }
+  return normalizeRouteTarget(location.pathname || "/");
+}
+
+function rewriteInternalLinks(scope = document) {
+  if (!scope?.querySelectorAll) return;
+  scope.querySelectorAll('a[href^="#/"]').forEach((link) => {
+    const path = normalizeRouteTarget(link.getAttribute("href") || "/");
+    link.setAttribute("href", path);
+    link.setAttribute("data-route-link", path);
+  });
+}
+
+function navigateTo(target, options = {}) {
+  const { replace = false, scroll = "auto" } = options;
+  const path = normalizeRouteTarget(target);
+  const current = getCurrentRoutePath();
+
+  if (replace || current !== path || location.hash) {
+    history[replace ? "replaceState" : "pushState"]({}, "", path);
+  }
+
+  closeAuthModal();
+  route();
+
+  if (scroll !== false) {
+    window.scrollTo({ top: 0, left: 0, behavior: scroll });
+    const contentEl = document.querySelector(".content");
+    if (contentEl) {
+      contentEl.scrollTop = 0;
+    }
+  }
+}
+
 function setView(html) {
   rulesRoot.innerHTML = html;
   const el = rulesRoot.firstElementChild;
@@ -500,6 +547,7 @@ function setView(html) {
     el.classList.add("view");
     requestAnimationFrame(() => el.classList.add("view--in"));
   }
+  rewriteInternalLinks(rulesRoot);
 }
 
 function setSearchVisible(visible) {
@@ -922,7 +970,7 @@ function handleRegister(values) {
   setSession(username);
   updateAuthUi();
   closeAuthModal();
-  location.hash = "#/account";
+  navigateTo("/account");
 }
 
 function handleLogin(values) {
@@ -951,7 +999,7 @@ function handleLogin(values) {
   setSession(updatedAccount.username);
   updateAuthUi();
   closeAuthModal();
-  location.hash = "#/account";
+  navigateTo("/account");
 }
 
 function bindAuthModalControls() {
@@ -1030,7 +1078,7 @@ function initAuth() {
 
   if (accountBtn) {
     accountBtn.addEventListener("click", () => {
-      location.hash = "#/account";
+      navigateTo("/account");
     });
   }
 
@@ -5539,9 +5587,7 @@ function renderSearch(sections) {
 }
 
 function parseRoute() {
-  const raw = (location.hash || "#/").replace(/^#/, "");
-  const path = raw.startsWith("/") ? raw : `/${raw}`;
-  const clean = path.replace(/\/+/g, "/");
+  const clean = getCurrentRoutePath();
   const parts = clean.split("/").filter(Boolean);
   if (!parts.length) return { name: "home" };
 
@@ -5936,7 +5982,15 @@ function init() {
   initAuth();
   initPointerFx();
   startLocalClock();
-  if (!location.hash) location.hash = "#/";
+  const legacyHashPath = location.hash && location.hash.startsWith("#/")
+    ? normalizeRouteTarget(location.hash)
+    : "";
+  if (legacyHashPath) {
+    history.replaceState({}, "", legacyHashPath);
+  } else if ((location.pathname || "") === "/index.html") {
+    history.replaceState({}, "", "/");
+  }
+  rewriteInternalLinks(document);
   route();
 }
 
@@ -5948,29 +6002,49 @@ if (searchInput) {
 }
 
 document.addEventListener("click", (e) => {
-  const homeLink = e.target && typeof e.target.closest === "function"
-    ? e.target.closest('.dock__item[data-dock="home"]')
+  const link = e.target && typeof e.target.closest === "function"
+    ? e.target.closest("a[href]")
     : null;
 
-  if (!homeLink) return;
-  e.preventDefault();
+  if (!link) return;
+  if (link.target === "_blank" || link.hasAttribute("download")) return;
 
-  if ((location.hash || "#/") !== "#/") {
-    location.hash = "#/";
+  const href = link.getAttribute("href") || "";
+  if (!href) return;
+
+  if (/^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:")) {
     return;
   }
 
-  route();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (href.startsWith("/auth/") || href.startsWith("/api/")) {
+    return;
+  }
+
+  if (href.startsWith("#/")) {
+    e.preventDefault();
+    navigateTo(href);
+    return;
+  }
+
+  if (href.startsWith("/")) {
+    e.preventDefault();
+    navigateTo(href);
+  }
 });
 
-window.addEventListener("hashchange", () => {
+window.addEventListener("popstate", () => {
   closeAuthModal();
   route();
   window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   const contentEl = document.querySelector(".content");
   if (contentEl) {
     contentEl.scrollTop = 0;
+  }
+});
+
+window.addEventListener("hashchange", () => {
+  if (location.hash && location.hash.startsWith("#/")) {
+    navigateTo(location.hash, { replace: true, scroll: "auto" });
   }
 });
 

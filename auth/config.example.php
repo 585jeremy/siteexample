@@ -5,7 +5,7 @@ return [
     'discord_client_secret' => 'YOUR_DISCORD_CLIENT_SECRET',
     'discord_redirect_uri' => 'https://sgcnr.net/auth/callback.php',
     'discord_guild_id' => 'YOUR_DISCORD_GUILD_ID',
-    'site_home_url' => 'https://sgcnr.net/#/',
+    'site_home_url' => 'https://sgcnr.net/',
     'allowed_origin' => 'https://sgcnr.net',
     'session_cookie_path' => '/',
     'session_cookie_domain' => 'sgcnr.net',
