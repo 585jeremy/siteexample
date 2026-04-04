@@ -6,23 +6,136 @@ const AUTH = {
 };
 
 const DEFAULT_ROUTE = "dashboard";
+const shell = document.getElementById("staffShell");
 const app = document.getElementById("staffApp");
 const authActions = document.getElementById("staffAuthActions");
 const updated = document.getElementById("staffUpdated");
+const modeChip = document.getElementById("staffModeChip");
 
 const teams = [
-  { slug: "management", short: "MG", name: "Management Team", eyebrow: "Executive Control", roleId: "1479411370331078799", summary: "Leadership approvals, final sign-off, policy direction, and cross-team handoff control.", stats: [["Priority lanes", "5", "Leadership approvals and escalations."], ["Live approvals", "12", "Announcements, policy, and final sign-off."], ["Ops health", "Stable", "Quick read on workflow readiness."]], tools: [{ eyebrow: "Command Board", title: "Approvals and direction", summary: "High-impact calls, leadership notes, and final decisions.", items: ["Approve major internal changes", "Publish leadership notes", "Track escalations between teams"] }, { eyebrow: "Policy Desk", title: "Standards and staffing", summary: "Rules, staffing decisions, and operational direction.", items: ["Update internal standards", "Review staffing changes", "Coordinate cross-team priorities"] }], lanes: [["Leadership handoff", "Pending approvals, staffing changes, and policy updates.", "Live"], ["Executive follow-up", "Final checks before site-wide or staff-wide announcements.", "Queue"]] },
-  { slug: "admin", short: "AD", name: "Admin Team", eyebrow: "Operations Control", roleId: "1479481021383835771", summary: "Operational oversight, complex player cases, internal reviews, and escalation control.", stats: [["Case queue", "18", "High-priority reviews and escalations."], ["Account checks", "34", "Identity lookups and staff-side verification."], ["Ops state", "Focused", "Admin queue is ready for action."]], tools: [{ eyebrow: "Case Desk", title: "High-level operations", summary: "Complex tickets, escalations, and admin-side follow-up.", items: ["Review escalated tickets", "Handle sensitive player cases", "Coordinate with management"] }, { eyebrow: "Identity Review", title: "Account and link checks", summary: "Discord, FiveM, and internal identity review.", items: ["Inspect linked identities", "Check unusual account states", "Verify staff-side player records"] }], lanes: [["Escalation board", "Waiting admin review from moderation or helpers.", "Now"], ["Internal review", "Admin-only notes and decision history.", "Live"]] },
-  { slug: "moderation", short: "MOD", name: "Moderation Team", eyebrow: "Case Review", roleId: "1479481164371595406", summary: "Reports, evidence review, action tracking, and player-facing moderation workflow.", stats: [["Open reports", "27", "Fresh reports waiting first response."], ["Evidence lanes", "9", "Screens, clips, and logs in review."], ["Action state", "Active", "Moderation queue is moving."]], tools: [{ eyebrow: "Report Queue", title: "Reports and enforcement", summary: "Core moderation flow for incoming player cases.", items: ["Review fresh reports", "Track pending punishments", "Prepare escalation notes"] }, { eyebrow: "Evidence Desk", title: "Proof and case notes", summary: "Clips, screenshots, and internal moderation notes.", items: ["Inspect uploaded evidence", "Write staff-only notes", "Mark follow-up requirements"] }], lanes: [["Report thread", "Newest reports and mod-to-admin escalations.", "Live"], ["Evidence thread", "Shared proof review and case handoff.", "Queue"]] },
-  { slug: "development", short: "DEV", name: "Development Team", eyebrow: "Build Pipeline", roleId: "1479481179198455818", summary: "Feature planning, deploy notes, issue tracking, and technical handoff across the project.", stats: [["Build items", "14", "Features, fixes, and blockers in motion."], ["Deploy notes", "6", "Pending rollout notes and checks."], ["Pipeline", "Green", "Core workflow is ready."]], tools: [{ eyebrow: "Release Board", title: "Builds and deploys", summary: "Release notes, blockers, and current technical priorities.", items: ["Track active feature work", "Prepare rollout notes", "Log blockers for staff visibility"] }, { eyebrow: "Issue Desk", title: "Technical follow-up", summary: "Bug handoff, internal requests, and cross-team support.", items: ["Review incoming staff issues", "Link GitHub tasks", "Coordinate with testers"] }], lanes: [["Build sync", "Active features, blockers, and release windows.", "Live"], ["Tech handoff", "Requests from staff teams waiting dev review.", "Queue"]] },
-  { slug: "testing", short: "QA", name: "Testing Team", eyebrow: "Validation Deck", roleId: "1479481184470962349", summary: "Bug validation, repro notes, patch checks, and structured test handoff for releases.", stats: [["Runs queued", "11", "Patch checks and validation requests."], ["Bug repros", "8", "Open repro tasks and notes."], ["Release read", "Ready", "Testing lane is prepared."]], tools: [{ eyebrow: "Test Runs", title: "Validation and checks", summary: "Structured QA runs for updates and fixes.", items: ["Run assigned test plans", "Log pass or fail state", "Record repro details"] }, { eyebrow: "Bug Review", title: "Repro and handoff", summary: "Cleaner developer handoff for bug fixing.", items: ["Attach repro steps", "Mark needs rework", "Link dev-facing bug notes"] }], lanes: [["QA board", "Assigned runs, failed checks, and retest needs.", "Live"], ["Repro thread", "Detailed repro notes and verification updates.", "Queue"]] },
-  { slug: "translation", short: "TR", name: "Translation Team", eyebrow: "Locale Desk", roleId: "1479481187692056626", summary: "Localization review, terminology consistency, and content rollout for translated player-facing copy.", stats: [["Locale tasks", "10", "Strings waiting review or update."], ["Terminology gaps", "4", "Terms needing alignment."], ["Coverage", "Strong", "Translation lane is stable."]], tools: [{ eyebrow: "String Review", title: "Localization backlog", summary: "Review new copy and keep translations aligned.", items: ["Review pending strings", "Mark missing translations", "Track locale updates"] }, { eyebrow: "Tone Guide", title: "Terminology and style", summary: "Shared wording consistency for the brand.", items: ["Keep glossary aligned", "Review phrasing quality", "Flag unclear source copy"] }], lanes: [["Locale queue", "Incoming strings and review status.", "Live"], ["Style sync", "Glossary and tone review follow-ups.", "Queue"]] },
-  { slug: "helper", short: "HP", name: "Helper Team", eyebrow: "Player Support", roleId: "1479485844304953458", summary: "Player questions, onboarding help, FAQ gaps, and first-response workflow for everyday support.", stats: [["Open asks", "21", "Player questions waiting response."], ["Guide gaps", "7", "Missing or outdated help topics."], ["Support mood", "Warm", "Player help lane is healthy."]], tools: [{ eyebrow: "Help Queue", title: "First-response support", summary: "Daily player questions and helper-side follow-up.", items: ["Answer onboarding questions", "Escalate account or rule issues", "Track repeat confusion points"] }, { eyebrow: "Guide Desk", title: "Knowledge and FAQ", summary: "Spot weak help pages and support friction.", items: ["Log FAQ gaps", "Suggest guide updates", "Track recurring support patterns"] }], lanes: [["Support handoff", "Helper-to-admin or helper-to-moderation escalations.", "Live"], ["FAQ updates", "Repeated confusion and content follow-up.", "Queue"]] },
-  { slug: "security", short: "SEC", name: "Security Team", eyebrow: "Incident Control", roleId: "1479481204028866600", summary: "Internal incident review, abuse tracking, access control checks, and security-side escalation handling.", stats: [["Alerts", "6", "Incidents and access concerns."], ["Reviews", "4", "Open internal investigations."], ["Security state", "Guarded", "Monitoring is active."]], tools: [{ eyebrow: "Incident Board", title: "Alerts and investigations", summary: "Sensitive incident tracking and security review.", items: ["Review abuse alerts", "Track internal investigations", "Escalate high-risk issues"] }, { eyebrow: "Access Desk", title: "Permissions and trust", summary: "Check internal access issues and unusual patterns.", items: ["Review access anomalies", "Audit sensitive permission use", "Track suspicious behavior"] }], lanes: [["Incident lane", "Open incident notes and urgent review items.", "Live"], ["Access review", "Permission checks and internal audit follow-up.", "Queue"]] },
-  { slug: "creator", short: "CC", name: "Content Creator Team", eyebrow: "Media Studio", roleId: "1479485986772877414", summary: "Creative requests, campaign assets, visual rollout, and staff-side handoff for media production.", stats: [["Asset asks", "13", "Pending banners, art, and promo tasks."], ["Review queue", "5", "Waiting approval or revision."], ["Studio state", "Rolling", "Content lane is active."]], tools: [{ eyebrow: "Content Board", title: "Assets and campaigns", summary: "Visual requests, deadlines, and release planning.", items: ["Review incoming asset asks", "Track campaign deliverables", "Prepare release visuals"] }, { eyebrow: "Approval Desk", title: "Creative review", summary: "Feedback, revisions, and sign-off flow.", items: ["Collect internal feedback", "Log change requests", "Mark assets approved"] }], lanes: [["Creative handoff", "Requests from management, social, and development.", "Live"], ["Review thread", "Feedback notes and revision tracking.", "Queue"]] },
-  { slug: "social", short: "SOC", name: "Social Team", eyebrow: "Community Pulse", roleId: "1479485995190583356", summary: "Post scheduling, platform coordination, event promotion, and community-facing campaign planning.", stats: [["Post queue", "16", "Scheduled and pending posts."], ["Campaigns", "7", "Active community pushes."], ["Pulse", "Up", "Social calendar is active."]], tools: [{ eyebrow: "Social Calendar", title: "Posts and timing", summary: "Plan, schedule, and track community content.", items: ["Prepare platform-specific posts", "Track event promotion", "Coordinate timing with creators"] }, { eyebrow: "Community Desk", title: "Engagement planning", summary: "Respond to trends and support public comms.", items: ["Review campaign impact", "Track upcoming events", "Prepare community highlights"] }], lanes: [["Posting lane", "Queued posts and timing updates.", "Live"], ["Campaign sync", "Cross-team promotion and community follow-up.", "Queue"]] },
+  {
+    slug: "management",
+    short: "MG",
+    name: "Management Team",
+    roleId: "1479411370331078799",
+    eyebrow: "Executive command",
+    summary: "Complete operational control, leadership approvals, cross-team visibility, and the top-level live surfaces once the server and bot integrations are online.",
+    stats: [["Clearance", "Full", "Management sees every workspace and every prepared live surface."], ["Prepared live lanes", "6", "txAdmin, server telemetry, incident pressure, and cross-team approvals."], ["Command state", "Prime", "Leadership workspace is built to sit above every team."]],
+    channels: [["Executive command", "Leadership-only control lane for final sign-off, staffing, and priority calls."], ["Cross-team escalations", "All urgent handoffs from Admin, Moderation, Security, and Development."], ["Broadcast approvals", "Final release for staff-wide notices, policy shifts, and rollout timing."], ["Live incident desk", "Single place for critical server, moderation, and access incidents."]],
+    modules: [["Live txAdmin console", "Prepared command surface for runtime actions, restarts, player management, and server-state control.", "prepared"], ["Live server data bus", "Prepared dashboard cards for queue, player count, performance, restart state, and incident pressure.", "prepared"], ["Executive approvals matrix", "Approvals, sign-off lanes, and staffing decisions across the whole portal.", "ready"], ["Cross-team command view", "Aggregated overview of every staff workspace and its highest-priority signals.", "ready"]],
+    feeds: [["Priority incident stream", "Prepared high-priority feed for future server and auth incidents.", "prepared"], ["Release and deploy watch", "Prepared launch board for site, API, and server rollout events.", "prepared"], ["Staff action firehose", "Prepared unified mirror of major staff actions from the Discord bot and future backend.", "prepared"], ["Command notes", "Leadership note stream for follow-up actions and policy decisions.", "ready"]],
+  },
+  {
+    slug: "admin",
+    short: "AD",
+    name: "Admin Team",
+    roleId: "1479481021383835771",
+    eyebrow: "Operations control",
+    summary: "High-level cases, linked identity review, appeal decisions, and staff-wide operational oversight with a stronger moderation mirror than any other non-management workspace.",
+    stats: [["Ops coverage", "High", "Admin controls escalations, linked accounts, and staff-wide case review."], ["Prepared live feeds", "4", "Moderation mirror, account integrity, appeals, and bot-side action logs."], ["Decision pressure", "Active", "This workspace is tuned for heavy review and escalation flow."]],
+    channels: [["Admin operations", "Main internal lane for difficult cases, escalations, and operational decisions."], ["Appeal and review", "Sensitive punishment reviews, appeals, and edge-case resolution."], ["Identity integrity", "Discord, FiveM, and account-link review for suspicious or broken states."], ["Moderation bridge", "Admin-side mirror of moderation escalation and bot-fed action logs."]],
+    modules: [["Live moderation mirror", "Prepared log wall for punishments, warnings, role changes, and other bot-fed moderation signals.", "prepared"], ["Linked account review", "Review Discord-to-FiveM identity matches, suspicious links, and account anomalies.", "ready"], ["Appeal decision board", "Organized case review space for staff-wide decisions and resolution tracking.", "ready"], ["Admin action oversight", "Prepared internal history for major staff decisions, bans, and escalations.", "prepared"]],
+    feeds: [["Case escalation queue", "Live-ready intake for reports and helper or moderator escalations.", "ready"], ["Bot moderation log", "Prepared Discord-bot mirror for major actions, reviewed from the admin level.", "prepared"], ["Identity exceptions", "Prepared alert lane for mismatched links and integrity issues.", "prepared"], ["Decision notes", "Internal admin notes and follow-up trail for sensitive cases.", "ready"]],
+  },
+  {
+    slug: "moderation",
+    short: "MOD",
+    name: "Moderation Team",
+    roleId: "1479481164371595406",
+    eyebrow: "Case review",
+    summary: "Fast report handling, evidence review, action tracking, and prepared live moderation streams from the Discord bot with a smaller surface than Admin.",
+    stats: [["Case intake", "Focused", "Moderation centers around report speed, evidence quality, and action clarity."], ["Prepared feeds", "3", "Action stream, evidence queue, and escalation handoff."], ["Response mode", "Hot", "Built for quick intake and clean escalation."]],
+    channels: [["Report intake", "First-look report queue with quick triage and ownership assignment."], ["Evidence wall", "Screens, clips, and proof review for active cases."], ["Action notes", "Case notes, warning history, and short moderation summaries."], ["Escalation handoff", "Structured path from Moderator to Admin or Security when a case grows."]],
+    modules: [["Live action stream", "Prepared bot-fed panel for warnings, kicks, bans, and timed punishments.", "prepared"], ["Evidence review wall", "Working space for proof quality, timestamps, and case context.", "ready"], ["Case ownership board", "Assign, track, and escalate active moderation reports cleanly.", "ready"], ["Repeat-offender glance", "Prepared view for pattern tracking and repeat behavior review.", "prepared"]],
+    feeds: [["Fresh report lane", "Newest reports waiting first moderation response.", "ready"], ["Action fire line", "Prepared live list of moderation actions once bot sync is expanded.", "prepared"], ["Escalation summary", "Compact queue of cases waiting admin or security attention.", "ready"], ["Policy reminders", "Shared moderation guidance and quick-reference policy notes.", "ready"]],
+  },
+  {
+    slug: "development",
+    short: "DEV",
+    name: "Development Team",
+    roleId: "1479481179198455818",
+    eyebrow: "Build pipeline",
+    summary: "Feature delivery, deployment readiness, technical issue intake, and prepared runtime surfaces for when the server and API are fully live.",
+    stats: [["Release track", "Green", "This workspace is built around deploys, blockers, and system readiness."], ["Prepared live lanes", "4", "Service health, txAdmin read-outs, config drift, and runtime watch."], ["Build focus", "High", "Technical handoff and delivery remain at the center."]],
+    channels: [["Deploy board", "Feature releases, patch planning, and launch approvals."], ["Issue bridge", "Incoming technical issues from staff teams and testers."], ["Config review", "Server config, API config, and environment change follow-up."], ["Health watch", "Prepared read-only ops lane for server and backend health."]],
+    modules: [["Service health board", "Prepared dashboard for API state, auth bridge, and portal uptime once the backend matures.", "prepared"], ["Runtime watch", "Prepared txAdmin and server-performance read-outs for operational debugging.", "prepared"], ["Issue handoff desk", "GitHub and internal issue flow for incoming requests and blockers.", "ready"], ["Release cut tracker", "Track release slices, rollback notes, and staging readiness.", "ready"]],
+    feeds: [["Build blocker queue", "Open blockers and unresolved technical risks.", "ready"], ["Deploy timeline", "Prepared event stream for releases, rollbacks, and hotfixes.", "prepared"], ["Service alerts", "Prepared incident lane for backend, auth, or runtime issues.", "prepared"], ["Cross-team tech asks", "Incoming technical tasks from Admin, Testing, and Management.", "ready"]],
+  },
+  {
+    slug: "testing",
+    short: "QA",
+    name: "Testing Team",
+    roleId: "1479481184470962349",
+    eyebrow: "Validation deck",
+    summary: "Regression checks, repro quality, release validation, and clear developer handoff with structured testing lanes.",
+    stats: [["Validation load", "Stable", "QA is built to move from test plans into clean pass or fail results."], ["Prepared live lanes", "2", "Release candidate watch and patch validation pulse."], ["QA state", "Ready", "Structured for repeatable checks, not chaos."]],
+    channels: [["Regression queue", "Assigned test plans and current validation runs."], ["Bug repro bank", "Clear reproduction steps, evidence, and notes for developers."], ["Patch validation", "Release-candidate checks and change review before sign-off."], ["Fail or pass board", "Simple resolution lane for approved, failed, or needs-rework states."]],
+    modules: [["Validation matrix", "Track current test runs, blockers, and pass or fail states.", "ready"], ["Bug repro archive", "Keep reproducible issues clean and ready for dev handoff.", "ready"], ["Release candidate watch", "Prepared lane for monitoring release validation progress live.", "prepared"], ["Retest tracker", "Follow-up board for fixed issues that need confirmation.", "ready"]],
+    feeds: [["Failure recap", "Issues that failed validation and need developer attention.", "ready"], ["Ready-to-ship queue", "Items that passed QA and can move forward.", "ready"], ["Live patch pulse", "Prepared signal lane for active validation windows.", "prepared"], ["Tester handoff", "Internal note flow between QA and development.", "ready"]],
+  },
+  {
+    slug: "translation",
+    short: "TR",
+    name: "Translation Team",
+    roleId: "1479481187692056626",
+    eyebrow: "Locale desk",
+    summary: "Localized copy review, glossary control, terminology consistency, and rollout planning for translated player-facing content.",
+    stats: [["Locale load", "Balanced", "Translation focuses on consistency and rollout quality."], ["Prepared live lanes", "2", "Locale rollout watch and source-change monitoring."], ["Coverage state", "Strong", "Built to keep terms aligned across updates."]],
+    channels: [["String queue", "Incoming phrases, text changes, and untranslated content."], ["Glossary desk", "Approved terms, phrasing standards, and consistency checks."], ["Source copy watch", "Review source changes before translation work starts."], ["Locale rollout", "Plan when language updates move into the public site or tools."]],
+    modules: [["String review board", "Review pending strings and keep translation status visible.", "ready"], ["Glossary control", "Central term alignment for titles, commands, and onboarding copy.", "ready"], ["Locale rollout planner", "Prepared release lane for pushing language updates into production.", "prepared"], ["Source diff watch", "Prepared watch panel for spotting text changes that need localization.", "prepared"]],
+    feeds: [["Pending localization", "Open text needing translation or revision.", "ready"], ["Terminology conflicts", "Terms that need alignment before release.", "ready"], ["Rollout pulse", "Prepared watch for active localization pushes.", "prepared"], ["Copy review notes", "Internal feedback and phrasing guidance.", "ready"]],
+  },
+  {
+    slug: "helper",
+    short: "HP",
+    name: "Helper Team",
+    roleId: "1479485844304953458",
+    eyebrow: "Player support",
+    summary: "First-response player support, onboarding help, FAQ gaps, and escalation handoff for issues that need more than a quick answer.",
+    stats: [["Support flow", "Warm", "Helpers focus on clarity, speed, and clean escalation."], ["Prepared live lanes", "2", "Onboarding watch and escalation pulse."], ["Queue mood", "Steady", "Support work is structured for speed, not noise."]],
+    channels: [["Player help queue", "Daily questions, onboarding issues, and first-response support."], ["FAQ gap desk", "Track what confuses players repeatedly and what needs guide updates."], ["Onboarding watch", "Spot weak points in the first player experience."], ["Escalation relay", "Pass account, moderation, or technical issues to the right staff team."]],
+    modules: [["Help intake board", "Assign and resolve first-response support requests.", "ready"], ["FAQ gap tracker", "Highlight repeated confusion and missing support content.", "ready"], ["Onboarding watch", "Prepared pattern board for common first-time player blockers.", "prepared"], ["Escalation relay", "Structured handoff from Helper to Admin, Moderator, or Development.", "ready"]],
+    feeds: [["Fresh help asks", "Newest questions and unresolved support issues.", "ready"], ["Escalation pulse", "Prepared queue of issues that need higher-level review.", "prepared"], ["Guide update requests", "Support-driven content improvements for the public site.", "ready"], ["Helper notes", "Short staff-only notes for repeated player confusion.", "ready"]],
+  },
+  {
+    slug: "security",
+    short: "SEC",
+    name: "Security Team",
+    roleId: "1479481204028866600",
+    eyebrow: "Incident control",
+    summary: "Incident review, access anomalies, abuse signals, and higher-risk staff-side investigations with prepared live feeds for future auth and server telemetry.",
+    stats: [["Risk state", "Guarded", "Security work is built around incidents, access control, and suspicious patterns."], ["Prepared live lanes", "4", "Auth anomalies, incident pressure, access audits, and alert surfaces."], ["Response focus", "Sharp", "This workspace is tuned for sensitive review."]],
+    channels: [["Incident desk", "Primary security incident and abuse investigation lane."], ["Access audit", "Review sensitive role use, auth issues, and internal access changes."], ["Suspicious activity", "Signals that need verification, pattern review, or escalation."], ["Security escalation", "High-risk handoff into Management or Admin when an issue grows."]],
+    modules: [["Incident monitor", "Track active incidents, ownership, and resolution progress.", "ready"], ["Auth anomaly review", "Prepared panel for suspicious login or role-sync patterns once the backend exposes them.", "prepared"], ["Access audit trail", "Structured record of sensitive permission changes and access checks.", "ready"], ["Risk escalation lane", "Escalate major issues to Management fast and cleanly.", "ready"]],
+    feeds: [["Security alert pulse", "Prepared high-priority incident feed for future server and auth events.", "prepared"], ["Access review stream", "Sensitive access checks and trust reviews.", "ready"], ["Abuse signal queue", "Incoming suspicious behavior or repeated anomaly pattern reports.", "ready"], ["Security notes", "Internal staff-only decisions and investigation updates.", "ready"]],
+  },
+  {
+    slug: "creator",
+    short: "CC",
+    name: "Content Creator Team",
+    roleId: "1479485986772877414",
+    eyebrow: "Media studio",
+    summary: "Creative asset planning, campaign production, review flow, and visual release prep for content that supports the project publicly.",
+    stats: [["Studio pace", "Rolling", "Creator work is organized around campaigns, approvals, and production flow."], ["Prepared live lanes", "2", "Media drop timing and campaign release pulse."], ["Asset pressure", "Medium", "Designed to keep requests and approvals clean."]],
+    channels: [["Campaign board", "Visual campaigns, release planning, and deliverables."], ["Asset approval", "Internal approval path for thumbnails, graphics, and promos."], ["Shot list", "Planned content shots, captures, and production notes."], ["Media release board", "Track which assets are ready to ship publicly."]],
+    modules: [["Asset request board", "Intake, organize, and prioritize new visual asks.", "ready"], ["Approval canvas", "Review revisions and move assets into final approval.", "ready"], ["Campaign production map", "Track active campaigns and which assets they still need.", "ready"], ["Media drop planner", "Prepared timing lane for aligned releases with Social and Management.", "prepared"]],
+    feeds: [["Creative queue", "New creative tasks waiting pickup or review.", "ready"], ["Approval stream", "Assets waiting sign-off or revision.", "ready"], ["Release pulse", "Prepared coordination lane for asset publication timing.", "prepared"], ["Content notes", "Internal notes for revisions, concepts, and campaign direction.", "ready"]],
+  },
+  {
+    slug: "social",
+    short: "SOC",
+    name: "Social Team",
+    roleId: "1479485995190583356",
+    eyebrow: "Community pulse",
+    summary: "Post scheduling, campaign timing, public communication planning, and prepared live engagement surfaces for future analytics and event pushes.",
+    stats: [["Calendar state", "Loaded", "Social work lives around timing, coordination, and community visibility."], ["Prepared live lanes", "3", "Engagement pulse, campaign timing, and live announcement sync."], ["Platform focus", "Active", "Built for public-facing coordination and timing."]],
+    channels: [["Post calendar", "Scheduling, platform timing, and post planning."], ["Campaign sync", "Cross-team alignment for releases, events, and promotions."], ["Announcement mirror", "Public announcement coordination with Management and Content Creator."], ["Community pulse", "Prepared view for engagement, reactions, and public momentum."]],
+    modules: [["Content calendar", "Track upcoming posts, deadlines, and platform needs.", "ready"], ["Announcement sync", "Coordinate outgoing communication across teams and channels.", "ready"], ["Community pulse", "Prepared dashboard for reaction and engagement patterns.", "prepared"], ["Campaign analytics lane", "Prepared summary board for future post and campaign performance metrics.", "prepared"]],
+    feeds: [["Scheduled post queue", "Upcoming posts and release timing.", "ready"], ["Announcement lane", "Active or pending public messaging items.", "ready"], ["Engagement watch", "Prepared future live reaction and momentum stream.", "prepared"], ["Community highlights", "Useful wins, moments, and content opportunities to amplify.", "ready"]],
+  },
 ];
 
+const managementRoleId = teams[0].roleId;
 const teamsBySlug = Object.fromEntries(teams.map((team) => [team.slug, team]));
 const state = { status: "loading", user: null, roles: [], syncStatus: "loading", verifiedAt: "", error: "" };
 
@@ -30,13 +143,7 @@ function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 }
 
-function initials(value) {
-  const parts = String(value || "Staff").trim().split(/\s+/).filter(Boolean);
-  return (parts[0]?.[0] || "S") + (parts[1]?.[0] || "");
-}
-
 function stampNow() {
-  if (!updated) return;
   const text = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "2-digit",
@@ -53,21 +160,14 @@ function routeSlug() {
   return slug === DEFAULT_ROUTE || teamsBySlug[slug] ? slug : DEFAULT_ROUTE;
 }
 
-function routeTeam() {
-  return teamsBySlug[routeSlug()] || null;
-}
-
-function currentReturnUrl(hashValue = window.location.hash || "#/dashboard") {
-  const normalized = hashValue.startsWith("#/") ? hashValue : "#/dashboard";
-  return `${window.location.origin}${window.location.pathname}${normalized}`;
-}
-
-function loginHref(hashValue) {
-  return `${AUTH.login}?return_to=${encodeURIComponent(currentReturnUrl(hashValue))}`;
+function loginHref() {
+  const target = `${window.location.origin}${window.location.pathname}#/dashboard`;
+  return `${AUTH.login}?return_to=${encodeURIComponent(target)}`;
 }
 
 function logoutHref() {
-  return `${AUTH.logout}?return_to=${encodeURIComponent(currentReturnUrl("#/dashboard"))}`;
+  const target = `${window.location.origin}${window.location.pathname}#/dashboard`;
+  return `${AUTH.logout}?return_to=${encodeURIComponent(target)}`;
 }
 
 function fetchJson(url) {
@@ -82,106 +182,122 @@ function fetchJson(url) {
   });
 }
 
-function unlockedTeams() {
-  return teams.filter((team) => state.roles.includes(team.roleId));
+function isSignedIn() {
+  return state.status === "signed_in" && !!state.user;
 }
 
-function accessState(team) {
-  if (state.status === "loading") {
-    return { kind: "loading", label: "Checking access", summary: "Discord verification is being checked for this workspace." };
+function hasManagementAccess() {
+  return state.roles.includes(managementRoleId);
+}
+
+function accessSet() {
+  const set = new Set();
+  if (!isSignedIn()) return set;
+  if (hasManagementAccess()) {
+    teams.forEach((team) => set.add(team.slug));
+    return set;
   }
-  if (state.status === "error") {
-    return { kind: "error", label: "Auth check failed", summary: state.error || "The live Discord verification endpoints could not be reached." };
-  }
-  if (state.status !== "signed_in") {
-    return { kind: "login", label: "Discord verification required", summary: `Sign in with Discord to check whether this account unlocks ${team.name}.` };
-  }
-  if (state.roles.includes(team.roleId)) {
-    return { kind: "granted", label: "Workspace unlocked", summary: `${team.name} is unlocked for this verified Discord account.` };
-  }
-  return { kind: "denied", label: "Workspace locked", summary: `${team.name} requires the exact verified Discord team role before the workspace opens.` };
+  teams.forEach((team) => {
+    if (state.roles.includes(team.roleId)) set.add(team.slug);
+  });
+  return set;
+}
+
+function hasTeamAccess(team) {
+  return accessSet().has(team.slug);
+}
+
+function shellMode() {
+  shell.classList.toggle("is-gated", !isSignedIn());
+  modeChip.textContent = !isSignedIn() ? "Staff access gateway" : hasManagementAccess() ? "Management override active" : "Role dashboard ready";
 }
 
 function accountMarkup() {
   if (!state.user) return "";
+  const name = state.user.verifiedIdentity || state.user.discordDisplayName || state.user.discordUsername || "Verified staff";
   const avatar = state.user.discordAvatarUrl
-    ? `<img class="staff-account__avatar" src="${esc(state.user.discordAvatarUrl)}" alt="${esc(state.user.verifiedIdentity || state.user.discordUsername || "Staff account")}" />`
-    : `<span class="staff-account__avatar staff-account__avatar--fallback">${esc(initials(state.user.verifiedIdentity || state.user.discordUsername))}</span>`;
-  return `<div class="staff-account">${avatar}<div class="staff-account__copy"><strong class="staff-account__name">${esc(state.user.verifiedIdentity || state.user.discordDisplayName || state.user.discordUsername)}</strong><span class="staff-account__meta">${esc(state.user.discordUsername || "Discord account")}</span></div></div>`;
+    ? `<img class="staff-account__avatar" src="${esc(state.user.discordAvatarUrl)}" alt="${esc(name)}" />`
+    : `<span class="staff-account__avatar staff-account__avatar--fallback">${esc(name.slice(0, 2).toUpperCase())}</span>`;
+  return `<div class="staff-account">${avatar}<div class="staff-account__copy"><strong class="staff-account__name">${esc(name)}</strong><span class="staff-account__meta">${esc(state.user.discordUsername || "discord account")}</span></div></div>`;
 }
 
-function topbarActions() {
-  const team = routeTeam();
-  if (state.status === "signed_in" && state.user) {
-    authActions.innerHTML = `${accountMarkup()}<button class="staff-action" type="button" data-action="refresh-auth">Refresh role check</button><a class="staff-action staff-action--primary" href="${logoutHref()}">Logout</a>`;
-    return;
-  }
+function renderTopbar() {
+  shellMode();
   if (state.status === "loading") {
-    authActions.innerHTML = `<button class="staff-action" type="button" disabled>Checking session</button><button class="staff-action staff-action--primary" type="button" disabled>Loading roles</button>`;
+    authActions.innerHTML = `<button class="staff-action" type="button" disabled>Checking session</button><button class="staff-action staff-action--primary" type="button" disabled>Preparing gateway</button>`;
     return;
   }
-  const label = team ? `Login to ${team.name}` : "Login to Staff Portal";
-  authActions.innerHTML = `<button class="staff-action" type="button" disabled>Discord verification required</button><a class="staff-action staff-action--primary" href="${loginHref(team ? `#/${team.slug}` : "#/dashboard")}">${esc(label)}</a>`;
+  if (!isSignedIn()) {
+    authActions.innerHTML = `<button class="staff-action" type="button" disabled>Discord-only verification</button><a class="staff-action staff-action--primary" href="${loginHref()}">Login to Staff Portal</a>`;
+    return;
+  }
+  authActions.innerHTML = `${accountMarkup()}<button class="staff-action" type="button" data-action="refresh-auth">Refresh role check</button><a class="staff-action staff-action--primary" href="${logoutHref()}">Logout</a>`;
 }
 
 function statCards(items) {
   return items.map(([label, value, meta]) => `<section class="staff-overview__card"><span class="staff-overview__label">${esc(label)}</span><div class="staff-overview__value">${esc(value)}</div><p class="staff-overview__meta">${esc(meta)}</p></section>`).join("");
 }
 
-function accessPanel(team, access) {
-  const mode = access.kind === "granted" ? "ok" : access.kind === "denied" || access.kind === "error" ? "warn" : "";
-  const title = access.kind === "granted" ? "Role verified" : access.kind === "error" ? "Auth bridge unavailable" : `${team.name} login`;
-  const targetHash = team.slug ? `#/${team.slug}` : "#/dashboard";
-  const otherUnlocked = unlockedTeams().filter((entry) => !team.slug || entry.slug !== team.slug).map((entry) => entry.name).join(", ") || "No other team spaces are unlocked on this Discord account yet.";
-  const buttons = access.kind === "granted"
-    ? `<div class="staff-access__buttons"><a class="staff-panel__button staff-panel__button--primary" href="${targetHash}">Open ${esc(team.name)}</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button></div>`
-    : `<div class="staff-access__buttons"><a class="staff-panel__button staff-panel__button--primary" href="${loginHref(targetHash)}">Login to ${esc(team.name)}</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button></div>`;
-  return `<section class="staff-card"><span class="staff-card__eyebrow">${esc(team.name)} Login</span><h2 class="staff-card__title">${esc(title)}</h2><p class="staff-card__summary">${esc(access.summary)}</p><div class="staff-access"><div class="staff-access__state ${mode ? `staff-access__state--${mode}` : ""}">${esc(access.label)}</div>${buttons}<div class="staff-access__summary"><strong>Verified identity</strong><span>${esc(state.user?.verifiedIdentity || "No verified Discord session")}</span></div><div class="staff-access__meta"><strong>Required role</strong>${esc(`${team.name} (${team.roleId})`)}</div><div class="staff-access__meta"><strong>Role sync status</strong>${esc(state.syncStatus || "pending")}</div><div class="staff-access__meta"><strong>Last Discord verification</strong>${esc(state.verifiedAt ? new Date(state.verifiedAt).toLocaleString("en-GB") : "Pending verification")}</div><div class="staff-access__meta"><strong>Other unlocked teams</strong>${esc(otherUnlocked)}</div></div></section>`;
+function statusBadge(label, variant) {
+  return `<span class="staff-state-pill staff-state-pill--${variant}">${esc(label)}</span>`;
 }
 
-function teamTools(team) {
-  return team.tools.map((tool) => `<article class="staff-card"><span class="staff-card__eyebrow">${esc(tool.eyebrow)}</span><h3 class="staff-card__title">${esc(tool.title)}</h3><p class="staff-card__summary">${esc(tool.summary)}</p><ul class="staff-card__list">${tool.items.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></article>`).join("");
+function rowStatus(stateName) {
+  const label = stateName === "ready" ? "Ready" : stateName === "prepared" ? "Prepared" : "Restricted";
+  return `<span class="workspace-row__status workspace-row__status--${stateName}">${esc(label)}</span>`;
 }
 
-function teamLanes(team) {
-  return `<section class="staff-thread"><span class="staff-thread__eyebrow">${esc(team.name)} Lanes</span><ul class="staff-thread__list">${team.lanes.map(([name, body, time]) => `<li class="staff-thread__item"><div><strong class="staff-thread__name">${esc(name)}</strong><p class="staff-thread__body">${esc(body)}</p></div><span class="staff-thread__time">${esc(time)}</span></li>`).join("")}</ul></section>`;
+function rowsMarkup(items, restricted = false) {
+  return items.map(([title, body, status]) => `<li class="workspace-row"><div class="workspace-row__copy"><strong class="workspace-row__title">${esc(title)}</strong><span class="workspace-row__body">${esc(body)}</span></div>${rowStatus(restricted ? "restricted" : status)}</li>`).join("");
+}
+
+function gateView() {
+  const gateState = state.status === "error" ? "Auth bridge unavailable" : state.status === "loading" ? "Checking Discord session" : "General staff login";
+  const gateCopy = state.status === "error"
+    ? state.error || "The staff site could not verify the live Discord endpoints yet."
+    : "Use the general staff login first. After Discord verification, the front page becomes your staff dashboard and only the workspaces your verified roles unlock can be entered.";
+  return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">SGCNR internal access</span><h1 class="staff-panel__title">Staff login<br />gateway</h1><p class="staff-panel__summary">${esc(gateCopy)}</p><div class="staff-panel__actions"><a class="staff-panel__button staff-panel__button--primary" href="${loginHref()}">Login with Discord</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh session</button></div></article><aside class="staff-overview">${statCards([["Access mode", "Discord", "No manual staff usernames or passwords are used here."], ["After login", "Dashboard", "You land on the role dashboard first, not inside a team."], ["Gateway state", gateState, "Bottom navigation stays hidden until a valid staff session exists."]])}</aside></section><section class="dashboard-grid"><article class="staff-card"><span class="staff-card__eyebrow">How this works</span><h2 class="staff-card__title">One login, then role-based workspaces</h2><p class="staff-card__summary">Every staff member enters through the same secure gateway. Once Discord verification succeeds, the dashboard reveals the teams that this account is actually allowed to enter.</p><ul class="workspace-list">${rowsMarkup([["General staff login", "Single secure entry point for the whole staff portal.", "ready"], ["Role dashboard", "Shows every workspace unlocked for the verified Discord account.", "ready"], ["Management override", "Management Team unlocks every team workspace and every prepared live surface.", "ready"], ["Prepared live surfaces", "txAdmin, server telemetry, moderation streams, and bot-fed views are scaffolded for future live wiring.", "prepared"]])}</ul></article><article class="staff-card"><span class="staff-card__eyebrow">Protected by design</span><h2 class="staff-card__title">The first page stays clean</h2><p class="staff-card__summary">Before login you do not see the floating team bar or the internal workspaces. The entire first impression is just the staff access gate.</p><ul class="workspace-list">${rowsMarkup([["No bottom dock before login", "The team navigation stays disabled until the session is verified.", "ready"], ["No cross-team guessing", "Users cannot browse team tools before the gateway is passed.", "ready"], ["Role verification first", "The dashboard and team pages only open after Discord roles are checked.", "ready"], ["Shared background identity", "The full-site SGCNR art stays present across the whole portal, not only one section.", "ready"]])}</ul></article></section></section>`;
+}
+
+function teamTile(team, unlocked) {
+  const preview = team.modules.slice(0, 3).map(([title]) => `<li>${esc(title)}</li>`).join("");
+  const footer = unlocked
+    ? `${statusBadge(hasManagementAccess() && !state.roles.includes(team.roleId) ? "Management override" : "Unlocked", "open")}<a class="staff-panel__button staff-panel__button--primary" href="#/${team.slug}">Enter workspace</a>`
+    : `${statusBadge("Role required", "locked")}<button class="staff-panel__button" type="button" disabled>Locked</button>`;
+  return `<article class="team-tile ${unlocked ? "team-tile--open" : "team-tile--locked"}"><div class="team-tile__top"><span class="team-tile__badge">${esc(team.short)}</span>${statusBadge(unlocked ? "Available" : "Locked", unlocked ? "open" : "locked")}</div><div><h2 class="team-tile__title">${esc(team.name)}</h2><p class="team-tile__summary">${esc(team.summary)}</p></div><ul class="team-tile__list">${preview}</ul><div class="team-tile__footer">${footer}</div></article>`;
 }
 
 function dashboardView() {
-  const unlocked = unlockedTeams();
-  if (state.status !== "signed_in" || !state.user) {
-    return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">Discord-only staff access</span><h1 class="staff-panel__title">Staff Portal<br />Login</h1><p class="staff-panel__summary">Sign in with Discord first. After login, the front page becomes the role dashboard and only the team spaces that match your verified staff roles unlock.</p><div class="staff-panel__actions"><a class="staff-panel__button staff-panel__button--primary" href="${loginHref("#/dashboard")}">Login to Staff Portal</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button></div></article><aside class="staff-overview">${statCards([["Team lanes", String(teams.length), "Management, moderation, development, testing, and more."], ["Auth mode", "Discord", "No manual staff login is used here."], ["Access type", "Role-gated", "Only verified staff roles unlock a workspace."]])}</aside></section><section class="staff-grid"><article class="staff-card"><span class="staff-card__eyebrow">What unlocks after login</span><h2 class="staff-card__title">Role-based dashboard</h2><p class="staff-card__summary">Once Discord verification succeeds, this page turns into the personal staff dashboard for that account.</p><ul class="staff-card__list"><li>Only the exact verified staff roles unlock their team spaces.</li><li>The dashboard shows which teams are currently open for this account.</li><li>Every team route still has its own dedicated login and role check state.</li></ul></article><article class="staff-card"><span class="staff-card__eyebrow">Protected access</span><h2 class="staff-card__title">No cross-team logins</h2><p class="staff-card__summary">Having staff access in one area does not unlock another one. Management, Admin, Moderation, Security, and the other teams all stay isolated behind their own Discord role.</p><ul class="staff-card__list"><li>Management only opens with the Management Team role.</li><li>Admin only opens with the Admin Team role.</li><li>Every other team follows the same rule.</li></ul></article></section></section>`;
-  }
-  const identity = state.user.verifiedIdentity || state.user.discordDisplayName || state.user.discordUsername;
-  if (!unlocked.length) {
-    return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">Verified staff dashboard</span><h1 class="staff-panel__title">No staff role<br />unlocked</h1><p class="staff-panel__summary">${esc(identity)} is signed in, but this Discord account does not currently hold any of the verified staff team roles used by the portal.</p><div class="staff-panel__actions"><button class="staff-panel__button staff-panel__button--primary" type="button" data-action="refresh-auth">Refresh role check</button><a class="staff-panel__button" href="${logoutHref()}">Logout</a></div></article><aside class="staff-overview">${statCards([["Unlocked teams", "0", "No staff workspaces are open for this account."], ["Sync status", state.syncStatus || "Pending", "Role verification is connected to Discord."], ["Verified identity", identity, "This is the current Discord identity."]])}</aside></section><section class="staff-grid"><article class="staff-card"><span class="staff-card__eyebrow">Next step</span><h2 class="staff-card__title">Role access is still required</h2><p class="staff-card__summary">If this account should have access, update the Discord staff role first and then run another role check from here.</p><ul class="staff-card__list"><li>Make sure the correct staff role is assigned in Discord.</li><li>Refresh the role check once the role is synced.</li><li>Then the dashboard will unlock the matching team space automatically.</li></ul></article>${accessPanel({ name: "Staff Portal", roleId: "Verified staff role" }, { kind: state.syncStatus === "error" ? "error" : "denied", label: state.syncStatus === "error" ? "Auth check failed" : "No team role unlocked", summary: state.error || "This account is verified, but no matching staff role is currently available for the portal." })}</section></section>`;
-  }
-  return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">Verified staff dashboard</span><h1 class="staff-panel__title">${esc(identity)}<br />dashboard</h1><p class="staff-panel__summary">This account is verified through Discord. The dashboard below shows every staff team that is currently unlocked for this role set.</p><div class="staff-panel__actions"><a class="staff-panel__button staff-panel__button--primary" href="#/${unlocked[0].slug}">Open ${esc(unlocked[0].name)}</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button><a class="staff-panel__button" href="${logoutHref()}">Logout</a></div></article><aside class="staff-overview">${statCards([["Unlocked teams", String(unlocked.length), "Team spaces verified for this account."], ["Discord roles", String(state.roles.length), "Current verified role count from Discord."], ["Sync status", state.syncStatus || "ok", "Live role bridge and session state."]])}</aside></section><section class="staff-grid"><article class="staff-card"><span class="staff-card__eyebrow">Unlocked workspaces</span><h2 class="staff-card__title">Your team access</h2><p class="staff-card__summary">Open any role-matched workspace directly from here.</p><ul class="staff-role-list">${unlocked.map((team) => `<li><div><strong>${esc(team.name)}</strong><span>${esc(team.summary)}</span></div><a class="staff-panel__button" href="#/${team.slug}">Open</a></li>`).join("")}</ul></article><article class="staff-card"><span class="staff-card__eyebrow">Verified role check</span><h2 class="staff-card__title">Current account state</h2><p class="staff-card__summary">This dashboard is built from the live Discord session and role verification state.</p><ul class="staff-kpi-list"><li><div><strong>Verified identity</strong><span>${esc(identity)}</span></div><span>${esc(state.user.discordUsername || "Discord")}</span></li><li><div><strong>Last role check</strong><span>${esc(state.verifiedAt ? new Date(state.verifiedAt).toLocaleString("en-GB") : "Pending verification")}</span></div><span>${esc(state.syncStatus || "ok")}</span></li><li><div><strong>Unlocked teams</strong><span>${esc(unlocked.map((team) => team.short).join(" / "))}</span></div><span>${esc(unlocked.map((team) => team.name).join(", "))}</span></li></ul></article></section></section>`;
+  const unlocked = teams.filter((team) => hasTeamAccess(team));
+  const locked = teams.filter((team) => !hasTeamAccess(team));
+  const identity = state.user.verifiedIdentity || state.user.discordDisplayName || state.user.discordUsername || "Verified staff";
+  return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">${hasManagementAccess() ? "Management clearance" : "Verified staff dashboard"}</span><h1 class="staff-panel__title">${esc(identity)}<br />operations desk</h1><p class="staff-panel__summary">${hasManagementAccess() ? "Management clearance is active, so every staff workspace is open here, including the prepared live txAdmin, server data, moderation, and incident surfaces." : "This dashboard only opens the staff categories that match the verified Discord roles on this account. Pick a workspace below to enter the team tools that belong to you."}</p><div class="staff-panel__actions">${unlocked[0] ? `<a class="staff-panel__button staff-panel__button--primary" href="#/${unlocked[0].slug}">Open ${esc(unlocked[0].name)}</a>` : `<button class="staff-panel__button staff-panel__button--primary" type="button" data-action="refresh-auth">Refresh role check</button>`}<button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button><a class="staff-panel__button" href="${logoutHref()}">Logout</a></div></article><aside class="staff-overview">${statCards([["Unlocked teams", String(unlocked.length), "Workspaces available to this verified Discord account right now."], ["Prepared live surfaces", hasManagementAccess() ? "Full" : "Scoped", hasManagementAccess() ? "Management gets the full prepared live stack." : "Prepared live modules only appear inside the teams you can actually enter."], ["Role bridge", state.syncStatus || "ok", "Current Discord role check and session sync state."]])}</aside></section><section class="dashboard-grid"><article class="staff-card"><span class="staff-card__eyebrow">Available now</span><h2 class="staff-card__title">Unlocked staff workspaces</h2><p class="staff-card__summary">${unlocked.length ? "These are the teams this account can enter right now." : "This account is verified, but no matching staff team role is currently unlocked yet."}</p><div class="team-tile-grid">${unlocked.length ? unlocked.map((team) => teamTile(team, true)).join("") : teams.slice(0, 2).map((team) => teamTile(team, false)).join("")}</div></article>${locked.length ? `<article class="staff-card"><span class="staff-card__eyebrow">Still protected</span><h2 class="staff-card__title">Other staff categories</h2><p class="staff-card__summary">These workspaces stay locked until the exact Discord team role is assigned to this account.</p><div class="team-tile-grid">${locked.map((team) => teamTile(team, false)).join("")}</div></article>` : `<article class="staff-card"><span class="staff-card__eyebrow">Global clearance</span><h2 class="staff-card__title">Every team is open</h2><p class="staff-card__summary">Management access is overriding individual team locks, so the full staff structure is available from this dashboard.</p><ul class="workspace-list">${rowsMarkup([["Live txAdmin console", "Prepared management surface for runtime commands, sessions, and restart control.", "prepared"], ["Live moderation mirror", "Prepared feed combining bot-side moderation logs and action summaries.", "prepared"], ["Server data spine", "Prepared queue, player, health, and incident metrics view.", "prepared"], ["Cross-team command", "Leadership overview of every team and its current operational state.", "ready"]])}</ul></article>`}</section></section>`;
+}
+
+function workspaceCard(title, eyebrow, summary, items, restricted) {
+  return `<article class="workspace-panel"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><ul class="workspace-list">${rowsMarkup(items, restricted)}</ul></article>`;
 }
 
 function teamView(team) {
-  const access = accessState(team);
-  const granted = access.kind === "granted";
-  const primary = granted ? `<a class="staff-panel__button staff-panel__button--primary" href="#/${team.slug}">Workspace unlocked</a>` : `<a class="staff-panel__button staff-panel__button--primary" href="${loginHref(`#/${team.slug}`)}">Login to ${esc(team.name)}</a>`;
-  const secondary = `<button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button>`;
-  const tertiary = granted ? `<a class="staff-panel__button" href="${logoutHref()}">Logout</a>` : `<button class="staff-panel__button" type="button" disabled>Workspace locked</button>`;
-  const lead = granted
-    ? `<article class="staff-card"><span class="staff-card__eyebrow">Workspace ready</span><h2 class="staff-card__title">${esc(team.name)} is unlocked</h2><p class="staff-card__summary">This verified Discord account has the exact staff role needed for this workspace.</p><ul class="staff-card__list">${team.tools[0].items.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></article>`
-    : `<article class="staff-card"><span class="staff-card__eyebrow">Workspace locked</span><h2 class="staff-card__title">${esc(team.name)} unlocks only after Discord role verification</h2><p class="staff-card__summary">The full workspace stays hidden until the signed-in Discord account matches the exact ${esc(team.name)} role.</p><ul class="staff-card__list"><li>Command dashboard unlocks after verification.</li><li>Team tools and handoff lanes unlock after verification.</li><li>Wrong-role accounts stay blocked even after login.</li></ul></article>`;
-  const tools = granted ? `<section class="staff-team-tools">${teamTools(team)}</section>${teamLanes(team)}` : "";
-  return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">${esc(team.eyebrow)}</span><h1 class="staff-panel__title">${esc(team.name)}</h1><p class="staff-panel__summary">${esc(team.summary)}</p><div class="staff-panel__actions">${primary}${secondary}${tertiary}</div></article><aside class="staff-overview">${statCards(team.stats)}</aside></section><section class="staff-grid">${lead}${accessPanel(team, access)}</section>${tools}</section>`;
+  const unlocked = hasTeamAccess(team);
+  const identity = state.user.verifiedIdentity || state.user.discordDisplayName || state.user.discordUsername || "Verified staff";
+  const override = hasManagementAccess() && !state.roles.includes(team.roleId);
+  const leadSummary = unlocked
+    ? `${team.summary}${override ? " Management clearance is overriding the direct team role for this workspace." : ""}`
+    : `This workspace is prepared, but it stays locked until the verified Discord account holds the exact ${team.name} role.`;
+  return `<section class="staff-page"><section class="staff-hero"><article class="staff-panel"><span class="staff-panel__eyebrow">${esc(team.eyebrow)}</span><h1 class="staff-panel__title">${esc(team.name)}</h1><p class="staff-panel__summary">${esc(leadSummary)}</p><div class="staff-panel__actions">${unlocked ? `<span class="staff-state-pill staff-state-pill--open">${override ? "Management override" : "Workspace unlocked"}</span>` : `<span class="staff-state-pill staff-state-pill--locked">Role required</span>`}<a class="staff-panel__button staff-panel__button--primary" href="#/dashboard">Back to dashboard</a><button class="staff-panel__button" type="button" data-action="refresh-auth">Refresh role check</button></div></article><aside class="staff-overview">${statCards(team.stats)}</aside></section><section class="workspace-grid">${workspaceCard("Channels", `${team.name} channels`, unlocked ? "These are the key internal lanes this role uses on the portal." : "Preview of the internal lanes this team will use once the correct role is unlocked.", team.channels.map(([title, body]) => [title, body, unlocked ? "ready" : "restricted"]), !unlocked)}${workspaceCard("Functions", `${team.name} functions`, unlocked ? "Role-specific operational tools, prepared surfaces, and review controls for this team." : "Preview of the functions reserved for this team once access is granted.", team.modules, !unlocked)}${workspaceCard("Live surfaces", `${team.name} live feeds`, unlocked ? "Prepared live data, bot-driven streams, and operations feeds connected to this role." : "Preview of the live and prepared surfaces reserved for this team.", team.feeds, !unlocked)}${workspaceCard("Access state", "Verified role state", unlocked ? "This account can enter this workspace and use the prepared surfaces that belong to it." : "This account is signed in, but the required role has not unlocked this workspace yet.", [["Verified identity", identity, "ready"], ["Required role", `${team.name} (${team.roleId})`, unlocked ? "ready" : "restricted"], ["Role sync state", state.syncStatus || "pending", state.syncStatus === "ok" ? "ready" : "prepared"], ["Last verification", state.verifiedAt ? new Date(state.verifiedAt).toLocaleString("en-GB") : "Pending verification", unlocked ? "ready" : "prepared"]], false)}</section></section>`;
 }
 
-function setActiveDock() {
+function render() {
+  renderTopbar();
   const active = routeSlug();
   document.querySelectorAll(".staff-dock__item").forEach((link) => {
     link.classList.toggle("is-active", link.dataset.team === active);
   });
-}
-
-function render() {
-  topbarActions();
-  setActiveDock();
+  if (!isSignedIn()) {
+    app.innerHTML = gateView();
+    return;
+  }
   const slug = routeSlug();
   app.innerHTML = slug === DEFAULT_ROUTE ? dashboardView() : teamView(teamsBySlug[slug] || teams[0]);
 }
@@ -191,9 +307,9 @@ async function loadAuth() {
   state.error = "";
   render();
   try {
-    const [me, roles] = await Promise.allSettled([fetchJson(AUTH.me), fetchJson(AUTH.roles)]);
-    if (me.status === "rejected") throw me.reason;
-    if (!me.value?.authenticated) {
+    const [meResult, rolesResult] = await Promise.allSettled([fetchJson(AUTH.me), fetchJson(AUTH.roles)]);
+    if (meResult.status === "rejected") throw meResult.reason;
+    if (!meResult.value?.authenticated) {
       state.status = "signed_out";
       state.user = null;
       state.roles = [];
@@ -203,17 +319,17 @@ async function loadAuth() {
       return;
     }
     state.status = "signed_in";
-    state.user = me.value.user || null;
-    if (roles.status === "fulfilled") {
-      state.roles = Array.isArray(roles.value.roles) ? roles.value.roles : [];
-      state.syncStatus = roles.value.syncStatus || "ok";
-      state.verifiedAt = roles.value.verifiedAt || "";
+    state.user = meResult.value.user || null;
+    if (rolesResult.status === "fulfilled") {
+      state.roles = Array.isArray(rolesResult.value.roles) ? rolesResult.value.roles : [];
+      state.syncStatus = rolesResult.value.syncStatus || "ok";
+      state.verifiedAt = rolesResult.value.verifiedAt || "";
       state.error = "";
     } else {
-      state.roles = Array.isArray(me.value.user?.roles) ? me.value.user.roles : [];
+      state.roles = Array.isArray(meResult.value.user?.roles) ? meResult.value.user.roles : [];
       state.syncStatus = "error";
       state.verifiedAt = "";
-      state.error = "The staff site could not reach the live Discord verification endpoints. This usually means the live auth config still needs to allow staff.sgcnr.net.";
+      state.error = "The staff site could not reach the live Discord verification endpoints. Make sure staff.sgcnr.net is listed in allowed_origins in the live auth config.";
     }
   } catch (error) {
     state.status = "error";
@@ -221,7 +337,7 @@ async function loadAuth() {
     state.roles = [];
     state.syncStatus = "error";
     state.verifiedAt = "";
-    state.error = "Auth check failed. The staff portal could not verify the live Discord session.";
+    state.error = "The staff gateway could not verify the live Discord session.";
   }
   render();
 }
