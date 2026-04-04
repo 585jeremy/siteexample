@@ -5,8 +5,9 @@ window.STAFF_GATE_CONFIG = {
       username: "stf-8Q4M-27JK",
       password: "Jeremy!",
       displayName: "Jeremy",
-      clearance: "General Staff",
+      clearance: "Management",
       issuedBy: "Management Team",
+      portalAccess: "all",
     },
   ],
 };
