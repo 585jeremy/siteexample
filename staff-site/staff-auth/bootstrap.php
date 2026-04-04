@@ -14,6 +14,31 @@ function staff_auth_config(string $key, $default = null)
     return $staffAuthConfig[$key] ?? $default;
 }
 
+function staff_auth_identifier(string $key, string $default): string
+{
+    $value = trim((string) staff_auth_config($key, $default));
+    if ($value === '' || !preg_match('/^[A-Za-z0-9_]+$/', $value)) {
+        return $default;
+    }
+
+    return $value;
+}
+
+function staff_auth_optional_identifier(string $key): ?string
+{
+    $value = trim((string) staff_auth_config($key, ''));
+    if ($value === '' || !preg_match('/^[A-Za-z0-9_]+$/', $value)) {
+        return null;
+    }
+
+    return $value;
+}
+
+function staff_auth_quote_identifier(string $value): string
+{
+    return '`' . str_replace('`', '', $value) . '`';
+}
+
 function staff_auth_allowed_origins(): array
 {
     $origins = [];

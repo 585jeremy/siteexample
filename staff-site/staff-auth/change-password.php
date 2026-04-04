@@ -49,10 +49,14 @@ if (strlen($newPassword) < 8) {
 
 try {
     $pdo = staff_auth_pdo();
+    $table = staff_auth_quote_identifier(staff_auth_identifier('staff_table', 'staff_accounts'));
+    $recordIdColumn = staff_auth_quote_identifier(staff_auth_identifier('staff_record_id_column', 'staff_id'));
+    $passwordHashColumn = staff_auth_quote_identifier(staff_auth_identifier('staff_password_hash_column', 'password_hash'));
+    $resetColumn = staff_auth_quote_identifier(staff_auth_identifier('staff_password_reset_column', 'is_temp_password'));
     $stmt = $pdo->prepare(
-        'UPDATE staff_accounts
-         SET password_hash = ?, password_reset_required = 0, updated_at = NOW()
-         WHERE id = ?'
+        'UPDATE ' . $table . '
+         SET ' . $passwordHashColumn . ' = ?, ' . $resetColumn . ' = 0
+         WHERE ' . $recordIdColumn . ' = ?'
     );
     $stmt->execute([
         password_hash($newPassword, PASSWORD_DEFAULT),
@@ -69,16 +73,21 @@ try {
 $_SESSION['staff_password_reset_required'] = false;
 
 try {
-    $audit = $pdo->prepare(
-        'INSERT INTO staff_audit_log (staff_account_id, action, target, meta_json)
-         VALUES (?, ?, ?, ?)'
-    );
-    $audit->execute([
-        $_SESSION['staff_account_id'],
-        'password_reset_completed',
-        $_SESSION['staff_id'] ?? '',
-        json_encode(['via' => 'staff_portal']),
-    ]);
+    $auditTable = staff_auth_optional_identifier('staff_audit_table');
+    $auditAccountIdColumn = staff_auth_optional_identifier('staff_audit_account_id_column');
+    if ($auditTable && $auditAccountIdColumn) {
+        $audit = $pdo->prepare(
+            'INSERT INTO ' . staff_auth_quote_identifier($auditTable) . ' (' .
+            staff_auth_quote_identifier($auditAccountIdColumn) . ', action, target, meta_json)
+             VALUES (?, ?, ?, ?)'
+        );
+        $audit->execute([
+            $_SESSION['staff_account_id'],
+            'password_reset_completed',
+            $_SESSION['staff_id'] ?? '',
+            json_encode(['via' => 'staff_portal']),
+        ]);
+    }
 } catch (Throwable $exception) {
     // Non-fatal.
 }

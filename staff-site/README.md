@@ -42,6 +42,28 @@ Fallback:
 - if the staff database backend is not configured yet, the portal falls back to `staff-gate-config.js`
 - that fallback should only be temporary
 
+## Existing table compatibility
+
+The staff auth backend can also work with a simpler table like:
+
+- `staff_id`
+- `username`
+- `password_hash`
+- `is_temp_password`
+- `last_login`
+- `created_at`
+- `updated_at`
+
+Use `staff-auth/config.php` to map the backend to that structure:
+
+- `staff_record_id_column = staff_id`
+- `staff_username_column = username`
+- `staff_password_hash_column = password_hash`
+- `staff_password_reset_column = is_temp_password`
+- `staff_last_login_column = last_login`
+
+Optional richer fields such as display name, clearance, issued by, active, and portal access can be added later.
+
 ## Included teams
 
 - Management Team
