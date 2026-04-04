@@ -8,12 +8,5 @@ window.STAFF_GATE_CONFIG = {
       clearance: "General Staff",
       issuedBy: "Management Team",
     },
-    {
-      username: "staff-preview",
-      password: "ChangeMe-2026",
-      displayName: "Staff Preview",
-      clearance: "General Staff",
-      issuedBy: "Management Team",
-    },
   ],
 };
