@@ -18,5 +18,6 @@ auth_send_json([
         'verifiedIdentity' => $_SESSION['discord_guild_nick'] ?? ($_SESSION['discord_username'] ?? ''),
         'discordLinked' => true,
         'roles' => $_SESSION['discord_roles'] ?? [],
+        'staffRoles' => $_SESSION['discord_staff_roles'] ?? [],
     ],
 ]);

@@ -5,6 +5,7 @@ $clientId = auth_config('discord_client_id', '');
 $clientSecret = auth_config('discord_client_secret', '');
 $redirectUri = auth_config('discord_redirect_uri', '');
 $guildId = auth_config('discord_guild_id', '');
+$staffGuildId = auth_config('discord_staff_guild_id', '');
 $siteHomeUrl = auth_config('site_home_url', 'https://sgcnr.net/#/');
 $returnTo = trim((string) ($_SESSION['oauth_return_to'] ?? ''));
 
@@ -39,14 +40,30 @@ if (!isset($user['id'])) {
     die('Failed to get user info.');
 }
 
-$member = auth_discord_request(
-    'https://discord.com/api/users/@me/guilds/' . rawurlencode($guildId) . '/member',
-    'GET',
-    null,
-    $accessToken
-);
+function auth_fetch_member_for_guild(string $guildId, string $accessToken): array
+{
+    if ($guildId === '') {
+        return [];
+    }
+
+    return auth_discord_request(
+        'https://discord.com/api/users/@me/guilds/' . rawurlencode($guildId) . '/member',
+        'GET',
+        null,
+        $accessToken
+    );
+}
+
+$member = auth_fetch_member_for_guild($guildId, $accessToken);
+$staffMember = [];
+if ($staffGuildId !== '') {
+    $staffMember = $staffGuildId === $guildId
+        ? $member
+        : auth_fetch_member_for_guild($staffGuildId, $accessToken);
+}
 
 $roles = $member['roles'] ?? [];
+$staffRoles = $staffMember['roles'] ?? [];
 $guildNick = $member['nick'] ?? ($user['global_name'] ?? $user['username']);
 $displayName = $user['global_name'] ?? $user['username'];
 $avatarHash = $user['avatar'] ?? null;
@@ -61,6 +78,11 @@ $_SESSION['discord_guild_nick'] = $guildNick;
 $_SESSION['discord_avatar_hash'] = $avatarHash;
 $_SESSION['discord_avatar_url'] = $avatarUrl;
 $_SESSION['discord_roles'] = $roles;
+$_SESSION['discord_public_guild_id'] = $guildId;
+$_SESSION['discord_public_member_found'] = isset($member['roles']);
+$_SESSION['discord_staff_guild_id'] = $staffGuildId;
+$_SESSION['discord_staff_member_found'] = isset($staffMember['roles']);
+$_SESSION['discord_staff_roles'] = $staffRoles;
 $_SESSION['logged_in'] = true;
 $_SESSION['last_verified_at'] = gmdate('c');
 unset($_SESSION['oauth_state']);

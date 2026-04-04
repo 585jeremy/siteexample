@@ -1,4 +1,4 @@
-const AUTH={login:"https://sgcnr.net/auth/login.php",me:"https://sgcnr.net/auth/api.php",roles:"https://sgcnr.net/auth/roles.php"};
+const AUTH={login:"https://sgcnr.net/auth/login.php",me:"https://sgcnr.net/auth/api.php",roles:"https://sgcnr.net/auth/roles.php?scope=staff"};
 const GATE=window.STAFF_GATE_CONFIG||{};
 const GATE_KEY=GATE.storageKey||"sgcnr_staff_gate_v2";
 const GATE_ACCOUNTS=Array.isArray(GATE.accounts)?GATE.accounts:[];
@@ -46,7 +46,7 @@ function renderTopbar(){
   shellMode();
   if(!state.gate.loggedIn){authActions.innerHTML="";return;}
   const account=state.gate.account||{displayName:"Staff Access",clearance:"General Staff",issuedBy:"Management Team"};
-  const discordStatus=hasDiscordSession()?`<span class="staff-mini-pill staff-mini-pill--good">Discord verified</span>`:state.discord.status==="error"?`<span class="staff-mini-pill staff-mini-pill--warn">Discord bridge needs setup</span>`:`<span class="staff-mini-pill">Discord team check pending</span>`;
+  const discordStatus=hasDiscordSession()?`<span class="staff-mini-pill staff-mini-pill--good">Discord verified</span>`:state.discord.status==="error"?`<span class="staff-mini-pill staff-mini-pill--warn">Discord staff check needs setup</span>`:`<span class="staff-mini-pill">Discord team check pending</span>`;
   authActions.innerHTML=`<div class="staff-account"><span class="staff-account__eyebrow">General staff access</span><strong class="staff-account__name">${esc(account.displayName)}</strong><span class="staff-account__meta">${esc(account.clearance)} issued by ${esc(account.issuedBy)}</span></div>${discordStatus}<button class="staff-action staff-action--primary" type="button" data-action="logout-staff">Leave staff portal</button>`;
 }
 
@@ -138,14 +138,22 @@ async function loadDiscordState(){
       state.discord.roles=Array.isArray(rolesResult.value.roles)?rolesResult.value.roles:[];
       state.discord.syncStatus=rolesResult.value.syncStatus||"ok";
       state.discord.verifiedAt=rolesResult.value.verifiedAt||"";
-      state.discord.status="connected";
-      state.discord.error="";
+      if(state.discord.syncStatus==="staff_guild_not_configured"){
+        state.discord.status="error";
+        state.discord.error="The staff Discord server ID is not configured yet, so the portal is still checking the wrong guild for team roles.";
+      }else if(state.discord.syncStatus==="staff_member_not_found"){
+        state.discord.status="connected";
+        state.discord.error="Your Discord account is signed in, but it is not being found inside the configured staff Discord server.";
+      }else{
+        state.discord.status="connected";
+        state.discord.error="";
+      }
     }else{
       state.discord.roles=Array.isArray(meResult.value.user?.roles)?meResult.value.user.roles:[];
       state.discord.syncStatus="error";
       state.discord.verifiedAt="";
       state.discord.status="error";
-      state.discord.error="staff.sgcnr.net still needs to be allowed in the live auth config so team verification can read the Discord role bridge.";
+      state.discord.error="staff.sgcnr.net still needs to be allowed in the live auth config so team verification can read the staff Discord role bridge.";
     }
   }catch{
     state.discord.status="error";
