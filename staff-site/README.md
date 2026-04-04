@@ -9,6 +9,38 @@ It is now prepared for automatic deployment through the repo workflow.
 - `index.html`
 - `staff.css`
 - `staff.js`
+- `staff-gate-config.js`
+- `staff-auth/`
+
+## Staff database login
+
+The staff portal now supports a real database-backed first login flow.
+
+Included backend files:
+
+- `staff-auth/bootstrap.php`
+- `staff-auth/config.example.php`
+- `staff-auth/schema.sql`
+- `staff-auth/me.php`
+- `staff-auth/login.php`
+- `staff-auth/change-password.php`
+- `staff-auth/logout.php`
+
+Recommended production setup:
+
+1. Copy `staff-auth/config.example.php` to `staff-auth/config.php`
+2. Fill in the real database credentials
+3. Run `staff-auth/schema.sql`
+4. Create staff accounts in `staff_accounts`
+5. For first-login accounts:
+   - set `password_hash` to `password_hash(staff_id)`
+   - set `password_reset_required = 1`
+6. After first login the portal will automatically force the user to a password reset screen
+
+Fallback:
+
+- if the staff database backend is not configured yet, the portal falls back to `staff-gate-config.js`
+- that fallback should only be temporary
 
 ## Included teams
 
