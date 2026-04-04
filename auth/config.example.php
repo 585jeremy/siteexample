@@ -7,6 +7,13 @@ return [
     'discord_guild_id' => 'YOUR_DISCORD_GUILD_ID',
     'site_home_url' => 'https://sgcnr.net/',
     'allowed_origin' => 'https://sgcnr.net',
+    'allowed_origins' => [
+        'https://sgcnr.net',
+        'https://staff.sgcnr.net',
+        'https://admin.sgcnr.net',
+        'https://support.sgcnr.net',
+        'https://testing.sgcnr.net',
+    ],
     'session_cookie_path' => '/',
     'session_cookie_domain' => 'sgcnr.net',
     'session_cookie_secure' => true,

@@ -6,6 +6,7 @@ $clientSecret = auth_config('discord_client_secret', '');
 $redirectUri = auth_config('discord_redirect_uri', '');
 $guildId = auth_config('discord_guild_id', '');
 $siteHomeUrl = auth_config('site_home_url', 'https://sgcnr.net/#/');
+$returnTo = trim((string) ($_SESSION['oauth_return_to'] ?? ''));
 
 if (!auth_has_minimum_config() || !$clientId || !$clientSecret || !$redirectUri) {
     http_response_code(500);
@@ -63,6 +64,7 @@ $_SESSION['discord_roles'] = $roles;
 $_SESSION['logged_in'] = true;
 $_SESSION['last_verified_at'] = gmdate('c');
 unset($_SESSION['oauth_state']);
+unset($_SESSION['oauth_return_to']);
 
 try {
     if (!empty(auth_config('mysql_dsn')) && !empty(auth_config('mysql_user'))) {
@@ -96,5 +98,5 @@ try {
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-header('Location: ' . $siteHomeUrl);
+header('Location: ' . ($returnTo && auth_is_allowed_redirect($returnTo) ? $returnTo : $siteHomeUrl));
 exit;

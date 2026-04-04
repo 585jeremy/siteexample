@@ -1,4 +1,4 @@
-name: Deploy Website to ZAP
+name: Deploy SGCNR Sites
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-public-site:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy files to ZAP Webspace
+      - name: Deploy public site to ZAP Webspace
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.ZAP_FTP_HOST }}
@@ -26,5 +26,29 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            staff-site/**
             README.md
             sgcnr-site.zip
+
+  deploy-staff-site:
+    if: ${{ secrets.ZAP_STAFF_SERVER_DIR != '' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy staff portal to staff.sgcnr.net
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.ZAP_FTP_HOST }}
+          username: ${{ secrets.ZAP_FTP_USER }}
+          password: ${{ secrets.ZAP_FTP_PASS }}
+          port: ${{ secrets.ZAP_FTP_PORT }}
+          protocol: ftp
+          local-dir: ./staff-site/
+          server-dir: ${{ secrets.ZAP_STAFF_SERVER_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            README.md

@@ -20,20 +20,73 @@ $sessionCookieSecure = array_key_exists('session_cookie_secure', $config)
     : $defaultSecure;
 $sessionCookieSameSite = $config['session_cookie_samesite'] ?? 'Lax';
 
-$origin = null;
-$allowedOrigin = $config['allowed_origin'] ?? '';
-if ($allowedOrigin) {
-    $origin = (string) $allowedOrigin;
-} else {
-    $siteHomeUrl = $config['site_home_url'] ?? '';
+function auth_allowed_origins(): array
+{
+    $origins = [];
+
+    $configuredList = auth_config('allowed_origins', []);
+    if (is_string($configuredList) && $configuredList !== '') {
+        $configuredList = array_map('trim', explode(',', $configuredList));
+    }
+
+    if (is_array($configuredList)) {
+        foreach ($configuredList as $origin) {
+            $origin = trim((string) $origin);
+            if ($origin !== '') {
+                $origins[] = $origin;
+            }
+        }
+    }
+
+    $allowedOrigin = trim((string) auth_config('allowed_origin', ''));
+    if ($allowedOrigin !== '') {
+        $origins[] = $allowedOrigin;
+    }
+
+    $siteHomeUrl = auth_config('site_home_url', '');
     if ($siteHomeUrl) {
         $parts = parse_url($siteHomeUrl);
         if (!empty($parts['scheme']) && !empty($parts['host'])) {
-            $origin = $parts['scheme'] . '://' . $parts['host'];
+            $origins[] = $parts['scheme'] . '://' . $parts['host'];
         }
     }
+
+    return array_values(array_unique(array_filter($origins)));
 }
 
+function auth_origin_header(): ?string
+{
+    $allowedOrigins = auth_allowed_origins();
+    $requestOrigin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
+
+    if ($requestOrigin !== '' && in_array($requestOrigin, $allowedOrigins, true)) {
+        return $requestOrigin;
+    }
+
+    return $allowedOrigins[0] ?? null;
+}
+
+function auth_is_allowed_redirect(string $url): bool
+{
+    $url = trim($url);
+    if ($url === '') {
+        return false;
+    }
+
+    if (str_starts_with($url, '/')) {
+        return true;
+    }
+
+    $parts = parse_url($url);
+    if (empty($parts['scheme']) || empty($parts['host'])) {
+        return false;
+    }
+
+    $origin = $parts['scheme'] . '://' . $parts['host'];
+    return in_array($origin, auth_allowed_origins(), true);
+}
+
+$origin = auth_origin_header();
 if ($origin) {
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Vary: Origin');
@@ -72,24 +125,6 @@ function auth_has_minimum_config(): bool
         auth_config('discord_client_secret', '') &&
         auth_config('discord_redirect_uri', '')
     );
-}
-
-function auth_origin_header(): ?string
-{
-    $allowedOrigin = auth_config('allowed_origin', '');
-    if ($allowedOrigin) {
-        return (string) $allowedOrigin;
-    }
-
-    $siteHomeUrl = auth_config('site_home_url', '');
-    if ($siteHomeUrl) {
-        $parts = parse_url($siteHomeUrl);
-        if (!empty($parts['scheme']) && !empty($parts['host'])) {
-            return $parts['scheme'] . '://' . $parts['host'];
-        }
-    }
-
-    return null;
 }
 
 function auth_send_json(array $payload, int $statusCode = 200): void

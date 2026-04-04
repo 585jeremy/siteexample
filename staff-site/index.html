@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SGCNR Staff Portal</title>
+    <link rel="stylesheet" href="./staff.css" />
+  </head>
+  <body>
+    <div class="staff-shell">
+      <header class="staff-topbar" aria-label="Staff top bar">
+        <div class="staff-topbar__status">
+          <div class="staff-chip">Discord-only staff access</div>
+          <div class="staff-chip staff-chip--soft" id="staffUpdated">Updated just now</div>
+        </div>
+        <div class="staff-brand" aria-label="SGCNR Staff">
+          <span class="staff-brand__glow staff-brand__glow--left" aria-hidden="true"></span>
+          <span class="staff-brand__glow staff-brand__glow--right" aria-hidden="true"></span>
+          <div class="staff-brand__mark">S</div>
+          <div class="staff-brand__copy">
+            <span class="staff-brand__eyebrow">SGCNR Internal</span>
+            <strong class="staff-brand__title">Staff Portal</strong>
+          </div>
+        </div>
+        <div class="staff-topbar__actions" id="staffAuthActions">
+          <button class="staff-action" type="button">Discord Sync Ready</button>
+          <button class="staff-action staff-action--primary" type="button">Role-gated Access</button>
+        </div>
+      </header>
+
+      <main class="staff-content" id="staffApp" aria-label="Staff portal content"></main>
+
+      <nav class="staff-dock" aria-label="Staff team navigation">
+        <a class="staff-dock__item" href="#/management" data-team="management"><span class="staff-dock__icon" aria-hidden="true">MG</span><span class="staff-dock__label">Management Team</span></a>
+        <a class="staff-dock__item" href="#/admin" data-team="admin"><span class="staff-dock__icon" aria-hidden="true">AD</span><span class="staff-dock__label">Admin Team</span></a>
+        <a class="staff-dock__item" href="#/moderation" data-team="moderation"><span class="staff-dock__icon" aria-hidden="true">MOD</span><span class="staff-dock__label">Moderation Team</span></a>
+        <a class="staff-dock__item" href="#/development" data-team="development"><span class="staff-dock__icon" aria-hidden="true">DEV</span><span class="staff-dock__label">Development Team</span></a>
+        <a class="staff-dock__item" href="#/testing" data-team="testing"><span class="staff-dock__icon" aria-hidden="true">QA</span><span class="staff-dock__label">Testing Team</span></a>
+        <a class="staff-dock__item" href="#/translation" data-team="translation"><span class="staff-dock__icon" aria-hidden="true">TR</span><span class="staff-dock__label">Translation Team</span></a>
+        <a class="staff-dock__item" href="#/helper" data-team="helper"><span class="staff-dock__icon" aria-hidden="true">HP</span><span class="staff-dock__label">Helper Team</span></a>
+        <a class="staff-dock__item" href="#/security" data-team="security"><span class="staff-dock__icon" aria-hidden="true">SEC</span><span class="staff-dock__label">Security Team</span></a>
+        <a class="staff-dock__item" href="#/creator" data-team="creator"><span class="staff-dock__icon" aria-hidden="true">CC</span><span class="staff-dock__label">Content Creator Team</span></a>
+        <a class="staff-dock__item" href="#/social" data-team="social"><span class="staff-dock__icon" aria-hidden="true">SOC</span><span class="staff-dock__label">Social Team</span></a>
+      </nav>
+    </div>
+
+    <script src="./staff.js"></script>
+  </body>
+</html>
