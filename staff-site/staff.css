@@ -478,6 +478,57 @@ body::after {
   line-height: 1.55;
 }
 
+.workspace-tools {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.workspace-tool {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.workspace-tool--prepared {
+  border-color: rgba(201, 154, 95, 0.2);
+}
+
+.workspace-tool__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.workspace-tool__summary {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.workspace-tool__action {
+  width: fit-content;
+}
+
+.workspace-tool__placeholder {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  width: fit-content;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 154, 95, 0.24);
+  color: rgba(240, 229, 214, 0.88);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .team-card--open {
   border-color: rgba(106, 140, 102, 0.22);
 }
@@ -591,7 +642,8 @@ body::after {
 
   .dashboard-hero__rail,
   .workspace-board,
-  .team-grid {
+  .team-grid,
+  .workspace-tools {
     grid-template-columns: 1fr;
   }
 

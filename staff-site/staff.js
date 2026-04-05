@@ -8,6 +8,7 @@ const GATE_API={
   changePassword:"./staff-auth/change-password.php",
   logout:"./staff-auth/logout.php"
 };
+const TXADMIN_BASE_URL="http://185.223.30.214:30583";
 const DEFAULT_ROUTE="dashboard";
 const PASSWORD_ROUTE="change-password";
 const shell=document.getElementById("staffShell");
@@ -46,6 +47,19 @@ const dashboardSections=[
     slugs:["creator","social"]
   }
 ];
+const txAdminSections={
+  management:[
+    {title:"Open txAdmin",summary:"Launch the main txAdmin panel in a new tab for full runtime control.",href:`${TXADMIN_BASE_URL}/`,label:"Open txAdmin",state:"live"},
+    {title:"Player manager",summary:"Jump straight into the player list for monitoring, kicks, and session review.",href:`${TXADMIN_BASE_URL}/login?r=%2Fplayers`,label:"Open players",state:"live"},
+    {title:"Runtime console",summary:"Prepared manager lane for live console commands and server-runtime control. Use txAdmin directly until the API bridge is added.",href:`${TXADMIN_BASE_URL}/login?r=%2Fconsole`,label:"Open console",state:"prepared"},
+    {title:"Service bridge",summary:"Prepared embedded layer for future live txAdmin data, resource state, and restart controls inside the staff portal.",href:"",label:"Prepared",state:"prepared"}
+  ],
+  admin:[
+    {title:"Open txAdmin",summary:"Open txAdmin in a new tab for higher-level server review and handoff into management when needed.",href:`${TXADMIN_BASE_URL}/`,label:"Open txAdmin",state:"live"},
+    {title:"Player overview",summary:"Review active player sessions, spot pressure points, and hand off actions to the correct team.",href:`${TXADMIN_BASE_URL}/login?r=%2Fplayers`,label:"Open players",state:"live"},
+    {title:"Operations snapshot",summary:"Prepared read-only server snapshot for player counts, incidents, and restart state once the API bridge is live.",href:"",label:"Prepared",state:"prepared"}
+  ]
+};
 const state={gate:{loggedIn:false,account:null,error:"",mode:"legacy",passwordResetRequired:false,resetError:"",backendConfigured:false},discord:{status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""}};
 
 function esc(value){return String(value??"").replace(/[&<>\"']/g,(char)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));}
@@ -174,6 +188,11 @@ function workspaceSection(title,eyebrow,summary,items){
   return `<article class="workspace-panel"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><ul class="workspace-list">${rowsMarkup(items)}</ul></article>`;
 }
 
+function workspaceToolsSection(title,eyebrow,summary,items){
+  if(!Array.isArray(items)||!items.length)return "";
+  return `<article class="workspace-panel workspace-panel--tools"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><div class="workspace-tools">${items.map((item)=>`<article class="workspace-tool workspace-tool--${esc(item.state||"ready")}"><div class="workspace-tool__top"><strong class="workspace-row__title">${esc(item.title)}</strong>${statusBadge(item.state==="prepared"?"Prepared":"Live",item.state==="prepared"?"prepared":"open")}</div><p class="workspace-tool__summary">${esc(item.summary)}</p>${item.href?`<a class="staff-panel__button staff-panel__button--primary workspace-tool__action" href="${esc(item.href)}" target="_blank" rel="noopener noreferrer">${esc(item.label||"Open")}</a>`:`<span class="workspace-tool__placeholder">${esc(item.label||"Prepared")}</span>`}</article>`).join("")}</div></article>`;
+}
+
 function workspaceView(team){
   const override=hasFullManagementAccess()&&!state.discord.roles.includes(team.roleId);
   const statusItems=[
@@ -183,7 +202,15 @@ function workspaceView(team){
     ["Last verification",hasGateManagementAccess()?"Management login active":state.discord.verifiedAt?new Date(state.discord.verifiedAt).toLocaleString("en-GB"):"Verified this session","ready"],
   ];
   const focusItems=(team.preview||[]).map((item)=>[item,"Active focus area for this team right now.","ready"]);
-  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)}</h1><p class="staff-copy">${esc(team.summary)}${override?" Management access is opening this workspace automatically.":""}</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--open">${override?"Management override":"Role verified"}</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Workspace state","Open",override?"Management clearance is unlocking this team.":"This workspace is open for the current session.")}${statCard("Access mode",hasGateManagementAccess()?"Manager gate":verifiedIdentity(),hasGateManagementAccess()?"No extra team login is required for this management account.":"Team access is tied to the verified Discord account.")}${statCard("Live readiness",team.live.some((item)=>item[2]==="prepared")?"Prepared":"Ready","Prepared live surfaces are ready for later server and bot integration.")}</div></section>${workspaceBoard(team.boards)}<section class="workspace-columns">${workspaceSection("Focus",`${team.name} focus`,"The most important surfaces and responsibilities in this workspace.",focusItems)}${workspaceSection("Channels",`${team.name} channels`,"Internal channels and working lanes for this role.",team.ch.map(([title,body])=>[title,body,"ready"]))}${workspaceSection("Functions",`${team.name} tools`,"Role-specific tools, boards, and operational surfaces.",team.fn)}${workspaceSection("Prepared live",`${team.name} live`,"Prepared live data, bot-driven mirrors, and future runtime feeds.",team.live)}${workspaceSection("Access state","Verification","General staff login opens the portal. Management logins can move across every team directly, while every other staff member still needs the matching Discord role.",statusItems)}</section></section>`;
+  const txSection=workspaceToolsSection(
+    "txAdmin",
+    `${team.name} runtime`,
+    team.slug==="management"
+      ?"Manager runtime access, launch links, and prepared in-portal txAdmin surfaces."
+      :"Admin runtime overview and faster launch links into txAdmin without exposing the full management stack.",
+    txAdminSections[team.slug]||[]
+  );
+  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)}</h1><p class="staff-copy">${esc(team.summary)}${override?" Management access is opening this workspace automatically.":""}</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--open">${override?"Management override":"Role verified"}</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Workspace state","Open",override?"Management clearance is unlocking this team.":"This workspace is open for the current session.")}${statCard("Access mode",hasGateManagementAccess()?"Manager gate":verifiedIdentity(),hasGateManagementAccess()?"No extra team login is required for this management account.":"Team access is tied to the verified Discord account.")}${statCard("Live readiness",team.live.some((item)=>item[2]==="prepared")?"Prepared":"Ready","Prepared live surfaces are ready for later server and bot integration.")}</div></section>${workspaceBoard(team.boards)}${txSection}<section class="workspace-columns">${workspaceSection("Focus",`${team.name} focus`,"The most important surfaces and responsibilities in this workspace.",focusItems)}${workspaceSection("Channels",`${team.name} channels`,"Internal channels and working lanes for this role.",team.ch.map(([title,body])=>[title,body,"ready"]))}${workspaceSection("Functions",`${team.name} tools`,"Role-specific tools, boards, and operational surfaces.",team.fn)}${workspaceSection("Prepared live",`${team.name} live`,"Prepared live data, bot-driven mirrors, and future runtime feeds.",team.live)}${workspaceSection("Access state","Verification","General staff login opens the portal. Management logins can move across every team directly, while every other staff member still needs the matching Discord role.",statusItems)}</section></section>`;
 }
 
 function render(){
