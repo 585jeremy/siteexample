@@ -29,6 +29,23 @@ const teams=[
 
 const managementRoleId=teams[0].roleId;
 const teamsBySlug=Object.fromEntries(teams.map((team)=>[team.slug,team]));
+const dashboardSections=[
+  {
+    title:"Command",
+    copy:"Leadership, investigations, moderation review, and high-trust control lanes.",
+    slugs:["management","admin","moderation","security"]
+  },
+  {
+    title:"Operations",
+    copy:"Build, QA, translation, and support-facing teams that keep the project moving.",
+    slugs:["development","testing","translation","helper"]
+  },
+  {
+    title:"Outreach",
+    copy:"Public-facing content, campaign planning, and social delivery surfaces.",
+    slugs:["creator","social"]
+  }
+];
 const state={gate:{loggedIn:false,account:null,error:"",mode:"legacy",passwordResetRequired:false,resetError:"",backendConfigured:false},discord:{status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""}};
 
 function esc(value){return String(value??"").replace(/[&<>\"']/g,(char)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));}
@@ -47,7 +64,11 @@ function hasManagementAccess(){return state.discord.roles.includes(managementRol
 function hasFullManagementAccess(){return hasGateManagementAccess()||hasManagementAccess();}
 function hasTeamAccess(team){return hasFullManagementAccess()||(hasDiscordSession()&&state.discord.roles.includes(team.roleId));}
 function verifiedIdentity(){return !state.discord.user?"Discord account not verified yet":state.discord.user.verifiedIdentity||state.discord.user.discordDisplayName||state.discord.user.discordUsername||"Verified Discord staff";}
-function shellMode(){shell.classList.toggle("is-gated",!state.gate.loggedIn||state.gate.passwordResetRequired);}
+function shellMode(){
+  const gated=!state.gate.loggedIn||state.gate.passwordResetRequired;
+  shell.classList.toggle("is-gated",gated);
+  document.body.classList.toggle("is-staff-authenticated",!gated);
+}
 function statusBadge(label,variant){return `<span class="staff-state-pill staff-state-pill--${variant}">${esc(label)}</span>`;}
 function rowStatus(stateName){const label=stateName==="ready"?"Ready":stateName==="prepared"?"Prepared":"Locked";return `<span class="workspace-row__status workspace-row__status--${stateName}">${esc(label)}</span>`;}
 function rowsMarkup(items,locked=false){return items.map(([title,body,status])=>`<li class="workspace-row"><div class="workspace-row__copy"><strong class="workspace-row__title">${esc(title)}</strong><span class="workspace-row__body">${esc(body)}</span></div>${rowStatus(locked?"restricted":status)}</li>`).join("");}
@@ -86,8 +107,8 @@ function renderTopbar(){
   shellMode();
   if(!state.gate.loggedIn){authActions.innerHTML="";return;}
   const account=state.gate.account||{displayName:"Staff Access",clearance:"General Staff",issuedBy:"Management Team"};
-  const discordStatus=state.gate.passwordResetRequired?`<span class="staff-mini-pill staff-mini-pill--warn">Password reset required</span>`:hasGateManagementAccess()?`<span class="staff-mini-pill staff-mini-pill--good">Management access active</span>`:hasDiscordSession()?`<span class="staff-mini-pill staff-mini-pill--good">Discord verified</span>`:state.discord.status==="error"?`<span class="staff-mini-pill staff-mini-pill--warn">Discord staff check needs setup</span>`:`<span class="staff-mini-pill">Discord team check pending</span>`;
-  authActions.innerHTML=`<div class="staff-account"><span class="staff-account__eyebrow">General staff access</span><strong class="staff-account__name">${esc(account.displayName)}</strong><span class="staff-account__meta">${esc(account.clearance)} issued by ${esc(account.issuedBy)}</span></div>${discordStatus}<button class="staff-action staff-action--primary" type="button" data-action="logout-staff">Leave staff portal</button>`;
+  const discordStatus=state.gate.passwordResetRequired?`<span class="staff-mini-pill staff-mini-pill--warn">Password reset required</span>`:hasGateManagementAccess()?`<span class="staff-mini-pill staff-mini-pill--good">Management access</span>`:hasDiscordSession()?`<span class="staff-mini-pill staff-mini-pill--good">Discord verified</span>`:state.discord.status==="error"?`<span class="staff-mini-pill staff-mini-pill--warn">Discord check needs attention</span>`:`<span class="staff-mini-pill">Discord team check pending</span>`;
+  authActions.innerHTML=`<div class="staff-account"><span class="staff-account__eyebrow">Signed in</span><strong class="staff-account__name">${esc(account.displayName)}</strong><span class="staff-account__meta">${esc(account.clearance)} access</span></div>${discordStatus}<button class="staff-action staff-action--primary" type="button" data-action="logout-staff">Log out</button>`;
 }
 
 function teamStatus(team){
@@ -104,43 +125,49 @@ function gateView(){
   const loginLabel=state.gate.backendConfigured?"Username":"Staff ID";
   const loginPlaceholder=state.gate.backendConfigured?"Enter your username":"Enter your staff ID";
   const hint=state.gate.backendConfigured
-    ?"Use the Username from the database and its matching password. If this is your first login, the portal will force you to set a new password before the dashboard opens."
+    ?"Use the username and password issued for your staff account. If this is a new account, you will be asked to set a new password after logging in."
     :configured
-      ?"This preview gate opens the dashboard only. Team entry stays Discord role-locked until the staff database is connected."
-      :"No staff credentials are configured yet. Add manager-issued accounts in staff-gate-config.js or finish the staff database setup.";
-  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">General staff access</span><h1 class="staff-heading">Staff access starts here.</h1><p class="staff-copy">Use the private staff credentials sent by management. This first step opens the internal dashboard. Entering an actual team workspace still needs the matching staff access level, and non-management teams can still be Discord role-locked where needed.</p></div><div class="staff-gate__panel"><span class="gate-kicker gate-kicker--soft">${state.gate.backendConfigured?"Database-backed staff login":"Manager-issued credentials"}</span><form class="gate-form" data-form="staff-gate" autocomplete="off"><label class="gate-form__field"><span>${esc(loginLabel)}</span><input class="gate-form__input" type="text" name="staffId" placeholder="${esc(loginPlaceholder)}" /></label><label class="gate-form__field"><span>Password</span><input class="gate-form__input" type="password" name="password" placeholder="Enter your staff password" /></label>${state.gate.error?`<p class="gate-form__error">${esc(state.gate.error)}</p>`:""}<p class="gate-form__hint">${esc(hint)}</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit" ${configured?"":"disabled"}>Enter staff dashboard</button></form></div></div></article></section>`;
+      ?"Temporary local gate is active. Team entry still uses the same role rules after sign-in."
+      :"No staff credentials are configured yet. Finish the staff database setup first.";
+  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">General staff access</span><h1 class="staff-heading">Staff portal login</h1><p class="staff-copy">Sign in to open the internal dashboard. Team workspaces are selected after login.</p></div><div class="staff-gate__panel"><form class="gate-form" data-form="staff-gate" autocomplete="off"><label class="gate-form__field"><span>${esc(loginLabel)}</span><input class="gate-form__input" type="text" name="staffId" placeholder="${esc(loginPlaceholder)}" /></label><label class="gate-form__field"><span>Password</span><input class="gate-form__input" type="password" name="password" placeholder="Enter your password" /></label>${state.gate.error?`<p class="gate-form__error">${esc(state.gate.error)}</p>`:""}<p class="gate-form__hint">${esc(hint)}</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit" ${configured?"":"disabled"}>Open dashboard</button></form></div></div></article></section>`;
 }
 
 function changePasswordView(){
   const account=state.gate.account||{displayName:"Staff Access"};
-  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">Password reset</span><h1 class="staff-heading">Create your new staff password.</h1><p class="staff-copy">${esc(account.displayName)}, your first login is valid, but the dashboard stays locked until you replace the temporary password issued during account creation.</p></div><div class="staff-gate__panel"><span class="gate-kicker gate-kicker--soft">Required before dashboard</span><form class="gate-form" data-form="staff-password-reset" autocomplete="off"><label class="gate-form__field"><span>New password</span><input class="gate-form__input" type="password" name="newPassword" placeholder="Choose a new password" /></label><label class="gate-form__field"><span>Confirm password</span><input class="gate-form__input" type="password" name="confirmPassword" placeholder="Repeat your new password" /></label>${state.gate.resetError?`<p class="gate-form__error">${esc(state.gate.resetError)}</p>`:""}<p class="gate-form__hint">Once you save the new password, the reset flag is cleared automatically and the staff dashboard opens.</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit">Save new password</button></form></div></div></article></section>`;
+  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">Password reset</span><h1 class="staff-heading">Set a new password</h1><p class="staff-copy">${esc(account.displayName)}, your account needs one password change before the dashboard opens.</p></div><div class="staff-gate__panel"><form class="gate-form" data-form="staff-password-reset" autocomplete="off"><label class="gate-form__field"><span>New password</span><input class="gate-form__input" type="password" name="newPassword" placeholder="Choose a new password" /></label><label class="gate-form__field"><span>Confirm password</span><input class="gate-form__input" type="password" name="confirmPassword" placeholder="Repeat your new password" /></label>${state.gate.resetError?`<p class="gate-form__error">${esc(state.gate.resetError)}</p>`:""}<p class="gate-form__hint">After saving, the password-reset flag is cleared automatically.</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit">Save password</button></form></div></div></article></section>`;
 }
 
 function teamCard(team){
   const status=teamStatus(team);
   const preview=team.preview.map((line)=>`<li>${esc(line)}</li>`).join("");
+  const hint=status.actionKind==="enter"?"Workspace is ready to open.":status.actionKind==="verify"?"Discord team verification is still needed for this area.":"This team is not available in the current session.";
   let actionMarkup=`<button class="staff-panel__button" type="button" disabled>${esc(status.actionLabel)}</button>`;
   if(status.actionKind==="verify")actionMarkup=`<a class="staff-panel__button staff-panel__button--primary" href="${teamLoginHref(team)}">${esc(status.actionLabel)}</a>`;
   if(status.actionKind==="enter")actionMarkup=`<a class="staff-panel__button staff-panel__button--primary" href="#/${team.slug}">${esc(status.actionLabel)}</a>`;
-  return `<article class="team-card team-card--${status.variant}"><div class="team-card__top"><span class="team-card__badge">${esc(team.short)}</span>${statusBadge(status.label,status.variant)}</div><div class="team-card__body"><span class="gate-kicker gate-kicker--soft">${esc(team.eyebrow)}</span><h2 class="team-card__title">${esc(team.name)}</h2><p class="team-card__summary">${esc(team.summary)}</p><ul class="team-card__list">${preview}</ul></div><div class="team-card__footer">${actionMarkup}</div></article>`;
+  return `<article class="team-card team-card--${status.variant}"><div class="team-card__top"><span class="team-card__badge">${esc(team.short)}</span>${statusBadge(status.label,status.variant)}</div><div class="team-card__body"><span class="gate-kicker gate-kicker--soft">${esc(team.eyebrow)}</span><h2 class="team-card__title">${esc(team.name)}</h2><p class="team-card__summary">${esc(team.summary)}</p><ul class="team-card__list">${preview}</ul></div><div class="team-card__footer"><span class="team-card__hint">${esc(hint)}</span>${actionMarkup}</div></article>`;
+}
+
+function dashboardSection(section){
+  const items=section.slugs.map((slug)=>teamsBySlug[slug]).filter(Boolean);
+  return `<section class="dashboard-section"><div class="dashboard-section__head"><div><span class="gate-kicker gate-kicker--soft">${esc(section.title)}</span><h2 class="dashboard-section__title">${esc(section.title)}</h2></div><p class="dashboard-section__copy">${esc(section.copy)}</p></div><div class="team-grid team-grid--dashboard">${items.map((team)=>teamCard(team)).join("")}</div></section>`;
 }
 
 function dashboardView(){
   const unlockedCount=teams.filter((team)=>hasTeamAccess(team)).length;
-  const discordState=hasGateManagementAccess()?"Manager login unlocks every staff team without another team login.":hasDiscordSession()?verifiedIdentity():state.discord.status==="error"?"Discord verification currently unavailable":"No Discord team verification yet";
+  const discordState=hasGateManagementAccess()?"Management login already unlocks every team in this portal.":hasDiscordSession()?verifiedIdentity():state.discord.status==="error"?"Discord verification currently needs attention.":"No team has been Discord-verified yet.";
   const account=state.gate.account||{displayName:"Staff Access",clearance:"General Staff"};
-  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">General staff dashboard</span><h1 class="staff-heading">${esc(account.displayName)}, choose your team.</h1><p class="staff-copy">You are inside the general staff portal now. Every team is visible here, but the actual workspace only opens after the matching Discord role is verified. Management logins can move across every team immediately without another team login.</p><div class="staff-panel__actions">${hasFullManagementAccess()?`<span class="staff-state-pill staff-state-pill--open">Management access active</span>`:`<span class="staff-state-pill staff-state-pill--prepared">Choose a team below</span>`}</div></article><div class="dashboard-hero__rail">${statCard("Staff gate",account.clearance||"General Staff","The first layer is open with manager-issued credentials.")}${statCard("Discord state",hasGateManagementAccess()?"Management":"Verified",discordState)}${statCard("Unlocked teams",String(unlockedCount),hasFullManagementAccess()?"Management access unlocks every team.":"Unlocked count changes only after Discord role checks.")}</div></section><section class="team-grid">${teams.map((team)=>teamCard(team)).join("")}</section></section>`;
+  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">General staff dashboard</span><h1 class="staff-heading">${esc(account.displayName)}, choose a workspace.</h1><p class="staff-copy">Start from the team you actually need. The portal now keeps every workspace in one place, with clearer status labels and less clutter before you enter a section.</p><div class="staff-panel__actions">${hasFullManagementAccess()?`<span class="staff-state-pill staff-state-pill--open">Management access active</span>`:`<span class="staff-state-pill staff-state-pill--prepared">Choose a team below</span>`}</div></article><div class="dashboard-hero__rail">${statCard("Access level",account.clearance||"General Staff","General staff login is active for this session.")}${statCard("Discord state",hasGateManagementAccess()?"Management":"Team check",discordState)}${statCard("Open workspaces",String(unlockedCount),hasFullManagementAccess()?"Management access keeps every team open automatically.":"This number increases as team roles are verified.")}</div></section><section class="dashboard-sections">${dashboardSections.map((section)=>dashboardSection(section)).join("")}</section></section>`;
 }
 
 function verificationView(team){
   if(hasGateManagementAccess())return workspaceView(team);
   const bridgeMessage=state.discord.status==="error"?state.discord.error||"The live Discord bridge could not be reached from this staff portal yet.":"The staff dashboard is already open, but entering a real team workspace still needs Discord role verification.";
-  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)} needs Discord verification.</h1><p class="staff-copy">${esc(bridgeMessage)}</p><div class="staff-panel__actions"><a class="staff-panel__button staff-panel__button--primary" href="${teamLoginHref(team)}">Verify ${esc(team.name)} with Discord</a><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("General gate","Open","Your manager-issued staff credentials already unlocked the main dashboard.")}${statCard("Required role",team.name,"This team only opens if the signed-in Discord account has the matching role.")}${statCard("Discord check",state.discord.status==="error"?"Needs setup":"Pending",state.discord.status==="error"?state.discord.error:"Use Discord only when entering the team you actually belong to.")}</div></section></section>`;
+  return `<section class="staff-view workspace-view staff-view--centered"><article class="staff-panel workspace-gate"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)} needs Discord verification</h1><p class="staff-copy">${esc(bridgeMessage)}</p><div class="staff-panel__actions"><a class="staff-panel__button staff-panel__button--primary" href="${teamLoginHref(team)}">Verify ${esc(team.name)}</a><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article></section>`;
 }
 
 function lockedView(team){
   if(hasGateManagementAccess())return workspaceView(team);
-  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)} is still locked.</h1><p class="staff-copy">The current Discord account is verified as ${esc(verifiedIdentity())}, but it does not carry the exact ${esc(team.name)} role. That means this workspace stays closed even though the general staff dashboard is already open.</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--locked">Role does not match</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Verified Discord",verifiedIdentity(),"This is the account currently used for team access checks.")}${statCard("Required role",team.name,`Role ID ${team.roleId}`)}${statCard("Management override",hasManagementAccess()?"Active":"Not active",hasManagementAccess()?"Management role would override this team lock.":"Only the team role or Management can unlock this workspace.")}</div></section></section>`;
+  return `<section class="staff-view workspace-view staff-view--centered"><article class="staff-panel workspace-gate"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)} is locked for this account</h1><p class="staff-copy">The current Discord account is verified as ${esc(verifiedIdentity())}, but it does not have the ${esc(team.name)} role. If this looks wrong, ask management to check your role assignment.</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--locked">Role does not match</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article></section>`;
 }
 
 function workspaceSection(title,eyebrow,summary,items){
@@ -150,18 +177,20 @@ function workspaceSection(title,eyebrow,summary,items){
 function workspaceView(team){
   const override=hasFullManagementAccess()&&!state.discord.roles.includes(team.roleId);
   const statusItems=[
-    ["General staff gate",state.gate.account?.displayName||"Staff access active","ready"],
-    ["Verified Discord",hasGateManagementAccess()?"Not required for this manager login":verifiedIdentity(),"ready"],
+    ["Staff access",state.gate.account?.displayName||"Staff access active","ready"],
+    ["Discord",hasGateManagementAccess()?"Management access is handling cross-team entry for this account.":verifiedIdentity(),"ready"],
     ["Role state",override?"Management override active":`${team.name} verified`,"ready"],
-    ["Last verification",hasGateManagementAccess()?"Manager session active":state.discord.verifiedAt?new Date(state.discord.verifiedAt).toLocaleString("en-GB"):"Verified this session","ready"],
+    ["Last verification",hasGateManagementAccess()?"Management login active":state.discord.verifiedAt?new Date(state.discord.verifiedAt).toLocaleString("en-GB"):"Verified this session","ready"],
   ];
-  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)}</h1><p class="staff-copy">${esc(team.summary)}${override?" Management access is opening this workspace automatically.":""}</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--open">${override?"Management override":"Role verified"}</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Workspace state","Open",override?"Management clearance is unlocking this team.":"This team role is verified for the current session.")}${statCard("Access mode",hasGateManagementAccess()?"Manager gate override":verifiedIdentity(),hasGateManagementAccess()?"This manager login can move across every team without another login.":"Team access is tied to the live Discord session.")}${statCard("Live readiness",team.live.some((item)=>item[2]==="prepared")?"Prepared":"Ready","Prepared surfaces are already scaffolded for future server and bot data.")}</div></section>${workspaceBoard(team.boards)}<section class="workspace-columns">${workspaceSection("Channels",`${team.name} channels`,"Internal channels and working lanes for this role.",team.ch.map(([title,body])=>[title,body,"ready"]))}${workspaceSection("Functions",`${team.name} control surfaces`,"Role-specific tools, boards, and operational surfaces.",team.fn)}${workspaceSection("Prepared live surfaces",`${team.name} live`,"Prepared live data, bot-driven mirrors, and future operational feeds for this role.",team.live)}${workspaceSection("Access frame","Verification state","General staff credentials open the portal. Management logins can move across every team directly, while every other staff member still needs the matching Discord role.",statusItems)}</section></section>`;
+  const focusItems=(team.preview||[]).map((item)=>[item,"Active focus area for this team right now.","ready"]);
+  return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)}</h1><p class="staff-copy">${esc(team.summary)}${override?" Management access is opening this workspace automatically.":""}</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--open">${override?"Management override":"Role verified"}</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Workspace state","Open",override?"Management clearance is unlocking this team.":"This workspace is open for the current session.")}${statCard("Access mode",hasGateManagementAccess()?"Manager gate":verifiedIdentity(),hasGateManagementAccess()?"No extra team login is required for this management account.":"Team access is tied to the verified Discord account.")}${statCard("Live readiness",team.live.some((item)=>item[2]==="prepared")?"Prepared":"Ready","Prepared live surfaces are ready for later server and bot integration.")}</div></section>${workspaceBoard(team.boards)}<section class="workspace-columns">${workspaceSection("Focus",`${team.name} focus`,"The most important surfaces and responsibilities in this workspace.",focusItems)}${workspaceSection("Channels",`${team.name} channels`,"Internal channels and working lanes for this role.",team.ch.map(([title,body])=>[title,body,"ready"]))}${workspaceSection("Functions",`${team.name} tools`,"Role-specific tools, boards, and operational surfaces.",team.fn)}${workspaceSection("Prepared live",`${team.name} live`,"Prepared live data, bot-driven mirrors, and future runtime feeds.",team.live)}${workspaceSection("Access state","Verification","General staff login opens the portal. Management logins can move across every team directly, while every other staff member still needs the matching Discord role.",statusItems)}</section></section>`;
 }
 
 function render(){
   renderTopbar();
   const current=routeSlug();
   document.querySelectorAll(".staff-dock__item").forEach((link)=>{link.classList.toggle("is-active",link.dataset.team===current);});
+  shell.dataset.route=current;
   if(!state.gate.loggedIn){app.innerHTML=gateView();return;}
   if(state.gate.passwordResetRequired){app.innerHTML=changePasswordView();return;}
   if(current===DEFAULT_ROUTE){app.innerHTML=dashboardView();return;}
@@ -245,7 +274,7 @@ async function handleStaffGateSubmit(form){
         :reason==="staff_auth_not_configured"
           ?"The staff database login is not configured yet."
           :reason==="missing_credentials"
-            ?"Enter both your staff ID and password."
+            ?(state.gate.backendConfigured?"Enter both your username and password.":"Enter both your staff ID and password.")
             :reason==="db_query_failed"
               ?"The live staff database query failed. Upload the latest staff-auth files and recheck the table mapping."
               :"The staff login could not be completed right now.";

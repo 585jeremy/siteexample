@@ -1073,7 +1073,7 @@ function initAuth() {
   }
 
   if (registerBtn) {
-    registerBtn.addEventListener("click", () => openAuthModal("login"));
+    registerBtn.addEventListener("click", () => openAuthModal("register"));
   }
 
   if (accountBtn) {

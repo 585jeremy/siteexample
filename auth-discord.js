@@ -27,14 +27,6 @@ window.addEventListener("load", async function () {
   }
 
   function clearDiscordSession() {
-    const session = JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || "null");
-    const accounts = readAccounts();
-
-    if (session?.username && accounts[session.username]?.discordLinked) {
-      delete accounts[session.username];
-      localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
-    }
-
     localStorage.removeItem(AUTH_SESSION_KEY);
   }
 
@@ -123,8 +115,7 @@ window.addEventListener("load", async function () {
       newLogoutBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        localStorage.removeItem(AUTH_ACCOUNTS_KEY);
-        localStorage.removeItem(AUTH_SESSION_KEY);
+        clearDiscordSession();
         window.location.href = LOGOUT_URL;
       });
     }
