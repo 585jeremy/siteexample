@@ -101,12 +101,14 @@ function teamStatus(team){
 
 function gateView(){
   const configured=state.gate.backendConfigured||GATE_ACCOUNTS.length>0;
+  const loginLabel=state.gate.backendConfigured?"Username":"Staff ID";
+  const loginPlaceholder=state.gate.backendConfigured?"Enter your username":"Enter your staff ID";
   const hint=state.gate.backendConfigured
-    ?"Use your manager-issued staff ID and password. If this is your first login, the portal will force you to set a new password before the dashboard opens."
+    ?"Use the Username from the database and its matching password. If this is your first login, the portal will force you to set a new password before the dashboard opens."
     :configured
       ?"This preview gate opens the dashboard only. Team entry stays Discord role-locked until the staff database is connected."
       :"No staff credentials are configured yet. Add manager-issued accounts in staff-gate-config.js or finish the staff database setup.";
-  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">General staff access</span><h1 class="staff-heading">Staff access starts here.</h1><p class="staff-copy">Use the private staff credentials sent by management. This first step opens the internal dashboard. Entering an actual team workspace still needs the matching staff access level, and non-management teams can still be Discord role-locked where needed.</p></div><div class="staff-gate__panel"><span class="gate-kicker gate-kicker--soft">${state.gate.backendConfigured?"Database-backed staff login":"Manager-issued credentials"}</span><form class="gate-form" data-form="staff-gate" autocomplete="off"><label class="gate-form__field"><span>Staff ID</span><input class="gate-form__input" type="text" name="staffId" placeholder="Enter your staff ID" /></label><label class="gate-form__field"><span>Password</span><input class="gate-form__input" type="password" name="password" placeholder="Enter your staff password" /></label>${state.gate.error?`<p class="gate-form__error">${esc(state.gate.error)}</p>`:""}<p class="gate-form__hint">${esc(hint)}</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit" ${configured?"":"disabled"}>Enter staff dashboard</button></form></div></div></article></section>`;
+  return `<section class="staff-view staff-gate"><article class="staff-gate__card"><div class="staff-gate__layout"><div class="staff-gate__copy"><span class="gate-kicker">General staff access</span><h1 class="staff-heading">Staff access starts here.</h1><p class="staff-copy">Use the private staff credentials sent by management. This first step opens the internal dashboard. Entering an actual team workspace still needs the matching staff access level, and non-management teams can still be Discord role-locked where needed.</p></div><div class="staff-gate__panel"><span class="gate-kicker gate-kicker--soft">${state.gate.backendConfigured?"Database-backed staff login":"Manager-issued credentials"}</span><form class="gate-form" data-form="staff-gate" autocomplete="off"><label class="gate-form__field"><span>${esc(loginLabel)}</span><input class="gate-form__input" type="text" name="staffId" placeholder="${esc(loginPlaceholder)}" /></label><label class="gate-form__field"><span>Password</span><input class="gate-form__input" type="password" name="password" placeholder="Enter your staff password" /></label>${state.gate.error?`<p class="gate-form__error">${esc(state.gate.error)}</p>`:""}<p class="gate-form__hint">${esc(hint)}</p><button class="staff-panel__button staff-panel__button--primary gate-form__submit" type="submit" ${configured?"":"disabled"}>Enter staff dashboard</button></form></div></div></article></section>`;
 }
 
 function changePasswordView(){
@@ -239,7 +241,7 @@ async function handleStaffGateSubmit(form){
     }catch(error){
       const reason=error?.payload?.error||"login_failed";
       state.gate.error=reason==="invalid_credentials"
-        ?"That staff ID and password pair does not match the database records."
+        ?"That username and password pair does not match the database records."
         :reason==="staff_auth_not_configured"
           ?"The staff database login is not configured yet."
           :reason==="missing_credentials"
