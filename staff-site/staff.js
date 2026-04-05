@@ -30,23 +30,6 @@ const teams=[
 
 const managementRoleId=teams[0].roleId;
 const teamsBySlug=Object.fromEntries(teams.map((team)=>[team.slug,team]));
-const dashboardSections=[
-  {
-    title:"Command",
-    copy:"Leadership, investigations, moderation review, and high-trust control lanes.",
-    slugs:["management","admin","moderation","security"]
-  },
-  {
-    title:"Operations",
-    copy:"Build, QA, translation, and support-facing teams that keep the project moving.",
-    slugs:["development","testing","translation","helper"]
-  },
-  {
-    title:"Outreach",
-    copy:"Public-facing content, campaign planning, and social delivery surfaces.",
-    slugs:["creator","social"]
-  }
-];
 const txAdminSections={
   management:[
     {title:"Open txAdmin",summary:"Launch the main txAdmin panel in a new tab for full runtime control.",href:`${TXADMIN_BASE_URL}/`,label:"Open txAdmin",state:"live"},
@@ -161,16 +144,19 @@ function teamCard(team){
   return `<article class="team-card team-card--${status.variant}"><div class="team-card__top"><span class="team-card__badge">${esc(team.short)}</span>${statusBadge(status.label,status.variant)}</div><div class="team-card__body"><span class="gate-kicker gate-kicker--soft">${esc(team.eyebrow)}</span><h2 class="team-card__title">${esc(team.name)}</h2><p class="team-card__summary">${esc(team.summary)}</p><ul class="team-card__list">${preview}</ul></div><div class="team-card__footer"><span class="team-card__hint">${esc(hint)}</span>${actionMarkup}</div></article>`;
 }
 
-function dashboardSection(section){
-  const items=section.slugs.map((slug)=>teamsBySlug[slug]).filter(Boolean);
-  return `<section class="dashboard-section"><div class="dashboard-section__head"><div><span class="gate-kicker gate-kicker--soft">${esc(section.title)}</span><h2 class="dashboard-section__title">${esc(section.title)}</h2></div><p class="dashboard-section__copy">${esc(section.copy)}</p></div><div class="team-grid team-grid--dashboard">${items.map((team)=>teamCard(team)).join("")}</div></section>`;
-}
-
 function dashboardView(){
   const unlockedCount=teams.filter((team)=>hasTeamAccess(team)).length;
   const discordState=hasGateManagementAccess()?"Management login already unlocks every team in this portal.":hasDiscordSession()?verifiedIdentity():state.discord.status==="error"?"Discord verification currently needs attention.":"No team has been Discord-verified yet.";
   const account=state.gate.account||{displayName:"Staff Access",clearance:"General Staff"};
-  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">General staff dashboard</span><h1 class="staff-heading">${esc(account.displayName)}, choose a workspace.</h1><p class="staff-copy">Start from the team you actually need. The portal now keeps every workspace in one place, with clearer status labels and less clutter before you enter a section.</p><div class="staff-panel__actions">${hasFullManagementAccess()?`<span class="staff-state-pill staff-state-pill--open">Management access active</span>`:`<span class="staff-state-pill staff-state-pill--prepared">Choose a team below</span>`}</div></article><div class="dashboard-hero__rail">${statCard("Access level",account.clearance||"General Staff","General staff login is active for this session.")}${statCard("Discord state",hasGateManagementAccess()?"Management":"Team check",discordState)}${statCard("Open workspaces",String(unlockedCount),hasFullManagementAccess()?"Management access keeps every team open automatically.":"This number increases as team roles are verified.")}</div></section><section class="dashboard-sections">${dashboardSections.map((section)=>dashboardSection(section)).join("")}</section></section>`;
+  const entryText=hasGateManagementAccess()
+    ?"Use the left navigation to open any workspace directly. This management account has cross-team access without extra team verification."
+    :"Use the left navigation to open the team you belong to. Your own staff login opens the portal, and your Discord role unlocks the actual workspace.";
+  const nextStep=hasGateManagementAccess()
+    ?"Open the team you want from the left."
+    :hasDiscordSession()
+      ?"Choose your team from the left. If the role matches, the workspace opens."
+      :"Choose your team from the left, then verify it with Discord when prompted.";
+  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">General staff dashboard</span><h1 class="staff-heading">${esc(account.displayName)}, welcome back.</h1><p class="staff-copy">${esc(entryText)}</p><div class="staff-panel__actions">${hasFullManagementAccess()?`<span class="staff-state-pill staff-state-pill--open">Management access active</span>`:`<span class="staff-state-pill staff-state-pill--prepared">Team access depends on Discord role</span>`}</div></article><div class="dashboard-hero__rail">${statCard("Access level",account.clearance||"General Staff","General staff login is active for this session.")}${statCard("Discord state",hasGateManagementAccess()?"Management":"Team check",discordState)}${statCard("Open workspaces",String(unlockedCount),hasFullManagementAccess()?"Management access keeps every team open automatically.":"Unlocked team count changes as roles are verified.")}</div></section><section class="workspace-columns"><article class="workspace-panel"><span class="workspace-panel__eyebrow">Navigation</span><h2 class="workspace-panel__title">Use the left navigation</h2><p class="workspace-panel__summary">Every team stays in the left navigation only, so the dashboard stays clean while you move through the portal.</p><ul class="workspace-list">${rowsMarkup([["Dashboard","Your session, access level, and next-step overview.","ready"],["Team workspaces","Management, Admin, Moderation, Development, Testing, Translation, Helper, Security, Content Creator, and Social are all opened from the left side.","ready"],["txAdmin links","Management and Admin see their txAdmin tools inside their own workspaces, not on the dashboard.","ready"]])}</ul></article><article class="workspace-panel"><span class="workspace-panel__eyebrow">Access flow</span><h2 class="workspace-panel__title">How access works</h2><p class="workspace-panel__summary">The first login opens the portal. Team entry is handled separately so the right people only open the right workspace.</p><ul class="workspace-list">${rowsMarkup([[hasGateManagementAccess()?"Management override":"Staff login",hasGateManagementAccess()?"This management account already has full portal access.":"Your own staff username and password open the portal.","ready"],["Team verification",hasGateManagementAccess()?"No extra team login is required for this management account.":"Non-management teams still require Discord verification before the workspace opens.","ready"],["Next step",nextStep,"ready"]])}</ul></article></section></section>`;
 }
 
 function verificationView(team){
