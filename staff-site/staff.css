@@ -19,7 +19,7 @@ html, body { min-height: 100%; }
 body {
   margin: 0;
   color: var(--text);
-  font-family: "Segoe UI Variable Text", "Segoe UI", Aptos, system-ui, sans-serif;
+  font-family: "Bahnschrift", "Segoe UI Variable Text", "Segoe UI", Aptos, system-ui, sans-serif;
   background: linear-gradient(180deg, #040506 0%, #090a0c 100%);
   overflow-x: hidden;
 }
@@ -199,6 +199,10 @@ body::after {
 .dashboard-hero,
 .workspace-hero {
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+}
+
+.dashboard-hero--minimal {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .workspace-columns {
