@@ -242,7 +242,11 @@ async function handleStaffGateSubmit(form){
         ?"That staff ID and password pair does not match the database records."
         :reason==="staff_auth_not_configured"
           ?"The staff database login is not configured yet."
-          :"The staff login could not be completed right now.";
+          :reason==="missing_credentials"
+            ?"Enter both your staff ID and password."
+            :reason==="db_query_failed"
+              ?"The live staff database query failed. Upload the latest staff-auth files and recheck the table mapping."
+              :"The staff login could not be completed right now.";
       render();
       return;
     }
