@@ -147,11 +147,9 @@ function teamCard(team){
 function dashboardView(){
   const account=state.gate.account||{displayName:"Staff Access",clearance:"General Staff"};
   const statusLine=hasGateManagementAccess()
-    ?"Management access is active. Use the left navigation to open any workspace directly."
-    :hasDiscordSession()
-      ?"Use the left navigation to open your workspace. The matching Discord role still controls access."
-      :"Use the left navigation to choose a team. Non-management teams will ask for Discord verification when opened.";
-  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero dashboard-hero--minimal"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">General staff dashboard</span><h1 class="staff-heading">${esc(account.displayName)}, welcome back.</h1><p class="staff-copy">${esc(statusLine)}</p><div class="staff-panel__actions">${hasFullManagementAccess()?`<span class="staff-state-pill staff-state-pill--open">Management access active</span>`:`<span class="staff-state-pill staff-state-pill--prepared">Workspace access is role-based</span>`}</div></article></section></section>`;
+    ?"Use the left navigation to open any workspace."
+    :"Use the left navigation to open the team you need.";
+  return `<section class="staff-view staff-dashboard"><section class="dashboard-hero dashboard-hero--minimal"><article class="staff-panel staff-panel--hero"><h1 class="staff-heading">${esc(account.displayName)}, welcome back.</h1><p class="staff-copy">${esc(statusLine)}</p></article></section></section>`;
 }
 
 function verificationView(team){
