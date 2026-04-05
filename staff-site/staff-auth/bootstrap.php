@@ -186,9 +186,29 @@ function staff_auth_pdo(): PDO
     return $pdo;
 }
 
+function staff_auth_bool_config(string $key, bool $default = false): bool
+{
+    $value = staff_auth_config($key, $default);
+    if (is_bool($value)) {
+        return $value;
+    }
+
+    $normalized = strtolower(trim((string) $value));
+    if ($normalized === '') {
+        return $default;
+    }
+
+    return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
+}
+
+function staff_auth_has_session(): bool
+{
+    return !empty($_SESSION['staff_logged_in']) && !empty($_SESSION['staff_account_id']);
+}
+
 function staff_auth_session_payload(): array
 {
-    if (empty($_SESSION['staff_logged_in'])) {
+    if (!staff_auth_has_session()) {
         return [
             'configured' => staff_auth_is_configured(),
             'authenticated' => false,
@@ -233,4 +253,36 @@ function staff_auth_require_post(): void
             'error' => 'method_not_allowed',
         ], 405);
     }
+}
+
+function staff_auth_require_login(): void
+{
+    if (!staff_auth_has_session()) {
+        staff_auth_send_json([
+            'configured' => staff_auth_is_configured(),
+            'ok' => false,
+            'error' => 'not_authenticated',
+        ], 401);
+    }
+}
+
+function staff_auth_access_level(): string
+{
+    $portalAccess = strtolower(trim((string) ($_SESSION['staff_portal_access'] ?? '')));
+    $clearance = strtolower(trim((string) ($_SESSION['staff_clearance'] ?? '')));
+
+    if (in_array($portalAccess, ['all', 'management'], true) || in_array($clearance, ['management', 'manager'], true)) {
+        return 'manager';
+    }
+
+    if (in_array($portalAccess, ['admin', 'operations'], true) || $clearance === 'admin') {
+        return 'admin';
+    }
+
+    return 'staff';
+}
+
+function staff_auth_txadmin_base_url(): string
+{
+    return rtrim(trim((string) staff_auth_config('txadmin_base_url', '')), '/');
 }

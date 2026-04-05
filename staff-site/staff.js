@@ -8,7 +8,9 @@ const GATE_API={
   changePassword:"./staff-auth/change-password.php",
   logout:"./staff-auth/logout.php"
 };
-const TXADMIN_BASE_URL="http://185.223.30.214:30583";
+const TXADMIN_API={
+  overview:"./staff-auth/txadmin-overview.php"
+};
 const DEFAULT_ROUTE="dashboard";
 const PASSWORD_ROUTE="change-password";
 const shell=document.getElementById("staffShell");
@@ -30,20 +32,7 @@ const teams=[
 
 const managementRoleId=teams[0].roleId;
 const teamsBySlug=Object.fromEntries(teams.map((team)=>[team.slug,team]));
-const txAdminSections={
-  management:[
-    {title:"Open txAdmin",summary:"Launch the main txAdmin panel in a new tab for full runtime control.",href:`${TXADMIN_BASE_URL}/`,label:"Open txAdmin",state:"live"},
-    {title:"Player manager",summary:"Jump straight into the player list for monitoring, kicks, and session review.",href:`${TXADMIN_BASE_URL}/login?r=%2Fplayers`,label:"Open players",state:"live"},
-    {title:"Runtime console",summary:"Prepared manager lane for live console commands and server-runtime control. Use txAdmin directly until the API bridge is added.",href:`${TXADMIN_BASE_URL}/login?r=%2Fconsole`,label:"Open console",state:"prepared"},
-    {title:"Service bridge",summary:"Prepared embedded layer for future live txAdmin data, resource state, and restart controls inside the staff portal.",href:"",label:"Prepared",state:"prepared"}
-  ],
-  admin:[
-    {title:"Open txAdmin",summary:"Open txAdmin in a new tab for higher-level server review and handoff into management when needed.",href:`${TXADMIN_BASE_URL}/`,label:"Open txAdmin",state:"live"},
-    {title:"Player overview",summary:"Review active player sessions, spot pressure points, and hand off actions to the correct team.",href:`${TXADMIN_BASE_URL}/login?r=%2Fplayers`,label:"Open players",state:"live"},
-    {title:"Operations snapshot",summary:"Prepared read-only server snapshot for player counts, incidents, and restart state once the API bridge is live.",href:"",label:"Prepared",state:"prepared"}
-  ]
-};
-const state={gate:{loggedIn:false,account:null,error:"",mode:"legacy",passwordResetRequired:false,resetError:"",backendConfigured:false},discord:{status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""}};
+const state={gate:{loggedIn:false,account:null,error:"",mode:"legacy",passwordResetRequired:false,resetError:"",backendConfigured:false},discord:{status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""},txadmin:{status:"idle",data:null,error:""}};
 
 function esc(value){return String(value??"").replace(/[&<>\"']/g,(char)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));}
 function normalize(value){return String(value??"").trim().toLowerCase();}
@@ -86,6 +75,7 @@ function syncGateFromBackend(payload){
   }
   state.gate.loggedIn=false;
   state.gate.account=null;
+  resetTxAdminState();
   clearStaffSession();
 }
 async function loadBackendGateState(){
@@ -98,6 +88,30 @@ async function loadBackendGateState(){
     state.gate.mode="legacy";
     return false;
   }
+}
+
+function resetTxAdminState(){
+  state.txadmin={status:"idle",data:null,error:""};
+}
+
+async function loadTxAdminState(){
+  if(!state.gate.loggedIn||state.gate.passwordResetRequired){
+    resetTxAdminState();
+    return;
+  }
+  state.txadmin.status="loading";
+  state.txadmin.error="";
+  try{
+    const payload=await fetchJson(TXADMIN_API.overview);
+    state.txadmin.status="ready";
+    state.txadmin.data=payload;
+    state.txadmin.error="";
+  }catch(error){
+    state.txadmin.status="error";
+    state.txadmin.data=null;
+    state.txadmin.error=error?.payload?.error||"txadmin_unavailable";
+  }
+  render();
 }
 
 function renderTopbar(){
@@ -167,9 +181,43 @@ function workspaceSection(title,eyebrow,summary,items){
   return `<article class="workspace-panel"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><ul class="workspace-list">${rowsMarkup(items)}</ul></article>`;
 }
 
+function txAdminCardsFor(team){
+  if(!["management","admin"].includes(team.slug))return [];
+  const data=state.txadmin.data||{};
+  const links=data.links||{};
+  const notes=Array.isArray(data.notes)?data.notes:[];
+  const accessLevel=data.accessLevel||"staff";
+  const bridgeEnabled=!!data.bridgeEnabled;
+  const mixedContentWarning=!!data.mixedContentWarning;
+  const bridgeSummary=state.txadmin.status==="error"
+    ?"The staff runtime bridge could not be reached. Check the staff-auth txAdmin config on the server."
+    :notes[0]||"Secure txAdmin bridge is prepared for backend wiring.";
+  const launchSummary=links.home
+    ? mixedContentWarning
+      ?"txAdmin launches in a new tab for now because the current runtime panel is still plain http://."
+      :"Launch the live txAdmin panel in a new tab."
+    :"txAdmin launch is prepared, but the backend config still needs the base URL.";
+  const playerSummary=links.players
+    ?"Jump straight into the player list for faster runtime review and handoff."
+    :"Player overview will unlock after the txAdmin base URL is configured.";
+  if(team.slug==="management"){
+    return[
+      {title:"Launch txAdmin",summary:launchSummary,href:links.home||"",label:links.home?"Open txAdmin":"Prepared",state:links.home?"open":"prepared"},
+      {title:"Player manager",summary:playerSummary,href:links.players||"",label:links.players?"Open players":"Prepared",state:links.players?"open":"prepared"},
+      {title:"Runtime console",summary:links.console?"Manager console is routed as a new-tab launch until the secure backend bridge replaces direct access.":"Manager-only console access is prepared on the backend and will unlock once the bridge is fully configured.",href:links.console||"",label:links.console?"Open console":"Prepared",state:links.console?(bridgeEnabled?"open":"prepared"):"prepared"},
+      {title:"Bridge layer",summary:bridgeSummary,href:"",label:bridgeEnabled?"Backend ready":"Prepared",state:bridgeEnabled?"open":"prepared"}
+    ];
+  }
+  return[
+    {title:"Launch txAdmin",summary:launchSummary,href:links.home||"",label:links.home?"Open txAdmin":"Prepared",state:links.home?"open":"prepared"},
+    {title:"Player overview",summary:playerSummary,href:links.players||"",label:links.players?"Open players":"Prepared",state:links.players?"open":"prepared"},
+    {title:"Read-only bridge",summary:accessLevel==="manager"||accessLevel==="admin"?"Prepared runtime snapshot for status, player pressure, incidents, and restart state once the backend bridge is enabled.":"Admin runtime bridge is prepared, but the backend account mapping still needs to mark this login as admin-capable.",href:"",label:accessLevel==="manager"||accessLevel==="admin"?(bridgeEnabled?"Backend ready":"Prepared"):"Awaiting access",state:accessLevel==="manager"||accessLevel==="admin"?(bridgeEnabled?"open":"prepared"):"locked"}
+  ];
+}
+
 function workspaceToolsSection(title,eyebrow,summary,items){
   if(!Array.isArray(items)||!items.length)return "";
-  return `<article class="workspace-panel workspace-panel--tools"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><div class="workspace-tools">${items.map((item)=>`<article class="workspace-tool workspace-tool--${esc(item.state||"ready")}"><div class="workspace-tool__top"><strong class="workspace-row__title">${esc(item.title)}</strong>${statusBadge(item.state==="prepared"?"Prepared":"Live",item.state==="prepared"?"prepared":"open")}</div><p class="workspace-tool__summary">${esc(item.summary)}</p>${item.href?`<a class="staff-panel__button staff-panel__button--primary workspace-tool__action" href="${esc(item.href)}" target="_blank" rel="noopener noreferrer">${esc(item.label||"Open")}</a>`:`<span class="workspace-tool__placeholder">${esc(item.label||"Prepared")}</span>`}</article>`).join("")}</div></article>`;
+  return `<article class="workspace-panel workspace-panel--tools"><span class="workspace-panel__eyebrow">${esc(eyebrow)}</span><h2 class="workspace-panel__title">${esc(title)}</h2><p class="workspace-panel__summary">${esc(summary)}</p><div class="workspace-tools">${items.map((item)=>{const variant=item.state==="prepared"?"prepared":item.state==="locked"?"locked":"open";const label=item.state==="prepared"?"Prepared":item.state==="locked"?"Locked":"Live";return `<article class="workspace-tool workspace-tool--${esc(item.state||"ready")}"><div class="workspace-tool__top"><strong class="workspace-row__title">${esc(item.title)}</strong>${statusBadge(label,variant)}</div><p class="workspace-tool__summary">${esc(item.summary)}</p>${item.href&&item.state!=="locked"?`<a class="staff-panel__button staff-panel__button--primary workspace-tool__action" href="${esc(item.href)}" target="_blank" rel="noopener noreferrer">${esc(item.label||"Open")}</a>`:`<span class="workspace-tool__placeholder">${esc(item.label||"Prepared")}</span>`}</article>`;}).join("")}</div></article>`;
 }
 
 function workspaceView(team){
@@ -185,9 +233,9 @@ function workspaceView(team){
     "txAdmin",
     `${team.name} runtime`,
     team.slug==="management"
-      ?"Manager runtime access, launch links, and prepared in-portal txAdmin surfaces."
-      :"Admin runtime overview and faster launch links into txAdmin without exposing the full management stack.",
-    txAdminSections[team.slug]||[]
+      ?"Manager runtime access, backend-prepared bridge surfaces, and safe launch links that keep secrets off the frontend."
+      :"Admin runtime overview and safer backend-prepared txAdmin access without exposing a full management console stack.",
+    txAdminCardsFor(team)
   );
   return `<section class="staff-view workspace-view"><section class="workspace-hero"><article class="staff-panel staff-panel--hero"><span class="gate-kicker">${esc(team.eyebrow)}</span><h1 class="staff-heading">${esc(team.name)}</h1><p class="staff-copy">${esc(team.summary)}${override?" Management access is opening this workspace automatically.":""}</p><div class="staff-panel__actions"><span class="staff-state-pill staff-state-pill--open">${override?"Management override":"Role verified"}</span><a class="staff-panel__button" href="#/dashboard">Back to dashboard</a></div></article><div class="dashboard-hero__rail">${statCard("Workspace state","Open",override?"Management clearance is unlocking this team.":"This workspace is open for the current session.")}${statCard("Access mode",hasGateManagementAccess()?"Manager gate":verifiedIdentity(),hasGateManagementAccess()?"No extra team login is required for this management account.":"Team access is tied to the verified Discord account.")}${statCard("Live readiness",team.live.some((item)=>item[2]==="prepared")?"Prepared":"Ready","Prepared live surfaces are ready for later server and bot integration.")}</div></section>${workspaceBoard(team.boards)}${txSection}<section class="workspace-columns">${workspaceSection("Focus",`${team.name} focus`,"The most important surfaces and responsibilities in this workspace.",focusItems)}${workspaceSection("Channels",`${team.name} channels`,"Internal channels and working lanes for this role.",team.ch.map(([title,body])=>[title,body,"ready"]))}${workspaceSection("Functions",`${team.name} tools`,"Role-specific tools, boards, and operational surfaces.",team.fn)}${workspaceSection("Prepared live",`${team.name} live`,"Prepared live data, bot-driven mirrors, and future runtime feeds.",team.live)}${workspaceSection("Access state","Verification","General staff login opens the portal. Management logins can move across every team directly, while every other staff member still needs the matching Discord role.",statusItems)}</section></section>`;
 }
@@ -271,7 +319,10 @@ async function handleStaffGateSubmit(form){
       state.discord={status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""};
       window.location.hash=state.gate.passwordResetRequired?`#/${PASSWORD_ROUTE}`:"#/dashboard";
       render();
-      if(!state.gate.passwordResetRequired)loadDiscordState();
+      if(!state.gate.passwordResetRequired){
+        loadDiscordState();
+        loadTxAdminState();
+      }
       return;
     }catch(error){
       const reason=error?.payload?.error||"login_failed";
@@ -296,6 +347,7 @@ async function handleStaffGateSubmit(form){
   }
   saveStaffSession(matched,{mode:"legacy",backendConfigured:false,passwordResetRequired:false});
   state.discord={status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""};
+  resetTxAdminState();
   window.location.hash="#/dashboard";
   render();
   loadDiscordState();
@@ -317,6 +369,7 @@ async function handlePasswordResetSubmit(form){
     window.location.hash="#/dashboard";
     render();
     loadDiscordState();
+    loadTxAdminState();
   }catch(error){
     const reason=error?.payload?.error||"password_update_failed";
     state.gate.resetError=reason==="password_mismatch"
@@ -337,6 +390,7 @@ async function handleStaffLogout(){
   clearStaffSession();
   state.gate={loggedIn:false,account:null,error:"",mode:state.gate.backendConfigured?"database":"legacy",passwordResetRequired:false,resetError:"",backendConfigured:state.gate.backendConfigured};
   state.discord={status:"idle",user:null,roles:[],syncStatus:"",verifiedAt:"",error:""};
+  resetTxAdminState();
   window.location.hash="#/dashboard";
   render();
 }
@@ -365,4 +419,4 @@ document.addEventListener("click",(event)=>{
 window.addEventListener("hashchange",render);
 loadStaffSession();
 render();
-(async()=>{const backendConfigured=await loadBackendGateState();render();if(!backendConfigured&&state.gate.loggedIn)loadDiscordState();if(backendConfigured&&state.gate.loggedIn&&!state.gate.passwordResetRequired)loadDiscordState();})();
+(async()=>{const backendConfigured=await loadBackendGateState();render();if(!backendConfigured&&state.gate.loggedIn)loadDiscordState();if(backendConfigured&&state.gate.loggedIn&&!state.gate.passwordResetRequired){loadDiscordState();loadTxAdminState();}})();

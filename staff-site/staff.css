@@ -501,6 +501,10 @@ body::after {
   border-color: rgba(201, 154, 95, 0.2);
 }
 
+.workspace-tool--locked {
+  border-color: rgba(156, 95, 68, 0.22);
+}
+
 .workspace-tool__top {
   display: flex;
   align-items: flex-start;
