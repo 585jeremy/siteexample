@@ -49,7 +49,7 @@ const DEFAULT_SERVER_CONFIG = {
   websiteHealthUrl: "",
   publicStatusUrl: "",
   nextRestartLabel: "Scheduled restart",
-  websiteName: "SGCNR Portal",
+  websiteName: "SGCNR",
   liveTrackingRequiresOptIn: true
 };
 const SERVER_CONFIG = {
@@ -1475,6 +1475,82 @@ function renderHelp() {
       </div>
     `);
   }
+
+function renderApply() {
+  setView(`
+    <div>
+      ${renderHeader("Apply", [{ label: "Apply" }])}
+      <div class="content-grid content-grid--sidebar">
+        <section class="section section--hero account-hero">
+          <div class="section__eyebrow">Staff applications</div>
+          <h2>Application form</h2>
+          <p class="doc-p">Use this form to prepare a staff application for SGCNR. It is intentionally read-only for now, so nothing gets sent until the real backend intake is connected.</p>
+          <form class="account-form" autocomplete="off">
+            <div class="account-form__grid">
+              <label class="account-field">
+                <span class="account-field__label">Discord username</span>
+                <input class="account-field__input" type="text" placeholder="Your Discord username" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">In-game name</span>
+                <input class="account-field__input" type="text" placeholder="Your in-game name" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">In-game level</span>
+                <input class="account-field__input" type="number" min="1" placeholder="Your current level" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Playtime (hours)</span>
+                <input class="account-field__input" type="number" min="0" placeholder="Your total playtime" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Timezone</span>
+                <input class="account-field__input" type="text" placeholder="Example: CET / EST" />
+              </label>
+              <label class="account-field">
+                <span class="account-field__label">Department interest</span>
+                <input class="account-field__input" type="text" placeholder="Moderation, Testing, Helper, etc." />
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Availability</span>
+                <textarea class="account-field__input account-field__input--textarea" rows="3" placeholder="When are you usually online?"></textarea>
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Moderation experience</span>
+                <textarea class="account-field__input account-field__input--textarea" rows="4" placeholder="Tell us about any moderation experience you have."></textarea>
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Testing experience</span>
+                <textarea class="account-field__input account-field__input--textarea" rows="4" placeholder="Tell us about any QA, bug-reporting, or testing experience you have."></textarea>
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Why should we accept you?</span>
+                <textarea class="account-field__input account-field__input--textarea" rows="5" placeholder="Explain why you would be a good fit for staff."></textarea>
+              </label>
+            </div>
+            <div class="auth-modal__actions">
+              <button class="auth__btn auth__btn--primary" type="button" disabled>Send application</button>
+            </div>
+            <div class="status-note">
+              <strong>Current state:</strong> this form is live as a clean layout only. Submission is blocked until the real application backend is connected.
+            </div>
+          </form>
+        </section>
+
+        <aside class="section section--stack">
+          <div class="section__eyebrow">What to include</div>
+          <h2>Before you apply</h2>
+          <div class="stack-list stack-list--compact">
+            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Use your real Discord username and in-game name.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Be honest about your level, playtime, and availability.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Include any moderation or testing experience you already have.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Take your time with the final answer about why you want to join staff.</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  `);
+}
 
 function setAccountFeedback(element, tone, text) {
   if (!element) return;
@@ -5616,6 +5692,7 @@ function parseRoute() {
   if (parts[0] === "start") return { name: "start" };
   if (parts[0] === "rules") return { name: "rules" };
   if (parts[0] === "commands") return { name: "commands" };
+  if (parts[0] === "apply" || parts[0] === "applications") return { name: "apply" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
   if (parts[0] === "account") return { name: "account" };
   if (parts[0] === "admin") return { name: "admin" };
@@ -5682,6 +5759,11 @@ function route() {
   if (r.name === "commands") {
     renderCommands();
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
+    return;
+  }
+  if (r.name === "apply") {
+    renderApply();
+    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Apply`;
     return;
   }
   if (r.name === "help") {
