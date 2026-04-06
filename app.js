@@ -1846,7 +1846,7 @@ function renderAdminDashboard(account) {
             <div class="stack-list__item"><span class="stack-list__index">02</span><span><strong>Applications & appeals:</strong> review queues for staff applications, ban appeals, and player reports.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">03</span><span><strong>Live ops controls:</strong> toggle active events, hottest zones, and manager-side notices shown on the Live page.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">04</span><span><strong>Account oversight:</strong> inspect Discord-linked accounts, verification status, and identity mismatches.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">05</span><span><strong>Support overview:</strong> open tickets, pending reviews, website health, and backend sync checks.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span><strong>Support overview:</strong> pending reports, pending reviews, website health, and backend sync checks.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">06</span><span><strong>Private notes:</strong> internal rollout reminders, changelog notes, and staff-only operational tasks.</span></div>
           </div>
         </section>
@@ -4385,8 +4385,8 @@ function normaliseDiscordOpsPayload(payload) {
     onlineMembers: toFiniteNumber(pickFirstDefined(guild, ["onlineMembers", "membersOnline", "presenceCount", "online"])),
     totalMembers: toFiniteNumber(pickFirstDefined(guild, ["totalMembers", "members", "memberCount"])),
     verifiedMembers: toFiniteNumber(pickFirstDefined(guild, ["verifiedMembers", "linkedMembers", "whitelistedMembers"])),
-    openTickets: toFiniteNumber(pickFirstDefined(support, ["openTickets", "ticketsOpen", "tickets"])),
-    pendingReports: toFiniteNumber(pickFirstDefined(support, ["pendingReports", "reportsOpen", "reports"])),
+    openTickets: toFiniteNumber(pickFirstDefined(support, ["openTickets", "open_tickets", "ticketsOpen", "tickets"])),
+    pendingReports: toFiniteNumber(pickFirstDefined(support, ["pendingReports", "pending_reports", "reportsOpen", "reports"])),
     pendingApplications: toFiniteNumber(pickFirstDefined(support, ["pendingApplications", "applicationsOpen", "applications"])),
     linkedAccounts: toFiniteNumber(pickFirstDefined(linking, ["linkedAccounts", "linkedUsers", "connections"])),
     syncRoles: syncRolesRaw == null ? false : Boolean(syncRolesRaw),
@@ -4901,7 +4901,7 @@ function renderDiscordOpsGrid(discord) {
     ["Bot Status", discord?.botStatus?.status === "online" ? "Online" : discord?.botStatus?.status === "offline" ? "Offline" : "Pending"],
     ["Members Online", discord?.onlineMembers != null ? String(discord.onlineMembers) : "—"],
     ["Total Members", discord?.totalMembers != null ? String(discord.totalMembers) : "—"],
-    ["Open Tickets", discord?.openTickets != null ? String(discord.openTickets) : "—"],
+    ["Pending Reports", discord?.pendingReports != null ? String(discord.pendingReports) : "—"],
     ["Linked Accounts", discord?.linkedAccounts != null ? String(discord.linkedAccounts) : "—"],
     ["Role Sync", discord?.syncRoles ? "Enabled" : discord?.configured ? "Ready" : "Pending"]
   ];
@@ -4950,7 +4950,7 @@ function renderDiscordLinking(discord) {
       <div class="stack-list__item"><span class="stack-list__index">01</span><span>Discord guild: ${escapeHtml(discord?.guildName || `${SERVER_CONFIG.name} Discord`)}</span></div>
       <div class="stack-list__item"><span class="stack-list__index">02</span><span>Account linking is ${discord?.linkingEnabled ? "enabled" : "prepared but not connected yet"}.</span></div>
       <div class="stack-list__item"><span class="stack-list__index">03</span><span>Role sync is ${discord?.syncRoles ? "enabled" : "ready for backend control"}.</span></div>
-      <div class="stack-list__item"><span class="stack-list__index">04</span><span>Support queue: ${discord?.openTickets != null ? `${discord.openTickets} open tickets` : "waiting for ticket data"}.</span></div>
+      <div class="stack-list__item"><span class="stack-list__index">04</span><span>Support queue: ${discord?.pendingReports != null ? `${discord.pendingReports} pending reports` : "waiting for report data"}.</span></div>
       <div class="stack-list__item"><span class="stack-list__index">05</span><span>Verified members: ${discord?.verifiedMembers != null ? String(discord.verifiedMembers) : "pending data feed"}.</span></div>
     </div>
     <div class="status-note">

@@ -60,7 +60,7 @@ window.SGCNR_SERVER_CONFIG = {
   //   "discord": {
   //     "botStatus": { "status": "online", "message": "Stable", "latencyMs": 88 },
   //     "guild": { "name": "SGCNR", "onlineMembers": 214, "totalMembers": 1820, "verifiedMembers": 906 },
-  //     "support": { "openTickets": 11, "pendingReports": 4, "pendingApplications": 3 },
+  //     "support": { "pending_reports": 4, "pendingApplications": 3 },
   //     "linking": { "enabled": true, "linkedAccounts": 682, "syncRoles": true, "oauthUrl": "https://..." },
   //     "announcements": [
   //       { "title": "Weekend event", "channel": "#announcements", "createdAt": "...", "detail": "Bonus payouts are live." }
