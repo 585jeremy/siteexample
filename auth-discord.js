@@ -80,6 +80,7 @@ window.addEventListener("load", async function () {
       discordId: discordUser.discordId || "",
       verifiedIdentity: discordUser.verifiedIdentity || discordUser.guildNickname || discordUser.discordDisplayName || discordUser.discordUsername || username,
       discordRoles: discordUser.roles || [],
+      discordStaffRoles: discordUser.staffRoles || [],
     };
 
     localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));

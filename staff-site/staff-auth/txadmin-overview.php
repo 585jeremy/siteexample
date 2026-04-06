@@ -9,19 +9,31 @@ $accessLevel = staff_auth_access_level();
 $bridgeEnabled = staff_auth_bool_config('txadmin_bridge_enabled', false);
 $consoleManagerOnly = staff_auth_bool_config('txadmin_console_manager_only', true);
 $baseConfigured = $configuredBaseUrl !== '';
+$baseAvailable = $baseUrl !== '';
 $requestIsSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-$mixedContentWarning = $baseConfigured && $requestIsSecure && stripos($baseUrl, 'http://') === 0;
+$mixedContentWarning = $baseAvailable && $requestIsSecure && stripos($baseUrl, 'http://') === 0;
+
+if (!in_array($accessLevel, ['manager', 'admin'], true)) {
+    staff_auth_send_json([
+        'configured' => true,
+        'ok' => false,
+        'authorized' => false,
+        'accessLevel' => $accessLevel,
+        'error' => 'insufficient_access',
+    ], 403);
+}
 
 $links = [
-    'home' => $baseConfigured ? $baseUrl . '/' : '',
-    'players' => $baseConfigured ? $baseUrl . '/login?r=%2Fplayers' : '',
-    'console' => $baseConfigured && (!$consoleManagerOnly || $accessLevel === 'manager')
+    'home' => $baseAvailable ? $baseUrl . '/' : '',
+    'players' => $baseAvailable ? $baseUrl . '/login?r=%2Fplayers' : '',
+    'console' => $baseAvailable && (!$consoleManagerOnly || $accessLevel === 'manager')
         ? $baseUrl . '/login?r=%2Fconsole'
         : '',
 ];
 
-$capabilities = ['launch'];
-if ($baseConfigured) {
+$capabilities = [];
+if ($baseAvailable) {
+    $capabilities[] = 'launch';
     $capabilities[] = 'players';
 }
 if ($bridgeEnabled) {

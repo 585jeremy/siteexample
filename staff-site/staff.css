@@ -317,6 +317,12 @@ body::after {
   box-shadow: 0 0 0 1px rgba(201, 154, 95, 0.22);
 }
 
+.gate-form__textarea {
+  min-height: 116px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
 .gate-form__error {
   margin: 0;
   color: #efc1af;

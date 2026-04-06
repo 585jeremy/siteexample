@@ -699,7 +699,9 @@ function normaliseAccountRecord(key, record) {
       createdAt: "",
       updatedAt: "",
       lastLoginAt: "",
-      discordLinked: false
+      discordLinked: false,
+      discordRoles: [],
+      discordStaffRoles: []
     };
   }
 
@@ -725,7 +727,19 @@ function normaliseAccountRecord(key, record) {
     createdAt: String(record?.createdAt || ""),
     updatedAt: String(record?.updatedAt || ""),
     lastLoginAt: String(record?.lastLoginAt || ""),
-    discordLinked: Boolean(record?.discordLinked)
+    discordLinked: Boolean(record?.discordLinked),
+    discordRoles: Array.isArray(record?.discordRoles)
+      ? record.discordRoles
+      : String(record?.discordRoles || "")
+          .split(",")
+          .map((role) => role.trim())
+          .filter(Boolean),
+    discordStaffRoles: Array.isArray(record?.discordStaffRoles)
+      ? record.discordStaffRoles
+      : String(record?.discordStaffRoles || "")
+          .split(",")
+          .map((role) => role.trim())
+          .filter(Boolean)
   };
 }
 
@@ -776,14 +790,22 @@ function getCurrentAccount() {
 }
 
 function getDiscordRoleList(account) {
-  if (!account?.discordRoles) return [];
+  const source = [
+    ...(Array.isArray(account?.discordRoles)
+      ? account.discordRoles
+      : String(account?.discordRoles || "")
+          .split(",")
+          .map((role) => role.trim())
+          .filter(Boolean)),
+    ...(Array.isArray(account?.discordStaffRoles)
+      ? account.discordStaffRoles
+      : String(account?.discordStaffRoles || "")
+          .split(",")
+          .map((role) => role.trim())
+          .filter(Boolean))
+  ];
 
-  const source = Array.isArray(account.discordRoles)
-    ? account.discordRoles
-    : String(account.discordRoles)
-        .split(",")
-        .map((role) => role.trim())
-        .filter(Boolean);
+  if (!source.length) return [];
 
   return source
     .flatMap((role) => {
