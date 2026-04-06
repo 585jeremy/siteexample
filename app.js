@@ -1508,12 +1508,16 @@ function renderApply() {
                 <input class="account-field__input" type="text" placeholder="Example: CET / EST" />
               </label>
               <label class="account-field">
-                <span class="account-field__label">Department interest</span>
-                <input class="account-field__input" type="text" placeholder="Moderation, Testing, Helper, etc." />
+                <span class="account-field__label">What role are you applying for?</span>
+                <input class="account-field__input" type="text" placeholder="Moderator, Tester, Helper, etc." />
               </label>
               <label class="account-field account-field--wide">
                 <span class="account-field__label">Availability</span>
                 <textarea class="account-field__input account-field__input--textarea" rows="3" placeholder="When are you usually online?"></textarea>
+              </label>
+              <label class="account-field account-field--wide">
+                <span class="account-field__label">Full ban history</span>
+                <textarea class="account-field__input account-field__input--textarea" rows="4" placeholder="Paste your full ban history here after requesting it in the SGCNR Discord ticket system."></textarea>
               </label>
               <label class="account-field account-field--wide">
                 <span class="account-field__label">Moderation experience</span>
@@ -1532,7 +1536,7 @@ function renderApply() {
               <button class="auth__btn auth__btn--primary" type="button" disabled>Send application</button>
             </div>
             <div class="status-note">
-              <strong>Current state:</strong> this form is live as a clean layout only. Submission is blocked until the real application backend is connected.
+              <strong>Current state:</strong> this form is live as a clean layout only. Submission is blocked until the real application backend is connected. Applicants should request their full ban history in the SGCNR Discord by opening a ticket and choosing <code>Ban history</code>.
             </div>
           </form>
         </section>
@@ -1543,8 +1547,9 @@ function renderApply() {
           <div class="stack-list stack-list--compact">
             <div class="stack-list__item"><span class="stack-list__index">01</span><span>Use your real Discord username and in-game name.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">02</span><span>Be honest about your level, playtime, and availability.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Include any moderation or testing experience you already have.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Take your time with the final answer about why you want to join staff.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Open a ticket in the SGCNR Discord and choose <strong>Ban history</strong> to get your full ban history first.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Include any moderation or testing experience you already have.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Take your time with the final answer about why you want to join staff.</span></div>
           </div>
         </aside>
       </div>
