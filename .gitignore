@@ -1,2 +1,4 @@
 /auth/config.php
 /staff-site/staff-auth/config.php
+/api/config.php
+/api/data/live-ops.json
