@@ -19,8 +19,8 @@ window.SGCNR_SERVER_CONFIG = {
   authProfileUrl: "https://sgcnr.net/auth/api.php",
   adminPanelLabel: "Manager",
   adminPanelRoles: [
-    "1479411370331078799",
-    "1479481021383835771"
+    "1463277998189838427",
+    "1463277637911970065"
   ],
   statusRefreshMs: 60000,
   maxPlayerPreview: 12,
@@ -93,6 +93,6 @@ window.SGCNR_SERVER_CONFIG = {
   // Optional public status page link and fallback restart label.
   publicStatusUrl: "",
   nextRestartLabel: "Scheduled restart",
-  websiteName: "SGCNR Portal",
+  websiteName: "SGCNR",
   liveTrackingRequiresOptIn: true
 };

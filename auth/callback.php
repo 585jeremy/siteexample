@@ -56,7 +56,9 @@ function auth_fetch_member_for_guild(string $guildId, string $accessToken): arra
 
 $member = auth_fetch_member_for_guild($guildId, $accessToken);
 $staffMember = [];
-if ($staffGuildId !== '') {
+if ($staffGuildId === '' || $staffGuildId === $guildId) {
+    $staffMember = $member;
+} elseif ($staffGuildId !== '') {
     $staffMember = $staffGuildId === $guildId
         ? $member
         : auth_fetch_member_for_guild($staffGuildId, $accessToken);
@@ -80,7 +82,7 @@ $_SESSION['discord_avatar_url'] = $avatarUrl;
 $_SESSION['discord_roles'] = $roles;
 $_SESSION['discord_public_guild_id'] = $guildId;
 $_SESSION['discord_public_member_found'] = isset($member['roles']);
-$_SESSION['discord_staff_guild_id'] = $staffGuildId;
+$_SESSION['discord_staff_guild_id'] = $staffGuildId !== '' ? $staffGuildId : $guildId;
 $_SESSION['discord_staff_member_found'] = isset($staffMember['roles']);
 $_SESSION['discord_staff_roles'] = $staffRoles;
 $_SESSION['logged_in'] = true;
