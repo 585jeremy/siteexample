@@ -8,6 +8,7 @@ window.SGCNR_SERVER_CONFIG = {
   discordOAuthUrl: "https://sgcnr.net/auth/login.php",
   discordOAuthCallbackUrl: "https://sgcnr.net/auth/callback.php",
   discordBotInviteUrl: "",
+  discordTicketChannelUrl: "https://discord.com/channels/1463273636353015870/1463674881399980073",
   discordSupportUrl: "",
   discordRoleVerifyUrl: "https://sgcnr.net/auth/roles.php",
   discordRoleSyncUrl: "https://sgcnr.net/auth/api.php",

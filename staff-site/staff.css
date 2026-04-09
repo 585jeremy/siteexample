@@ -740,3 +740,192 @@ body::after {
     border-radius: 22px;
   }
 }
+
+.staff-applications-view,
+.staff-applications-grid,
+.staff-applications-list,
+.staff-application-detail,
+.staff-application-chat,
+.staff-application-toolbar{
+  display: grid;
+  gap: 18px;
+}
+
+.staff-applications-list__items,
+.staff-application-chat__feed{
+  display: grid;
+  gap: 12px;
+}
+
+.staff-application-card{
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(16, 18, 23, 0.9), rgba(8, 10, 13, 0.94));
+}
+
+.staff-application-card.is-active{
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 1px rgba(222, 188, 140, 0.18) inset;
+}
+
+.staff-application-card__top,
+.staff-application-detail__header,
+.staff-application-message__meta{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.staff-application-card__eyebrow{
+  color: rgba(226, 213, 194, 0.56);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.staff-application-card__title{
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.staff-application-card__meta,
+.staff-application-copyCard p,
+.staff-application-message__body,
+.staff-applications-empty{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.staff-application-card__actions,
+.staff-application-toolbar__actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.staff-application-status{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.staff-application-status--open{
+  border-color: rgba(201, 154, 95, 0.3);
+  background: linear-gradient(180deg, rgba(76, 54, 31, 0.9), rgba(20, 16, 14, 0.96));
+}
+
+.staff-application-status--needs{
+  border-color: rgba(156, 95, 68, 0.34);
+  background: linear-gradient(180deg, rgba(86, 48, 25, 0.92), rgba(20, 14, 12, 0.96));
+}
+
+.staff-application-status--interview{
+  border-color: rgba(100, 128, 165, 0.34);
+  background: linear-gradient(180deg, rgba(29, 48, 69, 0.92), rgba(15, 18, 28, 0.96));
+}
+
+.staff-application-status--accepted{
+  border-color: rgba(106, 140, 102, 0.34);
+  background: linear-gradient(180deg, rgba(46, 63, 44, 0.9), rgba(19, 27, 18, 0.96));
+}
+
+.staff-application-status--closed{
+  border-color: rgba(156, 95, 68, 0.34);
+  background: linear-gradient(180deg, rgba(68, 24, 21, 0.9), rgba(18, 14, 13, 0.96));
+}
+
+.staff-application-detail__meta{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(236, 231, 222, 0.84);
+}
+
+.staff-application-copyGrid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.staff-application-copyCard{
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(13, 15, 19, 0.92), rgba(8, 10, 13, 0.9));
+}
+
+.staff-application-copyCard--wide{
+  grid-column: 1 / -1;
+}
+
+.staff-application-copyCard h3{
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 213, 194, 0.58);
+}
+
+.staff-application-chat{
+  padding-top: 6px;
+}
+
+.staff-application-message{
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+}
+
+.staff-application-message--staff{
+  background: linear-gradient(180deg, rgba(41, 31, 21, 0.92), rgba(14, 12, 11, 0.96));
+}
+
+.staff-application-message--applicant{
+  background: linear-gradient(180deg, rgba(16, 18, 23, 0.92), rgba(9, 10, 14, 0.96));
+}
+
+.staff-application-message--system{
+  background: linear-gradient(180deg, rgba(27, 22, 17, 0.88), rgba(11, 11, 13, 0.94));
+}
+
+.staff-application-message__meta{
+  color: rgba(226, 213, 194, 0.62);
+  font-size: 12px;
+}
+
+.staff-application-chat__input{
+  min-height: 120px;
+  resize: vertical;
+}
+
+@media (max-width: 980px){
+  .staff-application-detail__meta,
+  .staff-application-copyGrid{
+    grid-template-columns: 1fr;
+  }
+}

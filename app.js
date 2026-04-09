@@ -24,6 +24,7 @@ const DEFAULT_SERVER_CONFIG = {
   discordOAuthUrl: "",
   discordOAuthCallbackUrl: "",
   discordBotInviteUrl: "",
+  discordTicketChannelUrl: "",
   discordSupportUrl: "",
   discordRoleVerifyUrl: "",
   discordRoleSyncUrl: "",
@@ -57,6 +58,7 @@ const SERVER_CONFIG = {
   ...(window.SGCNR_SERVER_CONFIG || {})
 };
 const DISCORD_INVITE_URL = SERVER_CONFIG.discordUrl;
+const DISCORD_TICKET_CHANNEL_URL = SERVER_CONFIG.discordTicketChannelUrl || SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL;
 const SERVER_JOIN_CODE = SERVER_CONFIG.joinCode;
 const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_JOIN_CODE}`;
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
@@ -478,6 +480,35 @@ let serverStatusPageState = {
 let leaderboardPageState = {
   requestId: 0
 };
+const APPLICATION_API = {
+  list: "./auth/applications-list.php",
+  detail: "./auth/applications-detail.php",
+  submit: "./auth/applications-submit.php",
+  message: "./auth/applications-message.php"
+};
+const APPLICATION_STATUS_LABELS = {
+  submitted: "Submitted",
+  in_review: "In Review",
+  needs_info: "Needs Info",
+  interview: "Interview",
+  accepted: "Accepted",
+  denied: "Denied",
+  closed: "Closed"
+};
+const APPLICATION_OPEN_STATUSES = ["submitted", "in_review", "needs_info", "interview"];
+let applicationCenterState = {
+  loading: false,
+  submitting: false,
+  sending: false,
+  error: "",
+  success: "",
+  items: [],
+  activeId: "",
+  detail: null,
+  formValues: {},
+  pollTimer: null,
+  requestId: 0
+};
 
 function normalize(s) {
   return (s ?? "").toString().toLowerCase().trim();
@@ -491,6 +522,43 @@ function escapeHtml(s) {
     if (c === '"') return "&quot;";
     return "&#39;";
   });
+}
+
+async function requestJson(url, options = {}) {
+  const {
+    method = "GET",
+    body = null,
+    headers = {}
+  } = options;
+
+  const response = await fetch(url, {
+    method,
+    cache: "no-store",
+    credentials: "include",
+    headers: {
+      "X-Requested-With": "fetch",
+      ...(body != null ? { "Content-Type": "application/json" } : {}),
+      ...headers
+    },
+    body: body != null ? JSON.stringify(body) : undefined
+  });
+
+  const text = await response.text();
+  let payload = {};
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    payload = {};
+  }
+
+  if (!response.ok) {
+    throw Object.assign(new Error(payload?.error || `HTTP ${response.status}`), {
+      status: response.status,
+      payload
+    });
+  }
+
+  return payload;
 }
 
 function normalizeRouteTarget(target) {
@@ -590,14 +658,18 @@ function buildBreadcrumb(items) {
   return `<div class="breadcrumb">${parts}</div>`;
 }
 
-function renderHeader(title, breadcrumbItems) {
+function renderHeader(title, breadcrumbItems, options = {}) {
+  const {
+    showBadge = true,
+    badgeLabel = "SGCNR Portal"
+  } = options;
   const bc = breadcrumbItems?.length ? buildBreadcrumb(breadcrumbItems) : "";
   return `
     <div class="page-hero">
       ${bc}
       <div class="page-hero__row">
         <h1 class="page-title">${escapeHtml(title)}</h1>
-        <div class="page-hero__badge">SGCNR Portal</div>
+        ${showBadge ? `<div class="page-hero__badge">${escapeHtml(badgeLabel)}</div>` : ""}
       </div>
     </div>
   `;
@@ -1283,43 +1355,79 @@ function renderLandingHome() {
 }
 
 function renderStart() {
+  const quickLinks = [
+    { label: "Read the rules", href: "#/rules" },
+    { label: "Open commands", href: "#/commands" },
+    { label: "View the map", href: "#/map" },
+    { label: "Check live status", href: "#/live" }
+  ];
+
   setView(`
     <div>
-      ${renderHeader("Start Here", [{ label: "Start" }])}
+      ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
       <div class="content-grid content-grid--sidebar">
-        <section class="section section--hero">
+        <section class="section section--hero start-panel">
           <div class="section__eyebrow">New player entry</div>
-          <h2>How to join</h2>
+          <h2>Join in four clean steps</h2>
           <div class="doc-p">
-            Open FiveM, search for <strong>SGCNR</strong> and connect.
-            You can also use the direct join link:
-            <a class="info-link" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</a>
+            Start here if you are new. This page keeps the join flow, support route, and core links together without the extra clutter from before.
           </div>
-          <div class="feature-grid">
-            <div class="feature-card">
-              <div class="feature-card__label">Server</div>
-              <div class="feature-card__value">FiveM Ready</div>
-            </div>
-            <div class="feature-card">
-              <div class="feature-card__label">Access</div>
-              <div class="feature-card__value">Quick Join</div>
-            </div>
-            <div class="feature-card">
-              <div class="feature-card__label">Support</div>
-              <div class="feature-card__value">Discord Tickets</div>
-            </div>
+          <div class="start-flow">
+            <article class="start-flow__item">
+              <div class="start-flow__index">01</div>
+              <div class="start-flow__copy">
+                <strong>Open FiveM</strong>
+                <span>Search for <strong>SGCNR</strong> or use the direct connect link below.</span>
+              </div>
+            </article>
+            <article class="start-flow__item">
+              <div class="start-flow__index">02</div>
+              <div class="start-flow__copy">
+                <strong>Read the basics first</strong>
+                <span>Use the Rules and Commands pages before you jump into the city.</span>
+              </div>
+            </article>
+            <article class="start-flow__item">
+              <div class="start-flow__index">03</div>
+              <div class="start-flow__copy">
+                <strong>Use Discord tickets for staff help</strong>
+                <span>Ticket creation should go through the direct Discord ticket channel so staff can track it properly.</span>
+              </div>
+            </article>
+            <article class="start-flow__item">
+              <div class="start-flow__index">04</div>
+              <div class="start-flow__copy">
+                <strong>Keep Live and Map nearby</strong>
+                <span>The Live and Map tabs stay on the dock whenever you need current info or locations.</span>
+              </div>
+            </article>
+          </div>
+          <div class="start-panel__actions">
+            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Direct connect</a>
+            <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
+          </div>
+          <div class="status-note">
+            <strong>Direct join:</strong>
+            <a class="info-link" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</a>
           </div>
         </section>
 
-        <aside class="section section--stack">
+        <aside class="section section--stack start-sidecard">
           <div class="section__eyebrow">Useful links</div>
-          <h2>Quick links</h2>
-          <div class="info-links">
-            <a class="info-link" href="#/rules">Rules</a>
-            <a class="info-link" href="#/commands">Commands</a>
-            <a class="info-link" href="#/help">Help</a>
-            <a class="info-link" href="#/status">Server Status</a>
-            <a class="info-link" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
+          <h2>Quick access</h2>
+          <div class="start-linklist">
+            ${quickLinks.map((item) => `
+              <a class="start-linklist__item" href="${escapeHtml(item.href)}">
+                <span>${escapeHtml(item.label)}</span>
+                <span aria-hidden="true">+</span>
+              </a>
+            `).join("")}
+          </div>
+          <div class="start-ticket-panel">
+            <div class="start-ticket-panel__label">Support route</div>
+            <div class="start-ticket-panel__title">Ticket creation lives in Discord</div>
+            <div class="start-ticket-panel__text">If someone needs help, a ban-history request, or application prep, send them to the ticket channel directly.</div>
+            <a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
           </div>
         </aside>
       </div>
@@ -1329,8 +1437,8 @@ function renderStart() {
         <h2>New player checklist</h2>
         <div class="stack-list">
           <div class="stack-list__item"><span class="stack-list__index">01</span><span>Read the Rules and follow the category that applies to what you're doing.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions and support.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Join Discord to open tickets and get announcements.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions, punishments, appeals, and support guidance.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Use the Discord ticket channel when you need staff help or ban-history access.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">04</span><span>Be respectful and keep it fair — staff decisions are based on evidence.</span></div>
         </div>
       </section>
@@ -1397,6 +1505,7 @@ function renderCommands() {
 }
 
 function renderHelp() {
+  const ticketLink = `<a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">open a Discord ticket</a>`;
   setView(`
       <div>
       ${renderHeader("Help", [{ label: "Help" }])}
@@ -1411,11 +1520,11 @@ function renderHelp() {
             </div>
             <div class="info-faq__item">
               <div class="info-faq__q">Where do I report a player or get support?</div>
-              <div class="info-faq__a">Join Discord and open a ticket. Include video/screenshot evidence when possible.</div>
+              <div class="info-faq__a">Join Discord and ${ticketLink}. Include video/screenshot evidence when possible.</div>
             </div>
             <div class="info-faq__item">
               <div class="info-faq__q">How do I appeal a punishment?</div>
-              <div class="info-faq__a">Use Discord tickets. Provide context, your ID, and any evidence.</div>
+              <div class="info-faq__a">Use ${ticketLink}. Provide context, your ID, and any evidence.</div>
             </div>
             <div class="info-faq__item">
               <div class="info-faq__q">What should I do if I'm not sure about a rule?</div>
@@ -1428,7 +1537,7 @@ function renderHelp() {
             <div class="section__eyebrow">Best practice</div>
             <h2>Need help faster?</h2>
             <div class="stack-list stack-list--compact">
-              <div class="stack-list__item"><span class="stack-list__index">01</span><span>Open a Discord ticket.</span></div>
+              <div class="stack-list__item"><span class="stack-list__index">01</span><span>Use the direct Discord ticket channel.</span></div>
               <div class="stack-list__item"><span class="stack-list__index">02</span><span>Include your ID and screenshots.</span></div>
               <div class="stack-list__item"><span class="stack-list__index">03</span><span>Explain the issue clearly.</span></div>
             </div>
@@ -4354,7 +4463,7 @@ function normaliseDiscordOpsPayload(payload) {
       syncRoles: false,
       linkingEnabled: Boolean(SERVER_CONFIG.discordOAuthUrl),
       oauthUrl: SERVER_CONFIG.discordOAuthUrl || "",
-      supportUrl: SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL,
+      supportUrl: DISCORD_TICKET_CHANNEL_URL,
       botInviteUrl: SERVER_CONFIG.discordBotInviteUrl || "",
       announcements: []
     };
@@ -4392,7 +4501,7 @@ function normaliseDiscordOpsPayload(payload) {
     syncRoles: syncRolesRaw == null ? false : Boolean(syncRolesRaw),
     linkingEnabled: linkingEnabledRaw == null ? Boolean(SERVER_CONFIG.discordOAuthUrl) : Boolean(linkingEnabledRaw),
     oauthUrl: pickFirstDefined(linking, ["oauthUrl", "connectUrl", "linkUrl"]) || SERVER_CONFIG.discordOAuthUrl || "",
-    supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl"]) || SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL,
+    supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl"]) || DISCORD_TICKET_CHANNEL_URL,
     botInviteUrl: pickFirstDefined(payload, ["botInviteUrl", "inviteUrl"]) || SERVER_CONFIG.discordBotInviteUrl || "",
     announcements: announcementSource.map((entry, index) => ({
       id: pickFirstDefined(entry, ["id", "slug"]) || `discord-announcement-${index + 1}`,

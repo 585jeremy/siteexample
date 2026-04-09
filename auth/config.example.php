@@ -23,4 +23,11 @@ return [
     'mysql_dsn' => 'mysql:host=localhost;dbname=your_db;charset=utf8mb4',
     'mysql_user' => 'your_db_user',
     'mysql_password' => 'your_db_password',
+    // Optional: point both the public site and staff portal at the same shared applications DB.
+    'applications_mysql_dsn' => '',
+    'applications_mysql_user' => '',
+    'applications_mysql_password' => '',
+    // Optional: Discord webhook that should receive new application / applicant reply alerts.
+    'applications_discord_webhook_url' => '',
+    'applications_staff_portal_url' => 'https://staff.sgcnr.net/#/applications',
 ];

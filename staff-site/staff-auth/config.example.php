@@ -4,6 +4,10 @@ return [
     'mysql_dsn' => 'mysql:host=localhost;dbname=your_staff_db;charset=utf8mb4',
     'mysql_user' => 'your_staff_db_user',
     'mysql_password' => 'your_staff_db_password',
+    // Optional: point both the public site and staff portal at the same shared applications DB.
+    'applications_mysql_dsn' => '',
+    'applications_mysql_user' => '',
+    'applications_mysql_password' => '',
     'txadmin_base_url' => 'http://127.0.0.1:40120',
     'txadmin_bridge_enabled' => false,
     'txadmin_console_manager_only' => true,

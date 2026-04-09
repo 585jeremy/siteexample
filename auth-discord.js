@@ -87,12 +87,21 @@ window.addEventListener("load", async function () {
     localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ username }));
 
     if (typeof updateAuthUi === "function") updateAuthUi();
-    if (window.location.hash === "#/account" && typeof route === "function") {
-      route();
+    if (typeof route === "function" && typeof parseRoute === "function") {
+      const routeName = parseRoute().name;
+      if (routeName === "account" || routeName === "apply") {
+        route();
+      }
     }
   } else if (!authCheckFailed) {
     clearDiscordSession();
     if (typeof updateAuthUi === "function") updateAuthUi();
+    if (typeof route === "function" && typeof parseRoute === "function") {
+      const routeName = parseRoute().name;
+      if (routeName === "account" || routeName === "apply") {
+        route();
+      }
+    }
   }
 
   const loginBtn = document.getElementById("loginBtn");
