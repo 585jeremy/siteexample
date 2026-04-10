@@ -73,6 +73,8 @@ $avatarUrl = $avatarHash
     ? 'https://cdn.discordapp.com/avatars/' . rawurlencode($user['id']) . '/' . rawurlencode($avatarHash) . '.png?size=256'
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
+session_regenerate_id(true);
+
 $_SESSION['discord_id'] = $user['id'];
 $_SESSION['discord_username'] = $user['username'];
 $_SESSION['discord_display_name'] = $displayName;

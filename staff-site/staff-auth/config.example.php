@@ -32,4 +32,6 @@ return [
     'session_cookie_domain' => 'staff.sgcnr.net',
     'session_cookie_secure' => true,
     'session_cookie_samesite' => 'Lax',
+    // Keep staff logins active across refreshes and browser restarts.
+    'session_cookie_lifetime' => 2592000,
 ];

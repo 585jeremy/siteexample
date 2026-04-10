@@ -20,6 +20,8 @@ return [
     'session_cookie_domain' => 'sgcnr.net',
     'session_cookie_secure' => true,
     'session_cookie_samesite' => 'Lax',
+    // Keep website logins active across refreshes and browser restarts.
+    'session_cookie_lifetime' => 2592000,
     'mysql_dsn' => 'mysql:host=localhost;dbname=your_db;charset=utf8mb4',
     'mysql_user' => 'your_db_user',
     'mysql_password' => 'your_db_password',

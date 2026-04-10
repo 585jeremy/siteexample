@@ -107,18 +107,10 @@ $sessionCookieSecure = array_key_exists('session_cookie_secure', $staffAuthConfi
     ? (bool) $staffAuthConfig['session_cookie_secure']
     : $defaultSecure;
 $sessionCookieSameSite = staff_auth_config('session_cookie_samesite', 'Lax');
-
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_name('sgcnr_staff_gate');
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => $sessionCookiePath,
-        'domain' => $sessionCookieDomain,
-        'secure' => $sessionCookieSecure,
-        'httponly' => true,
-        'samesite' => $sessionCookieSameSite,
-    ]);
-    session_start();
+$defaultSessionCookieLifetime = 60 * 60 * 24 * 30;
+$sessionCookieLifetime = (int) staff_auth_config('session_cookie_lifetime', $defaultSessionCookieLifetime);
+if ($sessionCookieLifetime < 0) {
+    $sessionCookieLifetime = 0;
 }
 
 function staff_auth_is_configured(): bool
@@ -147,6 +139,37 @@ function staff_auth_send_json(array $payload, int $statusCode = 200): void
 
     echo json_encode($payload);
     exit;
+}
+
+function staff_auth_session_cookie_params(): array
+{
+    global $sessionCookiePath, $sessionCookieDomain, $sessionCookieSecure, $sessionCookieSameSite, $sessionCookieLifetime;
+
+    return [
+        'lifetime' => $sessionCookieLifetime,
+        'path' => $sessionCookiePath,
+        'domain' => $sessionCookieDomain,
+        'secure' => $sessionCookieSecure,
+        'httponly' => true,
+        'samesite' => $sessionCookieSameSite,
+    ];
+}
+
+function staff_auth_expire_session_cookie(): void
+{
+    if (!ini_get('session.use_cookies')) {
+        return;
+    }
+
+    $params = staff_auth_session_cookie_params();
+    setcookie(session_name(), '', [
+        'expires' => time() - 42000,
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $params['secure'],
+        'httponly' => $params['httponly'],
+        'samesite' => $params['samesite'],
+    ]);
 }
 
 function staff_auth_input(): array
@@ -285,4 +308,18 @@ function staff_auth_access_level(): string
 function staff_auth_txadmin_base_url(): string
 {
     return rtrim(trim((string) staff_auth_config('txadmin_base_url', '')), '/');
+}
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_name('sgcnr_staff_gate');
+
+    if ($sessionCookieLifetime > 0) {
+        $currentGcMaxLifetime = (int) ini_get('session.gc_maxlifetime');
+        if ($currentGcMaxLifetime < $sessionCookieLifetime) {
+            ini_set('session.gc_maxlifetime', (string) $sessionCookieLifetime);
+        }
+    }
+
+    session_set_cookie_params(staff_auth_session_cookie_params());
+    session_start();
 }

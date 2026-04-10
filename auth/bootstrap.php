@@ -19,6 +19,11 @@ $sessionCookieSecure = array_key_exists('session_cookie_secure', $config)
     ? (bool) $config['session_cookie_secure']
     : $defaultSecure;
 $sessionCookieSameSite = $config['session_cookie_samesite'] ?? 'Lax';
+$defaultSessionCookieLifetime = 60 * 60 * 24 * 30;
+$sessionCookieLifetime = (int) ($config['session_cookie_lifetime'] ?? $defaultSessionCookieLifetime);
+if ($sessionCookieLifetime < 0) {
+    $sessionCookieLifetime = 0;
+}
 
 function auth_allowed_origins(): array
 {
@@ -100,18 +105,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     exit;
 }
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => $sessionCookiePath,
-        'domain' => $sessionCookieDomain,
-        'secure' => $sessionCookieSecure,
-        'httponly' => true,
-        'samesite' => $sessionCookieSameSite,
-    ]);
-    session_start();
-}
-
 function auth_config(string $key, $default = null)
 {
     global $config;
@@ -125,6 +118,37 @@ function auth_has_minimum_config(): bool
         auth_config('discord_client_secret', '') &&
         auth_config('discord_redirect_uri', '')
     );
+}
+
+function auth_session_cookie_params(): array
+{
+    global $sessionCookiePath, $sessionCookieDomain, $sessionCookieSecure, $sessionCookieSameSite, $sessionCookieLifetime;
+
+    return [
+        'lifetime' => $sessionCookieLifetime,
+        'path' => $sessionCookiePath,
+        'domain' => $sessionCookieDomain,
+        'secure' => $sessionCookieSecure,
+        'httponly' => true,
+        'samesite' => $sessionCookieSameSite,
+    ];
+}
+
+function auth_expire_session_cookie(): void
+{
+    if (!ini_get('session.use_cookies')) {
+        return;
+    }
+
+    $params = auth_session_cookie_params();
+    setcookie(session_name(), '', [
+        'expires' => time() - 42000,
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $params['secure'],
+        'httponly' => $params['httponly'],
+        'samesite' => $params['samesite'],
+    ]);
 }
 
 function auth_send_json(array $payload, int $statusCode = 200): void
@@ -142,6 +166,18 @@ function auth_send_json(array $payload, int $statusCode = 200): void
 
     echo json_encode($payload);
     exit;
+}
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    if ($sessionCookieLifetime > 0) {
+        $currentGcMaxLifetime = (int) ini_get('session.gc_maxlifetime');
+        if ($currentGcMaxLifetime < $sessionCookieLifetime) {
+            ini_set('session.gc_maxlifetime', (string) $sessionCookieLifetime);
+        }
+    }
+
+    session_set_cookie_params(auth_session_cookie_params());
+    session_start();
 }
 
 function auth_discord_request(string $url, string $method = 'GET', ?array $data = null, ?string $token = null): array

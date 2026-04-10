@@ -90,6 +90,8 @@ $account = [
     'password_reset_required' => !empty($record['password_reset_required']),
 ];
 
+session_regenerate_id(true);
+
 staff_auth_store_account($account);
 
 try {
