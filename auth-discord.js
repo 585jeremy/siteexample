@@ -30,8 +30,19 @@ window.addEventListener("load", async function () {
     localStorage.removeItem(AUTH_SESSION_KEY);
   }
 
+  function buildAuthRedirectUrl(baseUrl) {
+    try {
+      const url = new URL(baseUrl, window.location.href);
+      url.searchParams.set("return_to", window.location.href);
+      return url.toString();
+    } catch {
+      return baseUrl;
+    }
+  }
+
   let discordUser = null;
   let authCheckFailed = false;
+  let explicitlyLoggedOut = false;
   try {
     const res = await fetch(AUTH_API, {
       credentials: "include",
@@ -40,9 +51,24 @@ window.addEventListener("load", async function () {
         "Cache-Control": "no-cache"
       }
     });
-    const data = await res.json();
-    if (data.authenticated && data.user) {
+    const text = await res.text();
+    let data = null;
+
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = null;
+    }
+
+    if (!res.ok) {
+      explicitlyLoggedOut = Boolean(data && (data.authenticated === false || data.logged_in === false));
+      authCheckFailed = !explicitlyLoggedOut;
+    } else if (data?.authenticated && data?.user) {
       discordUser = data.user;
+    } else if (data && (data.authenticated === false || data.logged_in === false)) {
+      explicitlyLoggedOut = true;
+    } else {
+      authCheckFailed = true;
     }
   } catch {
     authCheckFailed = true;
@@ -103,7 +129,7 @@ window.addEventListener("load", async function () {
         route();
       }
     }
-  } else if (!authCheckFailed) {
+  } else if (explicitlyLoggedOut) {
     clearDiscordSession();
     if (typeof updateAuthUi === "function") updateAuthUi();
     if (typeof route === "function" && typeof parseRoute === "function") {
@@ -122,7 +148,7 @@ window.addEventListener("load", async function () {
       newLoginBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        window.location.href = LOGIN_URL;
+        window.location.href = buildAuthRedirectUrl(LOGIN_URL);
       });
     }
   }
@@ -136,7 +162,7 @@ window.addEventListener("load", async function () {
         e.preventDefault();
         e.stopImmediatePropagation();
         clearDiscordSession();
-        window.location.href = LOGOUT_URL;
+        window.location.href = buildAuthRedirectUrl(LOGOUT_URL);
       });
     }
   }

@@ -356,7 +356,7 @@
       if (requestId !== applicationCenterState.requestId) return;
       applicationCenterState.detail = null;
       if (error?.payload?.error !== "not_authenticated") {
-        applicationCenterState.error = "The selected application could not be opened right now.";
+        applicationCenterState.error = getApplicationLoadErrorMessage(error, "The selected application could not be opened right now.");
       }
     }
 
@@ -413,7 +413,7 @@
       applicationCenterState.activeId = "";
       applicationCenterState.detail = null;
       if (error?.payload?.error !== "not_authenticated") {
-        applicationCenterState.error = "Application data could not be loaded right now.";
+        applicationCenterState.error = getApplicationLoadErrorMessage(error, "Application data could not be loaded right now.");
       }
       if (getApplicationRouteActive()) renderApply();
     }
@@ -449,6 +449,14 @@
     if (reason === "application_closed") return "This application chat is already closed.";
     if (reason === "missing_message") return "Write a message before sending it.";
     return "Your reply could not be sent right now.";
+  }
+
+  function getApplicationLoadErrorMessage(error, fallbackMessage) {
+    const reason = error?.payload?.error || error?.message || "application_load_failed";
+    if (reason === "applications_not_configured") return "The application backend is not connected yet.";
+    if (reason === "applications_query_failed") return "The application database could not be reached right now.";
+    if (reason === "application_detail_failed") return "The selected application could not be opened right now.";
+    return fallbackMessage;
   }
 
   async function handleApplicationSubmit(form) {
