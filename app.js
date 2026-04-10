@@ -1896,7 +1896,7 @@ function renderAccountDashboard(account) {
           <h2>Connected methods</h2>
           ${renderAccountLoginMethods(account)}
           <div class="status-note">
-            <strong>Discord linking:</strong> the website now supports reading linked FiveM identity data from the bot database when `bot_mysql_*` is configured. Discord OAuth still controls the website session, while the bot tables can fill in verified game identity, ticket counts, and linked-account data.
+            <strong>Discord linking:</strong> the website now supports reading linked FiveM identity data from the bot database when <code>bot_mysql_*</code> is configured. Discord OAuth still controls the website session, while the bot tables can fill in verified game identity, ticket counts, and linked-account data.
           </div>
         </aside>
       </div>
