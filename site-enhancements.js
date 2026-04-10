@@ -637,8 +637,8 @@
                   </label>
                   <label class="account-field">
                     <span class="account-field__label">Applying for</span>
-                    <select class="account-field__input" name="roleRequested" ${formDisabled ? "disabled" : ""}>
-                      <option value="">Select a role</option>
+                    <select class="account-field__input" name="roleRequested" required ${formDisabled ? "disabled" : ""}>
+                      <option value="" disabled${formValues.roleRequested ? "" : " selected"}>Select a role</option>
                       ${APPLICATION_ROLE_OPTIONS.map((role) => `<option value="${escapeHtml(role)}"${formValues.roleRequested === role ? " selected" : ""}>${escapeHtml(role)}</option>`).join("")}
                     </select>
                   </label>

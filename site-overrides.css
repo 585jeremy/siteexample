@@ -3158,10 +3158,13 @@ body.is-landing .dock{
 }
 
 body.is-standard{
+  background-color: #060708;
   background:
     radial-gradient(circle at 14% 12%, rgba(171,127,74,.14), transparent 22%),
     radial-gradient(circle at 86% 16%, rgba(179,63,63,.12), transparent 20%),
     linear-gradient(180deg, #060708 0%, #08090b 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 body.is-standard .topbar{
@@ -5724,6 +5727,42 @@ body.is-standard .content{
   color: rgba(247,239,224,.96);
   font: inherit;
   outline: none;
+}
+
+select.account-field__input{
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 42px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(247,239,224,.74) 50%),
+    linear-gradient(135deg, rgba(247,239,224,.74) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) calc(50% - 2px),
+    calc(100% - 16px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+select.account-field__input:invalid{
+  color: rgba(220,202,175,.72);
+  -webkit-text-fill-color: rgba(220,202,175,.72);
+}
+
+select.account-field__input:valid{
+  color: rgba(247,239,224,.96);
+  -webkit-text-fill-color: rgba(247,239,224,.96);
+}
+
+select.account-field__input option{
+  color: rgba(247,239,224,.96);
+  background: #15110f;
+}
+
+select.account-field__input option[value=""]{
+  color: rgba(220,202,175,.72);
 }
 
 .account-field__input::placeholder{
