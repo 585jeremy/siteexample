@@ -23,6 +23,11 @@ return [
     'mysql_dsn' => 'mysql:host=localhost;dbname=your_db;charset=utf8mb4',
     'mysql_user' => 'your_db_user',
     'mysql_password' => 'your_db_password',
+    // Optional: separate Discord bot DB used for bot-side verification, player links, and tickets.
+    // Leave blank when the bot tables live in the same DB as the website auth tables.
+    'bot_mysql_dsn' => '',
+    'bot_mysql_user' => '',
+    'bot_mysql_password' => '',
     // Optional: point both the public site and staff portal at the same shared applications DB.
     'applications_mysql_dsn' => '',
     'applications_mysql_user' => '',

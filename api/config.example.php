@@ -7,6 +7,12 @@ return [
     // Optional custom storage path. Relative paths resolve from the /api folder.
     'storage_file' => 'data/live-ops.json',
 
+    // Optional: separate Discord bot DB used for ticket and verification fallback counts.
+    // Leave blank when the bot tables live in the same DB as the website API DB.
+    'bot_mysql_dsn' => '',
+    'bot_mysql_user' => '',
+    'bot_mysql_password' => '',
+
     // Defaults used by api/live-ops.php before the first successful bot push.
     'default_guild_name' => 'SGCNR',
     'linking_enabled' => true,
@@ -17,4 +23,3 @@ return [
     'live_tracking_requires_opt_in' => true,
     'live_tracking_label' => 'Website Live Tracking',
 ];
-

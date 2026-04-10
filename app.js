@@ -766,6 +766,16 @@ function normaliseAccountRecord(key, record) {
       bio: "",
       region: SERVER_CONFIG.region || "EU",
       password: record,
+      verificationStatus: "",
+      verificationSource: "",
+      fivemName: "",
+      fivemLicense: "",
+      fivemId: "",
+      steamId: "",
+      rockstarId: "",
+      discordIdent: "",
+      linkedAt: "",
+      verifiedAt: "",
       trackingOptIn: false,
       emailUpdates: false,
       createdAt: "",
@@ -794,6 +804,16 @@ function normaliseAccountRecord(key, record) {
     bio: String(record?.bio || "").trim(),
     region: String(record?.region || SERVER_CONFIG.region || "EU").trim(),
     password: String(record?.password || ""),
+    verificationStatus: String(record?.verificationStatus || "").trim().toLowerCase(),
+    verificationSource: String(record?.verificationSource || "").trim(),
+    fivemName: String(record?.fivemName || "").trim(),
+    fivemLicense: String(record?.fivemLicense || "").trim(),
+    fivemId: String(record?.fivemId || "").trim(),
+    steamId: String(record?.steamId || "").trim(),
+    rockstarId: String(record?.rockstarId || "").trim(),
+    discordIdent: String(record?.discordIdent || "").trim(),
+    linkedAt: String(record?.linkedAt || "").trim(),
+    verifiedAt: String(record?.verifiedAt || "").trim(),
     trackingOptIn: Boolean(record?.trackingOptIn),
     emailUpdates: Boolean(record?.emailUpdates),
     createdAt: String(record?.createdAt || ""),
@@ -1681,6 +1701,14 @@ function setAccountFeedback(element, tone, text) {
 }
 
 function renderAccountLoginMethods(account) {
+  const verificationStatus = account?.verificationStatus === "verified"
+    ? "Verified"
+    : account?.verificationStatus === "linked"
+      ? "Linked"
+      : "Pending";
+  const verificationSource = account?.verificationSource === "bot_database"
+    ? "Discord bot database"
+    : account?.verificationSource || "Pending bridge";
   const methods = [
     ["Website Name", getAccountDisplayName(account)],
     ["Discord Name", account?.guildNickname || account?.discordDisplayName || account?.discordUsername || (account?.discord ? `@${account.discord}` : "Pending sync")],
@@ -1688,7 +1716,10 @@ function renderAccountLoginMethods(account) {
     ["Discord OAuth", SERVER_CONFIG.discordOAuthUrl ? (account?.discordLinked ? "Linked" : "Ready to connect") : "Backend required"],
     ["Backend Verification", SERVER_CONFIG.discordRoleVerifyUrl ? "Prepared" : "Pending backend"],
     ["Role Sync", SERVER_CONFIG.discordRoleSyncUrl ? "Prepared" : "Pending bot/backend"],
-    ["FiveM Identity", account?.verifiedIdentity || "Pending game sync"]
+    ["FiveM Identity", account?.verifiedIdentity || "Pending game sync"],
+    ["Verification Status", verificationStatus],
+    ["Verification Source", verificationSource],
+    ["FiveM Record", account?.fivemId || account?.fivemLicense || "No bot record yet"]
   ];
 
   return `
@@ -1738,9 +1769,21 @@ function renderAccountGuest() {
 function renderAccountDashboard(account) {
   const createdLabel = account?.createdAt ? formatServerTimestamp(account.createdAt) : "Not recorded";
   const lastLoginLabel = account?.lastLoginAt ? formatServerTimestamp(account.lastLoginAt) : "No login yet";
+  const linkedAtLabel = account?.linkedAt ? formatServerTimestamp(account.linkedAt) : "Not recorded";
+  const verifiedAtLabel = account?.verifiedAt ? formatServerTimestamp(account.verifiedAt) : "Not verified";
   const avatarUrl = getAccountAvatarUrl(account, 128);
   const discordName = account?.guildNickname || account?.discordDisplayName || account?.discordUsername || (account?.discord ? `@${account.discord}` : "Not linked");
   const verifiedIdentity = account?.verifiedIdentity || "Pending FiveM sync";
+  const verificationStatus = account?.verificationStatus === "verified"
+    ? "Verified"
+    : account?.verificationStatus === "linked"
+      ? "Linked"
+      : "Pending";
+  const verificationSource = account?.verificationSource === "bot_database"
+    ? "Bot bridge"
+    : account?.verificationSource || "Pending";
+  const fivemRecord = account?.fivemId || "No FiveM ID";
+  const fivemLicense = account?.fivemLicense || "No license synced";
 
   return `
     <div>
@@ -1759,7 +1802,7 @@ function renderAccountDashboard(account) {
           </div>
         </div>
         <h2>${escapeHtml(getAccountDisplayName(account))}</h2>
-        <p class="doc-p">Manage your Discord-linked website identity, privacy settings, and future synced features from one place. The visible website name and avatar are ready to come from the linked Discord account.</p>
+        <p class="doc-p">Manage your Discord-linked website identity, privacy settings, and synced FiveM details from one place. The website can now pull linked game identity data from the Discord bot database when that bridge is configured.</p>
 
         <div class="status-grid account-summary">
           <div class="status-card">
@@ -1775,12 +1818,22 @@ function renderAccountDashboard(account) {
           <div class="status-card">
             <div class="status-card__label">Ingame Identity</div>
             <div class="status-card__value">${escapeHtml(verifiedIdentity)}</div>
-            <div class="status-card__meta">Trusted FiveM-linked name</div>
+            <div class="status-card__meta">${escapeHtml(verifiedAtLabel)}</div>
           </div>
           <div class="status-card">
             <div class="status-card__label">Discord ID</div>
             <div class="status-card__value">${escapeHtml(account.discordId || "Pending OAuth")}</div>
             <div class="status-card__meta">${escapeHtml(account.discordLinked ? "Linked and verified" : "Waiting for Discord auth")}</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Verification Status</div>
+            <div class="status-card__value">${escapeHtml(verificationStatus)}</div>
+            <div class="status-card__meta">${escapeHtml(verificationSource)}</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">FiveM Record</div>
+            <div class="status-card__value">${escapeHtml(fivemRecord)}</div>
+            <div class="status-card__meta">${escapeHtml(fivemLicense)}</div>
           </div>
           <div class="status-card">
             <div class="status-card__label">Created</div>
@@ -1791,6 +1844,11 @@ function renderAccountDashboard(account) {
             <div class="status-card__label">Last Login</div>
             <div class="status-card__value">${escapeHtml(lastLoginLabel)}</div>
             <div class="status-card__meta">${escapeHtml(account.trackingOptIn ? "Live tracking opt-in enabled" : "Live tracking opt-in disabled")}</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card__label">Linked Since</div>
+            <div class="status-card__value">${escapeHtml(linkedAtLabel)}</div>
+            <div class="status-card__meta">${escapeHtml(account?.discordIdent || "No Discord identifier stored")}</div>
           </div>
         </div>
       </section>
@@ -1838,7 +1896,7 @@ function renderAccountDashboard(account) {
           <h2>Connected methods</h2>
           ${renderAccountLoginMethods(account)}
           <div class="status-note">
-            <strong>Discord linking:</strong> the intended flow is Discord OAuth on the website, backend token verification, then a role check through your bot or the Discord API. Once those endpoints exist, this account page can link roles, verification status, tickets, and other community features.
+            <strong>Discord linking:</strong> the website now supports reading linked FiveM identity data from the bot database when `bot_mysql_*` is configured. Discord OAuth still controls the website session, while the bot tables can fill in verified game identity, ticket counts, and linked-account data.
           </div>
         </aside>
       </div>

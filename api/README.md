@@ -19,6 +19,22 @@ This folder is the website-side ingest bridge for the Discord bot / FiveM bridge
    - `WEB_API_URL=https://sgcnr.net/api/update.php`
    - `WEB_API_SECRET=your-secret`
 
+## Optional bot DB fallback
+
+If the live snapshot has not received every stat yet, `live-ops.php` can now also read the Discord bot database directly.
+
+Set these optional keys in `api/config.php` when the bot uses a separate MySQL database:
+
+- `bot_mysql_dsn`
+- `bot_mysql_user`
+- `bot_mysql_password`
+
+Fallback values currently supported:
+
+- linked account count from `players`
+- verified account count from `verified`
+- open ticket count from `tickets`
+
 ## Accepted update shapes
 
 ### Single key update
@@ -116,4 +132,3 @@ Data is stored in:
 - `api/data/live-ops.json`
 
 That file is ignored in git and created on the first successful push.
-
