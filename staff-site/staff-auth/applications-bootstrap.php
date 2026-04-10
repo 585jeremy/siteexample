@@ -114,6 +114,21 @@ function staff_applications_allowed_statuses(): array
     return ['submitted', 'in_review', 'needs_info', 'interview', 'accepted', 'denied', 'closed'];
 }
 
+function staff_applications_status_label(string $status): string
+{
+    $labels = [
+        'submitted' => 'Submitted',
+        'in_review' => 'Under Review',
+        'needs_info' => 'Needs Info',
+        'interview' => 'Interview',
+        'accepted' => 'Accepted',
+        'denied' => 'Rejected',
+        'closed' => 'Closed',
+    ];
+
+    return $labels[$status] ?? 'Open';
+}
+
 function staff_applications_application_payload(array $row): array
 {
     return [

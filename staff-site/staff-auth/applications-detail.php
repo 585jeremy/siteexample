@@ -3,6 +3,7 @@
 require_once __DIR__ . '/applications-bootstrap.php';
 
 staff_auth_require_login();
+staff_auth_require_application_review();
 $publicId = staff_applications_clean_text($_GET['applicationId'] ?? $_GET['id'] ?? '', 24);
 
 if ($publicId === '') {

@@ -4,6 +4,7 @@ require_once __DIR__ . '/applications-bootstrap.php';
 
 staff_auth_require_post();
 staff_auth_require_login();
+staff_auth_require_application_manage();
 $input = staff_auth_input();
 
 $publicId = staff_applications_clean_text($input['applicationId'] ?? $input['id'] ?? '', 24);
@@ -64,7 +65,7 @@ try {
             (int) $application['id'],
             'system',
             $staff['displayName'] !== '' ? $staff['displayName'] : 'Staff',
-            sprintf('Status updated to %s.', str_replace('_', ' ', $status)),
+            sprintf('Status updated to %s.', staff_applications_status_label($status)),
         ]);
 
         $touch = $pdo->prepare('UPDATE staff_applications SET last_message_at = NOW() WHERE id = ?');

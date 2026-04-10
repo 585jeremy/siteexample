@@ -229,6 +229,104 @@ function staff_auth_has_session(): bool
     return !empty($_SESSION['staff_logged_in']) && !empty($_SESSION['staff_account_id']);
 }
 
+function staff_auth_access_tokens(): array
+{
+    $raw = strtolower(trim((string) ($_SESSION['staff_portal_access'] ?? '')));
+    if ($raw === '') {
+        return [];
+    }
+
+    $parts = preg_split('/[\s,|;]+/', $raw) ?: [];
+    $tokens = [];
+
+    foreach ($parts as $part) {
+        $token = trim((string) $part);
+        if ($token !== '') {
+            $tokens[$token] = true;
+        }
+    }
+
+    return array_keys($tokens);
+}
+
+function staff_auth_has_access_token(string ...$tokens): bool
+{
+    $granted = staff_auth_access_tokens();
+    if (!$granted) {
+        return false;
+    }
+
+    foreach ($tokens as $token) {
+        $normalized = strtolower(trim($token));
+        if ($normalized !== '' && in_array($normalized, $granted, true)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function staff_auth_access_level(): string
+{
+    $clearance = strtolower(trim((string) ($_SESSION['staff_clearance'] ?? '')));
+
+    if (
+        staff_auth_has_access_token('all', 'management') ||
+        in_array($clearance, ['management', 'manager'], true)
+    ) {
+        return 'manager';
+    }
+
+    if (
+        staff_auth_has_access_token('admin', 'operations') ||
+        $clearance === 'admin'
+    ) {
+        return 'admin';
+    }
+
+    return 'staff';
+}
+
+function staff_auth_application_permissions(): array
+{
+    $accessLevel = staff_auth_access_level();
+    $canManage = in_array($accessLevel, ['manager', 'admin'], true)
+        || staff_auth_has_access_token('applications_manage', 'app_manage');
+    $canReview = $canManage
+        || staff_auth_has_access_token('applications', 'applications_review', 'app_review');
+
+    return [
+        'canReview' => $canReview,
+        'canManage' => $canManage,
+    ];
+}
+
+function staff_auth_require_application_review(): void
+{
+    $permissions = staff_auth_application_permissions();
+    if (!$permissions['canReview']) {
+        staff_auth_send_json([
+            'configured' => staff_auth_is_configured(),
+            'ok' => false,
+            'error' => 'permission_denied',
+            'permissions' => $permissions,
+        ], 403);
+    }
+}
+
+function staff_auth_require_application_manage(): void
+{
+    $permissions = staff_auth_application_permissions();
+    if (!$permissions['canManage']) {
+        staff_auth_send_json([
+            'configured' => staff_auth_is_configured(),
+            'ok' => false,
+            'error' => 'permission_denied',
+            'permissions' => $permissions,
+        ], 403);
+    }
+}
+
 function staff_auth_session_payload(): array
 {
     if (!staff_auth_has_session()) {
@@ -250,6 +348,7 @@ function staff_auth_session_payload(): array
             'clearance' => $_SESSION['staff_clearance'] ?? 'General Staff',
             'issuedBy' => $_SESSION['staff_issued_by'] ?? 'Management Team',
             'portalAccess' => $_SESSION['staff_portal_access'] ?? '',
+            'applicationPermissions' => staff_auth_application_permissions(),
             'active' => true,
         ],
     ];
@@ -287,22 +386,6 @@ function staff_auth_require_login(): void
             'error' => 'not_authenticated',
         ], 401);
     }
-}
-
-function staff_auth_access_level(): string
-{
-    $portalAccess = strtolower(trim((string) ($_SESSION['staff_portal_access'] ?? '')));
-    $clearance = strtolower(trim((string) ($_SESSION['staff_clearance'] ?? '')));
-
-    if (in_array($portalAccess, ['all', 'management'], true) || in_array($clearance, ['management', 'manager'], true)) {
-        return 'manager';
-    }
-
-    if (in_array($portalAccess, ['admin', 'operations'], true) || $clearance === 'admin') {
-        return 'admin';
-    }
-
-    return 'staff';
 }
 
 function staff_auth_txadmin_base_url(): string

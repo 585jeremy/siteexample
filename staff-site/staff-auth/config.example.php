@@ -20,6 +20,10 @@ return [
     'staff_display_name_column' => '',
     'staff_clearance_column' => '',
     'staff_issued_by_column' => '',
+    // Example values in the mapped portal access column:
+    // app_review = can review applications and reply in chat
+    // app_manage = can also change application status and assignment
+    // management / all = full portal access
     'staff_portal_access_column' => '',
     'staff_active_column' => '',
     'staff_audit_table' => '',

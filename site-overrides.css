@@ -6328,13 +6328,18 @@ body.is-map .auth__btn--account .auth__accountName{
 
 .apply-chat__summary{
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid rgba(183,137,85,.12);
   background: rgba(255,255,255,.02);
   color: rgba(237,230,218,.84);
+}
+
+.apply-summary .stack-list strong,
+.apply-chat__summary strong{
+  color: rgba(247,240,229,.96);
 }
 
 .apply-chat__feed{

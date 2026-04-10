@@ -161,11 +161,11 @@ function auth_applications_status_label(string $status): string
 {
     $labels = [
         'submitted' => 'Submitted',
-        'in_review' => 'In Review',
+        'in_review' => 'Under Review',
         'needs_info' => 'Needs Info',
         'interview' => 'Interview',
         'accepted' => 'Accepted',
-        'denied' => 'Denied',
+        'denied' => 'Rejected',
         'closed' => 'Closed',
     ];
 

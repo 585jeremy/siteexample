@@ -3,13 +3,14 @@
 require_once __DIR__ . '/applications-bootstrap.php';
 
 staff_auth_require_login();
+staff_auth_require_application_review();
 
 try {
     $pdo = staff_applications_pdo();
     $stmt = $pdo->query(
         "SELECT public_id, applicant_name, role_requested, status, assigned_staff_name, created_at, updated_at, last_message_at, last_staff_reply_at
          FROM staff_applications
-         ORDER BY FIELD(status, 'submitted', 'needs_info', 'in_review', 'interview', 'accepted', 'denied', 'closed'), last_message_at DESC, created_at DESC"
+         ORDER BY FIELD(status, 'submitted', 'in_review', 'needs_info', 'interview', 'accepted', 'denied', 'closed'), last_message_at DESC, created_at DESC"
     );
     $items = array_map('staff_applications_application_payload', $stmt->fetchAll());
 
@@ -34,6 +35,7 @@ try {
         'ok' => true,
         'items' => $items,
         'counts' => $counts,
+        'permissions' => staff_auth_application_permissions(),
     ]);
 } catch (Throwable $e) {
     staff_auth_send_json([

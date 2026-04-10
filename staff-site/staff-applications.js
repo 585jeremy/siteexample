@@ -8,16 +8,17 @@
   };
   const STAFF_APPLICATION_STATUS_LABELS = {
     submitted: "Submitted",
-    in_review: "In Review",
+    in_review: "Under Review",
     needs_info: "Needs Info",
     interview: "Interview",
     accepted: "Accepted",
-    denied: "Denied",
+    denied: "Rejected",
     closed: "Closed"
   };
 
   state.applicationsView = {
     loading: false,
+    loadedOnce: false,
     items: [],
     counts: {},
     activeId: "",
@@ -26,17 +27,76 @@
     success: "",
     sending: false,
     updating: false,
-    pollTimer: null
+    pollTimer: null,
+    permissions: {
+      canReview: false,
+      canManage: false
+    }
   };
 
   render = function renderWithApplications() {
     originalStaffRender();
+    syncApplicationsDock();
+    if (
+      applicationsRouteActive() &&
+      state.gate.loggedIn &&
+      !state.gate.passwordResetRequired &&
+      applicationPermissionsLoaded() &&
+      currentApplicationPermissions().canReview &&
+      !state.applicationsView.loadedOnce &&
+      !state.applicationsView.loading
+    ) {
+      loadStaffApplications({ showLoading: true, keepSelection: true });
+      return;
+    }
     renderApplicationsWorkspace();
   };
 
   function applicationsRouteActive() {
     const slug = (window.location.hash || "").replace(/^#\/?/, "").split("/")[0].toLowerCase();
     return slug === "applications";
+  }
+
+  function applicationPermissionsLoaded() {
+    const permissions = state.gate.account?.applicationPermissions;
+    return !!permissions && typeof permissions === "object";
+  }
+
+  function currentApplicationPermissions() {
+    const stored = state.gate.account?.applicationPermissions;
+    const live = state.applicationsView.permissions;
+    return {
+      canReview: !!(live?.canReview || stored?.canReview),
+      canManage: !!(live?.canManage || stored?.canManage)
+    };
+  }
+
+  function persistApplicationPermissions(permissions) {
+    const normalised = {
+      canReview: !!permissions?.canReview,
+      canManage: !!permissions?.canManage
+    };
+
+    state.applicationsView.permissions = normalised;
+
+    if (state.gate.account) {
+      state.gate.account.applicationPermissions = normalised;
+      try {
+        sessionStorage.setItem(GATE_KEY, JSON.stringify(state.gate.account));
+      } catch {
+        // Non-fatal.
+      }
+    }
+  }
+
+  function syncApplicationsDock() {
+    const link = document.querySelector('.staff-dock__item[data-team="applications"]');
+    if (!link) return;
+
+    const shouldHide = !state.gate.loggedIn
+      || state.gate.passwordResetRequired
+      || (applicationPermissionsLoaded() && !currentApplicationPermissions().canReview);
+    link.hidden = shouldHide;
   }
 
   function clearApplicationsPoll() {
@@ -117,11 +177,11 @@
           ${renderStaffApplicationStatus(item.status)}
         </div>
         <div class="staff-application-card__meta">${esc(item.roleRequested || "Staff application")}</div>
-        <div class="staff-application-card__meta">${esc(item.assignedStaffName ? `Handled by ${item.assignedStaffName}` : "Unassigned")}</div>
+        <div class="staff-application-card__meta">${esc(item.assignedStaffName ? `Handled by ${item.assignedStaffName}` : "Waiting for assignment")}</div>
         <div class="staff-application-card__meta">Updated ${esc(staffApplicationTimestamp(item.lastMessageAt || item.updatedAt || item.createdAt))}</div>
         <div class="staff-application-card__actions">
           <button class="staff-panel__button staff-panel__button--primary" type="button" data-staff-application-open="${esc(item.publicId)}">Open case</button>
-          <button class="staff-panel__button" type="button" data-staff-application-chat="${esc(item.publicId)}">Live chat</button>
+          <button class="staff-panel__button" type="button" data-staff-application-chat="${esc(item.publicId)}">Open chat</button>
         </div>
       </article>
     `).join("");
@@ -147,6 +207,7 @@
     clearApplicationsPoll();
     if (!applicationsRouteActive()) return;
     if (!state.gate.loggedIn || state.gate.passwordResetRequired) return;
+    if (!currentApplicationPermissions().canReview) return;
     if (!state.applicationsView.items.length) return;
 
     state.applicationsView.pollTimer = window.setTimeout(() => {
@@ -155,7 +216,7 @@
   }
 
   async function loadStaffApplicationDetail(publicId, options = {}) {
-    if (!publicId) {
+    if (!publicId || !currentApplicationPermissions().canReview) {
       state.applicationsView.detail = null;
       renderApplicationsWorkspace();
       return;
@@ -167,10 +228,15 @@
         application: normaliseStaffApplication(payload?.application),
         messages: Array.isArray(payload?.messages) ? payload.messages : []
       };
-    } catch {
+    } catch (error) {
       state.applicationsView.detail = null;
+      if (error?.payload?.permissions) {
+        persistApplicationPermissions(error.payload.permissions);
+      }
       if (!options.silent) {
-        state.applicationsView.error = "That application could not be opened right now.";
+        state.applicationsView.error = error?.payload?.error === "permission_denied"
+          ? "This staff account does not have access to open applications."
+          : "That application could not be opened right now.";
       }
     }
 
@@ -181,6 +247,11 @@
   async function loadStaffApplications(options = {}) {
     clearApplicationsPoll();
     if (!state.gate.loggedIn || state.gate.passwordResetRequired) return;
+    if (applicationPermissionsLoaded() && !currentApplicationPermissions().canReview) {
+      state.applicationsView.loadedOnce = true;
+      renderApplicationsWorkspace();
+      return;
+    }
 
     if (options.showLoading !== false) {
       state.applicationsView.loading = true;
@@ -189,9 +260,11 @@
 
     try {
       const payload = await fetchJson(STAFF_APPLICATIONS_API.list);
+      persistApplicationPermissions(payload?.permissions || state.applicationsView.permissions);
       state.applicationsView.items = Array.isArray(payload?.items) ? payload.items.map(normaliseStaffApplication).filter(Boolean) : [];
       state.applicationsView.counts = payload?.counts || {};
       state.applicationsView.loading = false;
+      state.applicationsView.loadedOnce = true;
 
       const keepSelection = options.keepSelection !== false
         && state.applicationsView.items.some((item) => item.publicId === state.applicationsView.activeId);
@@ -204,22 +277,62 @@
         renderApplicationsWorkspace();
         scheduleApplicationsPoll();
       }
-    } catch {
+    } catch (error) {
+      if (error?.payload?.permissions) {
+        persistApplicationPermissions(error.payload.permissions);
+      }
       state.applicationsView.loading = false;
+      state.applicationsView.loadedOnce = true;
       state.applicationsView.items = [];
       state.applicationsView.detail = null;
-      state.applicationsView.error = "Applications could not be loaded from the staff backend.";
+      state.applicationsView.error = error?.payload?.error === "permission_denied"
+        ? "This staff account does not have access to the applications desk."
+        : "Applications could not be loaded from the staff backend.";
       renderApplicationsWorkspace();
     }
   }
 
+  function renderApplicationsLocked(permissionsKnown) {
+    const body = permissionsKnown
+      ? "This staff account is signed in correctly, but it does not have application access yet. Management can grant review access with portal_access set to app_review, or manager access with app_manage."
+      : "Checking whether this staff account has application access.";
+    const pill = permissionsKnown ? "Access required" : "Checking access";
+
+    app.innerHTML = `
+      <section class="staff-view workspace-view staff-view--centered">
+        <article class="staff-panel workspace-gate">
+          <span class="gate-kicker">Application desk</span>
+          <h1 class="staff-heading">${permissionsKnown ? "Application access is locked" : "Checking application access"}</h1>
+          <p class="staff-copy">${esc(body)}</p>
+          <div class="staff-panel__actions">
+            <span class="staff-state-pill staff-state-pill--prepared">${esc(pill)}</span>
+            <a class="staff-panel__button" href="#/dashboard">Back to dashboard</a>
+          </div>
+        </article>
+      </section>
+    `;
+  }
+
   function renderApplicationsWorkspace() {
+    syncApplicationsDock();
+
     if (!applicationsRouteActive()) {
       clearApplicationsPoll();
       return;
     }
 
     if (!state.gate.loggedIn || state.gate.passwordResetRequired) {
+      return;
+    }
+
+    if (!applicationPermissionsLoaded()) {
+      renderApplicationsLocked(false);
+      return;
+    }
+
+    const permissions = currentApplicationPermissions();
+    if (!permissions.canReview) {
+      renderApplicationsLocked(true);
       return;
     }
 
@@ -233,10 +346,33 @@
     const summaryCards = `
       <div class="dashboard-hero__rail">
         ${statCard("New", String(view.counts.submitted || 0), "Fresh applications waiting for first review.")}
-        ${statCard("Needs info", String(view.counts.needs_info || 0), "Applicants that still need follow-up or missing details.")}
-        ${statCard("Resolved", String((view.counts.accepted || 0) + (view.counts.denied || 0)), "Accepted or denied applications already processed.")}
+        ${statCard("Needs info", String(view.counts.needs_info || 0), "Applicants waiting on a reply or missing information.")}
+        ${statCard("Access", permissions.canManage ? "Manage" : "Review", permissions.canManage ? "This account can change status and assignment." : "This account can review applications and reply in chat.")}
       </div>
     `;
+    const managerControls = detail
+      ? permissions.canManage
+        ? `
+          <form class="staff-application-toolbar" data-form="staff-application-status">
+            <input type="hidden" name="applicationId" value="${esc(detail.application.publicId)}" />
+            <label class="gate-form__field">
+              <span>Application status</span>
+              <select class="gate-form__input" name="status">
+                ${Object.entries(STAFF_APPLICATION_STATUS_LABELS).map(([value, label]) => `<option value="${esc(value)}"${detail.application.status === value ? " selected" : ""}>${esc(label)}</option>`).join("")}
+              </select>
+            </label>
+            <div class="staff-application-toolbar__actions">
+              <button class="staff-panel__button staff-panel__button--primary" type="submit" ${view.updating ? "disabled" : ""}>${view.updating ? "Saving..." : "Save status"}</button>
+              <button class="staff-panel__button" type="button" data-staff-assign="${esc(detail.application.publicId)}">Assign to me</button>
+            </div>
+          </form>
+        `
+        : `
+          <div class="staff-applications-note">
+            This account can review the application and reply in chat, but only application managers can change status or assignment.
+          </div>
+        `
+      : "";
     const detailMarkup = detail
       ? `
         <article class="workspace-panel staff-application-detail">
@@ -249,38 +385,28 @@
           </div>
           <div class="staff-application-detail__meta">
             <div><strong>Case:</strong> ${esc(detail.application.publicId)}</div>
-            <div><strong>Role:</strong> ${esc(detail.application.roleRequested || "Staff application")}</div>
+            <div><strong>Requested role:</strong> ${esc(detail.application.roleRequested || "Staff application")}</div>
+            <div><strong>Discord:</strong> ${esc(detail.application.discordDisplayName || detail.application.discordUsername || "Not provided")}</div>
+            <div><strong>Assigned staff:</strong> ${esc(detail.application.assignedStaffName || "Unassigned")}</div>
             <div><strong>Timezone:</strong> ${esc(detail.application.timezone || "Not provided")}</div>
             <div><strong>Playtime:</strong> ${esc(detail.application.playtimeHours !== "" && detail.application.playtimeHours != null ? `${detail.application.playtimeHours}h` : "Not provided")}</div>
             <div><strong>Level:</strong> ${esc(detail.application.inGameLevel !== "" && detail.application.inGameLevel != null ? String(detail.application.inGameLevel) : "Not provided")}</div>
-            <div><strong>Assigned staff:</strong> ${esc(detail.application.assignedStaffName || "Unassigned")}</div>
+            <div><strong>Last update:</strong> ${esc(staffApplicationTimestamp(detail.application.lastMessageAt || detail.application.updatedAt || detail.application.createdAt))}</div>
           </div>
           <div class="staff-application-copyGrid">
             <article class="staff-application-copyCard"><h3>Availability</h3><p>${esc(detail.application.availability || "Not provided")}</p></article>
             <article class="staff-application-copyCard"><h3>Ban history</h3><p>${esc(detail.application.banHistory || "Not provided")}</p></article>
             <article class="staff-application-copyCard"><h3>Moderation experience</h3><p>${esc(detail.application.moderationExperience || "Not provided")}</p></article>
             <article class="staff-application-copyCard"><h3>Testing experience</h3><p>${esc(detail.application.testingExperience || "Not provided")}</p></article>
-            <article class="staff-application-copyCard staff-application-copyCard--wide"><h3>Why should we accept them?</h3><p>${esc(detail.application.fitReason || "Not provided")}</p></article>
+            <article class="staff-application-copyCard staff-application-copyCard--wide"><h3>Why they fit the role</h3><p>${esc(detail.application.fitReason || "Not provided")}</p></article>
           </div>
-          <form class="staff-application-toolbar" data-form="staff-application-status">
-            <input type="hidden" name="applicationId" value="${esc(detail.application.publicId)}" />
-            <label class="gate-form__field">
-              <span>Status</span>
-              <select class="gate-form__input" name="status">
-                ${Object.entries(STAFF_APPLICATION_STATUS_LABELS).map(([value, label]) => `<option value="${esc(value)}"${detail.application.status === value ? " selected" : ""}>${esc(label)}</option>`).join("")}
-              </select>
-            </label>
-            <div class="staff-application-toolbar__actions">
-              <button class="staff-panel__button staff-panel__button--primary" type="submit" ${view.updating ? "disabled" : ""}>${view.updating ? "Saving..." : "Update status"}</button>
-              <button class="staff-panel__button" type="button" data-staff-assign="${esc(detail.application.publicId)}">Assign to me</button>
-            </div>
-          </form>
+          ${managerControls}
           <div class="staff-application-chat" id="staffApplicationChat">
             <div class="staff-application-chat__feed">${renderStaffApplicationMessages(detail)}</div>
             <form class="staff-application-chat__composer" data-form="staff-application-message">
               <input type="hidden" name="applicationId" value="${esc(detail.application.publicId)}" />
               <label class="gate-form__field">
-                <span>Live chat reply</span>
+                <span>Reply to applicant</span>
                 <textarea class="gate-form__input staff-application-chat__input" name="message" placeholder="Write a reply for the applicant..." ${view.sending || detail.application.status === "closed" ? "disabled" : ""}></textarea>
               </label>
               <button class="staff-panel__button staff-panel__button--primary" type="submit" ${view.sending || detail.application.status === "closed" ? "disabled" : ""}>${view.sending ? "Sending..." : "Send reply"}</button>
@@ -288,7 +414,7 @@
           </div>
         </article>
       `
-      : `<article class="workspace-panel"><div class="staff-applications-empty">Select an application card to open the full case and live chat.</div></article>`;
+      : `<article class="workspace-panel"><div class="staff-applications-empty">Select an application card to open the case, review its details, and reply in chat.</div></article>`;
 
     app.innerHTML = `
       <section class="staff-view workspace-view staff-applications-view">
@@ -296,7 +422,7 @@
           <article class="staff-panel staff-panel--hero">
             <span class="gate-kicker">Application desk</span>
             <h1 class="staff-heading">Applications</h1>
-            <p class="staff-copy">Review incoming applications, assign a handler, update status, and keep the live case chat in one place.</p>
+            <p class="staff-copy">Keep applicant review, case chat, and final status handling in one queue. Reviewers can work the case, while managers can also change status and assignment.</p>
             ${view.error ? `<p class="gate-form__error">${esc(view.error)}</p>` : view.success ? `<p class="gate-form__hint">${esc(view.success)}</p>` : ""}
             <div class="staff-panel__actions">
               <span class="staff-state-pill staff-state-pill--open">${esc(`${view.items.length} cases loaded`)}</span>
@@ -307,9 +433,9 @@
         </section>
         <section class="workspace-columns staff-applications-grid">
           <article class="workspace-panel staff-applications-list">
-            <span class="workspace-panel__eyebrow">Open queue</span>
-            <h2 class="workspace-panel__title">Application list</h2>
-            <p class="workspace-panel__summary">Each card opens the full case. The live chat button jumps directly to the private thread.</p>
+            <span class="workspace-panel__eyebrow">Application queue</span>
+            <h2 class="workspace-panel__title">Cases</h2>
+            <p class="workspace-panel__summary">Open a case to review the application, reply to the applicant, and check the current status.</p>
             <div class="staff-applications-list__items">
               ${view.loading ? `<div class="staff-applications-empty">Loading applications...</div>` : renderStaffApplicationsList(view.items, view.activeId)}
             </div>
@@ -321,6 +447,13 @@
   }
 
   async function handleStatusUpdate(form, assignToSelf = false) {
+    if (!currentApplicationPermissions().canManage) {
+      state.applicationsView.error = "Only application managers can change status or assignment.";
+      state.applicationsView.success = "";
+      renderApplicationsWorkspace();
+      return;
+    }
+
     const values = Object.fromEntries(new FormData(form).entries());
     state.applicationsView.error = "";
     state.applicationsView.success = "";
@@ -337,10 +470,15 @@
       state.applicationsView.success = assignToSelf ? "Application assigned to your staff account." : "Application status updated.";
       await loadStaffApplications({ showLoading: false, keepSelection: true, selectedId: values.applicationId });
     } catch (error) {
+      if (error?.payload?.permissions) {
+        persistApplicationPermissions(error.payload.permissions);
+      }
       state.applicationsView.updating = false;
       state.applicationsView.error = error?.payload?.error === "invalid_status"
         ? "That status is not allowed."
-        : "The application could not be updated right now.";
+        : error?.payload?.error === "permission_denied"
+          ? "Only application managers can change status or assignment."
+          : "The application could not be updated right now.";
       renderApplicationsWorkspace();
     }
   }
@@ -361,10 +499,15 @@
       state.applicationsView.success = "Reply sent to the applicant chat.";
       await loadStaffApplications({ showLoading: false, keepSelection: true, selectedId: values.applicationId });
     } catch (error) {
+      if (error?.payload?.permissions) {
+        persistApplicationPermissions(error.payload.permissions);
+      }
       state.applicationsView.sending = false;
       state.applicationsView.error = error?.payload?.error === "application_closed"
         ? "This application is already closed."
-        : "The reply could not be sent right now.";
+        : error?.payload?.error === "permission_denied"
+          ? "This staff account does not have permission to reply to applicant chats."
+          : "The reply could not be sent right now.";
       renderApplicationsWorkspace();
     }
   }
@@ -425,16 +568,26 @@
   });
 
   window.addEventListener("hashchange", () => {
+    syncApplicationsDock();
     if (applicationsRouteActive()) {
       renderApplicationsWorkspace();
-      loadStaffApplications({ showLoading: !state.applicationsView.items.length, keepSelection: true });
+      if (applicationPermissionsLoaded() && currentApplicationPermissions().canReview) {
+        loadStaffApplications({ showLoading: !state.applicationsView.items.length, keepSelection: true });
+      }
     } else {
       clearApplicationsPoll();
     }
   });
 
+  syncApplicationsDock();
   renderApplicationsWorkspace();
-  if (applicationsRouteActive() && state.gate.loggedIn && !state.gate.passwordResetRequired) {
+  if (
+    applicationsRouteActive() &&
+    state.gate.loggedIn &&
+    !state.gate.passwordResetRequired &&
+    applicationPermissionsLoaded() &&
+    currentApplicationPermissions().canReview
+  ) {
     loadStaffApplications({ showLoading: !state.applicationsView.items.length, keepSelection: true });
   }
 })();

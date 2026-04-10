@@ -4,6 +4,7 @@ require_once __DIR__ . '/applications-bootstrap.php';
 
 staff_auth_require_post();
 staff_auth_require_login();
+staff_auth_require_application_review();
 $input = staff_auth_input();
 
 $publicId = staff_applications_clean_text($input['applicationId'] ?? $input['id'] ?? '', 24);

@@ -488,11 +488,11 @@ const APPLICATION_API = {
 };
 const APPLICATION_STATUS_LABELS = {
   submitted: "Submitted",
-  in_review: "In Review",
+  in_review: "Under Review",
   needs_info: "Needs Info",
   interview: "Interview",
   accepted: "Accepted",
-  denied: "Denied",
+  denied: "Rejected",
   closed: "Closed"
 };
 const APPLICATION_OPEN_STATUSES = ["submitted", "in_review", "needs_info", "interview"];

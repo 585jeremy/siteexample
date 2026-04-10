@@ -37,6 +37,13 @@ Recommended production setup:
    - set `password_reset_required = 1`
 6. After first login the portal will automatically force the user to a password reset screen
 
+Custom login note:
+
+- each staff member signs in with the username stored in `staff_id` or the mapped username column
+- passwords are checked against the configured password-hash column
+- display name, clearance, and portal access are read from the mapped staff table columns
+- this means you can fully control staff logins from your own database without Discord bot login replacing the staff password flow
+
 Fallback:
 
 - if the staff database backend is not configured yet, the portal falls back to `staff-gate-config.js`
@@ -99,6 +106,12 @@ Important setup note:
 
 - the public website auth side and the staff portal must point at the same application tables
 - if the main public auth DB and the staff DB are different, set `applications_mysql_dsn`, `applications_mysql_user`, and `applications_mysql_password` in both config files to the same shared database
+
+Application permissions:
+
+- `portal_access = app_review` lets a staff account open applications and reply in the applicant chat
+- `portal_access = app_manage` lets a staff account review applications and also change status or assignment
+- `portal_access = management` or `all`, or `clearance = Admin/Manager/Management`, also grants full application management access
 
 ## Auto deploy
 
