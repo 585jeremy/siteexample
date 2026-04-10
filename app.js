@@ -4520,6 +4520,8 @@ function normaliseDiscordOpsPayload(payload) {
       linkedAccounts: null,
       syncRoles: false,
       linkingEnabled: Boolean(SERVER_CONFIG.discordOAuthUrl),
+      lastPushAt: null,
+      lastSource: "",
       oauthUrl: SERVER_CONFIG.discordOAuthUrl || "",
       supportUrl: DISCORD_TICKET_CHANNEL_URL,
       botInviteUrl: SERVER_CONFIG.discordBotInviteUrl || "",
@@ -4530,6 +4532,7 @@ function normaliseDiscordOpsPayload(payload) {
   const guild = payload.guild && typeof payload.guild === "object" ? payload.guild : payload;
   const support = payload.support && typeof payload.support === "object" ? payload.support : {};
   const linking = payload.linking && typeof payload.linking === "object" ? payload.linking : {};
+  const meta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
   const announcementSource = Array.isArray(payload.announcements)
     ? payload.announcements
     : Array.isArray(payload.feed)
@@ -4558,6 +4561,8 @@ function normaliseDiscordOpsPayload(payload) {
     linkedAccounts: toFiniteNumber(pickFirstDefined(linking, ["linkedAccounts", "linkedUsers", "connections"])),
     syncRoles: syncRolesRaw == null ? false : Boolean(syncRolesRaw),
     linkingEnabled: linkingEnabledRaw == null ? Boolean(SERVER_CONFIG.discordOAuthUrl) : Boolean(linkingEnabledRaw),
+    lastPushAt: parseSnapshotDate(pickFirstDefined(meta, ["lastPushAt", "lastSyncAt"])),
+    lastSource: pickFirstDefined(meta, ["lastSource", "source"]) || "",
     oauthUrl: pickFirstDefined(linking, ["oauthUrl", "connectUrl", "linkUrl"]) || SERVER_CONFIG.discordOAuthUrl || "",
     supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl"]) || DISCORD_TICKET_CHANNEL_URL,
     botInviteUrl: pickFirstDefined(payload, ["botInviteUrl", "inviteUrl"]) || SERVER_CONFIG.discordBotInviteUrl || "",
@@ -5111,6 +5116,9 @@ function renderDiscordLinking(discord) {
   const supportUrl = discord?.supportUrl || DISCORD_INVITE_URL;
   const oauthUrl = discord?.oauthUrl || "";
   const inviteUrl = discord?.botInviteUrl || "";
+  const syncNote = discord?.lastPushAt
+    ? `Last bot sync ${formatServerTimestamp(discord.lastPushAt)}${discord?.lastSource ? ` via ${discord.lastSource}` : ""}.`
+    : "The website is still waiting for the first Discord bot sync. If this stays pending, check the live ops bridge on the host.";
 
   return `
     <div class="stack-list stack-list--compact">
@@ -5119,6 +5127,9 @@ function renderDiscordLinking(discord) {
       <div class="stack-list__item"><span class="stack-list__index">03</span><span>Role sync is ${discord?.syncRoles ? "enabled" : "ready for backend control"}.</span></div>
       <div class="stack-list__item"><span class="stack-list__index">04</span><span>Support queue: ${discord?.pendingReports != null ? `${discord.pendingReports} pending reports` : "waiting for report data"}.</span></div>
       <div class="stack-list__item"><span class="stack-list__index">05</span><span>Verified members: ${discord?.verifiedMembers != null ? String(discord.verifiedMembers) : "pending data feed"}.</span></div>
+    </div>
+    <div class="status-note">
+      <strong>Live sync:</strong> ${escapeHtml(syncNote)}
     </div>
     <div class="status-note">
       <strong>Backend requirement:</strong> Discord account linking, role rewards, ticket sync, punishments, verification, and bot automation need a real backend API and database behind this website.
