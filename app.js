@@ -5920,11 +5920,12 @@ function route() {
   }
   updateDockActive(r.name);
 
-  const isStandardPage = !["home", "map", "wiki"].includes(r.name);
+  const isStandardPage = !["home", "map", "wiki", "apply"].includes(r.name);
   document.body.classList.toggle("is-landing", r.name === "home");
   document.body.classList.toggle("is-map", r.name === "map");
   document.body.classList.toggle("is-wiki", r.name === "wiki");
   document.body.classList.toggle("is-standard", isStandardPage);
+  document.body.classList.toggle("is-apply", r.name === "apply");
 
   const inRulesFlow = r.name === "rules" || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);

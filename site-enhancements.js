@@ -271,8 +271,8 @@
         <div class="apply-card__meta">Submitted ${escapeHtml(formatServerTimestamp(item.createdAt))}</div>
         <div class="apply-card__meta">${escapeHtml(item.assignedStaffName ? `Handled by ${item.assignedStaffName}` : "Waiting for staff assignment")}</div>
         <div class="apply-card__actions">
-          <button class="auth__btn auth__btn--primary" type="button" data-application-select="${escapeHtml(item.publicId)}">Open case</button>
-          <button class="auth__btn" type="button" data-application-chat="${escapeHtml(item.publicId)}">Live chat</button>
+          <button class="auth__btn auth__btn--primary" type="button" data-application-select="${escapeHtml(item.publicId)}">View case</button>
+          <button class="auth__btn" type="button" data-application-chat="${escapeHtml(item.publicId)}">Open chat</button>
         </div>
       </article>
     `).join("");
@@ -304,7 +304,7 @@
       <section class="section apply-chat" data-application-thread>
         <div class="apply-chat__top">
           <div>
-            <div class="section__eyebrow">Live chat</div>
+            <div class="section__eyebrow">Application chat</div>
             <h2>${escapeHtml(detail.application.publicId)} conversation</h2>
           </div>
           ${renderApplicationStatusPill(detail.application.status)}
@@ -525,55 +525,74 @@
     const formValues = applicationCenterState.formValues || {};
     const activeApplication = applicationCenterState.items.find((item) => item.publicId === applicationCenterState.activeId) || applicationCenterState.items[0] || null;
     const openApplication = applicationCenterState.items.find((item) => isApplicationOpenStatus(item.status)) || null;
+    const hasApplicationHistory = applicationCenterState.loading || applicationCenterState.items.length > 0;
     const detail = applicationCenterState.detail?.application?.publicId === activeApplication?.publicId
       ? applicationCenterState.detail
       : null;
     const processMarkup = `
-      <div class="apply-process">
-        <article class="apply-process__item">
-          <div class="apply-process__index">01</div>
-          <div class="apply-process__copy"><strong>Sign in with Discord</strong><span>Every application is tied to the real Discord account that is signed into the website.</span></div>
+      <div class="apply-stage__steps">
+        <article class="apply-stage__step">
+          <span class="apply-stage__stepIndex">01</span>
+          <div>
+            <strong>Open a ban-history ticket</strong>
+            <span>Get the full result first so your application is complete when staff opens it.</span>
+          </div>
         </article>
-        <article class="apply-process__item">
-          <div class="apply-process__index">02</div>
-          <div class="apply-process__copy"><strong>Collect your ban history</strong><span>Open a ticket first, then paste the full result into the application form.</span></div>
+        <article class="apply-stage__step">
+          <span class="apply-stage__stepIndex">02</span>
+          <div>
+            <strong>Send one clear application</strong>
+            <span>Fill the required fields, add optional background if it helps, then submit once.</span>
+          </div>
         </article>
-        <article class="apply-process__item">
-          <div class="apply-process__index">03</div>
-          <div class="apply-process__copy"><strong>Track the case here</strong><span>After you submit, staff reviews it in the portal and any follow-up happens in your private case chat.</span></div>
+        <article class="apply-stage__step">
+          <span class="apply-stage__stepIndex">03</span>
+          <div>
+            <strong>Track the case here</strong>
+            <span>Staff updates the status and any follow-up stays inside your private case chat.</span>
+          </div>
         </article>
-      </div>
-    `;
-    const statusGuideMarkup = `
-      <div class="stack-list stack-list--compact">
-        <div class="stack-list__item"><span class="stack-list__index">01</span><span><strong>Submitted:</strong> staff has not picked up the case yet.</span></div>
-        <div class="stack-list__item"><span class="stack-list__index">02</span><span><strong>Under review:</strong> a staff member is actively checking your application.</span></div>
-        <div class="stack-list__item"><span class="stack-list__index">03</span><span><strong>Needs info:</strong> you need to answer in the private case chat.</span></div>
-        <div class="stack-list__item"><span class="stack-list__index">04</span><span><strong>Accepted / Rejected / Closed:</strong> the case has a final outcome.</span></div>
       </div>
     `;
 
     if (!account) {
       setView(`
-        <div>
-          ${renderHeader("Apply", [{ label: "Apply" }], { showBadge: false })}
-          <div class="content-grid content-grid--sidebar">
-            <section class="section section--hero apply-hero">
+        <div class="apply-page">
+          <section class="section section--hero apply-stage__hero apply-stage__hero--intro">
+            <div class="section__eyebrow">Staff applications</div>
+            <h2>Apply for staff</h2>
+            <p class="doc-p">One clean form, one private case, one place to track the decision. Sign in with Discord first, then send your application only after your ban-history ticket is ready.</p>
+            <div class="apply-stage__statusRow">
+              <span class="apply-sidecard__pill">Discord sign-in required</span>
+              <span class="apply-sidecard__pill">One open application max</span>
+            </div>
+            ${processMarkup}
+            <div class="apply-stage__actions">
+              ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Sign in with Discord</a>` : `<button class="auth__btn auth__btn--primary" type="button" disabled>Discord login not connected yet</button>`}
+              <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket</a>
+            </div>
+          </section>
+
+          <section class="apply-layout apply-layout--guest">
+            <aside class="section section--stack apply-sidecard">
               <div class="section__eyebrow">Staff applications</div>
-              <h2>Apply with one clear flow</h2>
-              <p class="doc-p">Sign in with Discord, collect your ban history, and send one application. After that, you can track the case status and staff replies from this page.</p>
-              ${processMarkup}
-              <div class="auth-modal__actions">
-                ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Sign in with Discord</a>` : `<button class="auth__btn auth__btn--primary" type="button" disabled>Discord login not connected yet</button>`}
-                <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ban-history ticket</a>
+              <h2>Before you start</h2>
+              <div class="apply-sidecard__list">
+                <div>Use the same Discord account you want tied to the application.</div>
+                <div>Paste the full ban history from the ticket, not a short summary.</div>
+                <div>Only send one application at a time. Follow-up happens in the case chat later.</div>
+              </div>
+            </aside>
+            <section class="section section--stack apply-panel apply-panel--notes">
+              <div class="section__eyebrow">What to write</div>
+              <h2>Keep the form direct</h2>
+              <div class="apply-sidecard__list">
+                <div>State your real availability clearly so staff knows when you can actually help.</div>
+                <div>Use the main answer to explain why you fit the role, not to repeat your ticket.</div>
+                <div>Add optional background only if it gives staff useful context.</div>
               </div>
             </section>
-            <aside class="section section--stack apply-summary">
-              <div class="section__eyebrow">Status guide</div>
-              <h2>What the updates mean</h2>
-              ${statusGuideMarkup}
-            </aside>
-          </div>
+          </section>
         </div>
       `);
       return;
@@ -581,115 +600,152 @@
 
     const displayName = getAccountDisplayName(account);
     const formDisabled = Boolean(openApplication) || applicationCenterState.submitting;
-
-    setView(`
-      <div>
-        ${renderHeader("Apply", [{ label: "Apply" }], { showBadge: false })}
-        <div class="content-grid content-grid--sidebar">
-          <section class="section section--hero apply-hero">
-            <div class="section__eyebrow">Staff applications</div>
-            <h2>Application center</h2>
-            <p class="doc-p">Send one application, then track the case here. Staff reviews it in the portal, updates the status, and replies in your private chat if they need anything else.</p>
-            ${processMarkup}
-          </section>
-          <aside class="section section--stack apply-summary">
-            <div class="section__eyebrow">Signed in as</div>
-            <h2>${escapeHtml(displayName)}</h2>
-            <div class="apply-accountMeta">${escapeHtml(account.discordUsername ? `@${account.discordUsername}` : displayName)}</div>
-            <div class="status-note">
-              <strong>Before you submit:</strong> use the ticket channel for your full ban history, then paste that result into the form below.
-            </div>
-            <div class="auth-modal__actions">
-              <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Ban-history ticket</a>
-            </div>
-            ${openApplication ? `<div class="status-note"><strong>Open application:</strong> You already have ${escapeHtml(openApplication.publicId)} in progress. Use the live chat below instead of sending another one.</div>` : ""}
-            <div class="section__eyebrow">Status guide</div>
-            <h2>Case updates</h2>
-            ${statusGuideMarkup}
-          </aside>
-        </div>
-
-        <div class="content-grid content-grid--sidebar">
-          <section class="section account-hero apply-formShell">
-            <div class="section__eyebrow">Application form</div>
-            <h2>${openApplication ? "Application already in progress" : "Send your application"}</h2>
-            <p class="doc-p">Required fields come first. Extra background details are optional, but they can still help reviewers understand your experience.</p>
-            ${renderApplyFeedback()}
-            <form class="account-form" data-form="application-submit" autocomplete="off">
-              <div class="apply-form__section">
-                <div class="apply-form__sectionTitle">Required details</div>
-                <div class="account-form__grid">
-                  <label class="account-field">
-                    <span class="account-field__label">Discord account</span>
-                    <input class="account-field__input" type="text" value="${escapeHtml(displayName)}" disabled />
-                  </label>
-                  <label class="account-field">
-                    <span class="account-field__label">Applying for *</span>
-                    <select class="account-field__input" name="roleRequested" required ${formDisabled ? "disabled" : ""}>
-                      <option value="" disabled${formValues.roleRequested ? "" : " selected"}>Select a role</option>
-                      ${APPLICATION_ROLE_OPTIONS.map((role) => `<option value="${escapeHtml(role)}"${formValues.roleRequested === role ? " selected" : ""}>${escapeHtml(role)}</option>`).join("")}
-                    </select>
-                  </label>
-                  <label class="account-field">
-                    <span class="account-field__label">In-game name *</span>
-                    <input class="account-field__input" type="text" name="inGameName" value="${escapeHtml(formValues.inGameName || "")}" placeholder="Your in-game name" required ${formDisabled ? "disabled" : ""} />
-                  </label>
-                  <label class="account-field account-field--wide">
-                    <span class="account-field__label">Availability *</span>
-                    <textarea class="account-field__input account-field__input--textarea" rows="3" name="availability" placeholder="When are you usually online, and how often can you be active?" required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.availability || "")}</textarea>
-                  </label>
-                  <label class="account-field account-field--wide">
-                    <span class="account-field__label">Full ban history *</span>
-                    <textarea class="account-field__input account-field__input--textarea" rows="4" name="banHistory" placeholder="Paste the full ban history you received through the Discord ticket channel." required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.banHistory || "")}</textarea>
-                  </label>
-                  <label class="account-field account-field--wide">
-                    <span class="account-field__label">Why do you want this role? *</span>
-                    <textarea class="account-field__input account-field__input--textarea" rows="5" name="fitReason" placeholder="Explain why you would be a good fit for this staff role." required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.fitReason || "")}</textarea>
-                  </label>
-                </div>
+    const queueMarkup = applicationCenterState.loading
+      ? `<div class="apply-empty">Loading your applications...</div>`
+      : renderApplicantApplicationCards(applicationCenterState.items, activeApplication?.publicId || "");
+    const primaryPanelMarkup = openApplication
+      ? `
+        <section class="section apply-panel apply-panel--locked">
+          <div class="section__eyebrow">Current application</div>
+          <h2>${escapeHtml(openApplication.roleRequested || "Staff application")} is already in review</h2>
+          <p class="doc-p">You already have ${escapeHtml(openApplication.publicId)} open. Track the status here and use the private case chat below if staff needs more from you.</p>
+          <div class="apply-activeCase">
+            ${renderApplicationStatusPill(openApplication.status)}
+            <span class="apply-activeCase__meta">${escapeHtml(openApplication.assignedStaffName ? `Handled by ${openApplication.assignedStaffName}` : "Waiting for staff assignment")}</span>
+          </div>
+          <div class="apply-stage__actions">
+            <button class="auth__btn auth__btn--primary" type="button" data-application-select="${escapeHtml(openApplication.publicId)}">View case</button>
+            <button class="auth__btn" type="button" data-application-chat="${escapeHtml(openApplication.publicId)}">Jump to chat</button>
+          </div>
+        </section>
+      `
+      : `
+        <section class="section apply-panel apply-panel--form">
+          <div class="section__eyebrow">Application form</div>
+          <h2>Send one clean application</h2>
+          <p class="doc-p">Your Discord identity is attached automatically. Keep the required answers direct, then use the optional section only if it adds helpful background.</p>
+          ${renderApplyFeedback()}
+          <form class="account-form apply-form" data-form="application-submit" autocomplete="off">
+            <div class="apply-form__group">
+              <div class="account-form__grid">
+                <label class="account-field">
+                  <span class="account-field__label">Applying for *</span>
+                  <select class="account-field__input" name="roleRequested" required ${formDisabled ? "disabled" : ""}>
+                    <option value="" disabled${formValues.roleRequested ? "" : " selected"}>Select a role</option>
+                    ${APPLICATION_ROLE_OPTIONS.map((role) => `<option value="${escapeHtml(role)}"${formValues.roleRequested === role ? " selected" : ""}>${escapeHtml(role)}</option>`).join("")}
+                  </select>
+                </label>
+                <label class="account-field">
+                  <span class="account-field__label">In-game name *</span>
+                  <input class="account-field__input" type="text" name="inGameName" value="${escapeHtml(formValues.inGameName || "")}" placeholder="Your in-game name" required ${formDisabled ? "disabled" : ""} />
+                </label>
+                <label class="account-field">
+                  <span class="account-field__label">Timezone</span>
+                  <input class="account-field__input" type="text" name="timezone" value="${escapeHtml(formValues.timezone || defaultTimezone)}" placeholder="Example: Europe/Berlin" ${formDisabled ? "disabled" : ""} />
+                </label>
+                <label class="account-field account-field--wide">
+                  <span class="account-field__label">Availability *</span>
+                  <textarea class="account-field__input account-field__input--textarea" rows="3" name="availability" placeholder="When are you usually online, and how often can you be active?" required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.availability || "")}</textarea>
+                </label>
+                <label class="account-field account-field--wide">
+                  <span class="account-field__label">Full ban history *</span>
+                  <textarea class="account-field__input account-field__input--textarea" rows="4" name="banHistory" placeholder="Paste the full ban history from your Discord ticket." required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.banHistory || "")}</textarea>
+                </label>
+                <label class="account-field account-field--wide">
+                  <span class="account-field__label">Why do you fit this role? *</span>
+                  <textarea class="account-field__input account-field__input--textarea" rows="5" name="fitReason" placeholder="Keep it direct. Why are you a good fit for this role?" required ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.fitReason || "")}</textarea>
+                </label>
               </div>
-
-              <div class="apply-form__section">
-                <div class="apply-form__sectionTitle">Extra details (optional)</div>
+            </div>
+            <details class="apply-optional">
+              <summary>Add background if it helps</summary>
+              <div class="apply-optional__content">
                 <div class="account-form__grid">
                   <label class="account-field">
                     <span class="account-field__label">In-game level</span>
-                    <input class="account-field__input" type="number" min="1" name="inGameLevel" value="${escapeHtml(formValues.inGameLevel || "")}" placeholder="Your current level" ${formDisabled ? "disabled" : ""} />
+                    <input class="account-field__input" type="number" min="1" name="inGameLevel" value="${escapeHtml(formValues.inGameLevel || "")}" placeholder="Current level" ${formDisabled ? "disabled" : ""} />
                   </label>
                   <label class="account-field">
                     <span class="account-field__label">Playtime (hours)</span>
-                    <input class="account-field__input" type="number" min="0" name="playtimeHours" value="${escapeHtml(formValues.playtimeHours || "")}" placeholder="Your total playtime" ${formDisabled ? "disabled" : ""} />
-                  </label>
-                  <label class="account-field">
-                    <span class="account-field__label">Timezone</span>
-                    <input class="account-field__input" type="text" name="timezone" value="${escapeHtml(formValues.timezone || defaultTimezone)}" placeholder="Example: Europe/Berlin" ${formDisabled ? "disabled" : ""} />
+                    <input class="account-field__input" type="number" min="0" name="playtimeHours" value="${escapeHtml(formValues.playtimeHours || "")}" placeholder="Total playtime" ${formDisabled ? "disabled" : ""} />
                   </label>
                   <label class="account-field account-field--wide">
-                    <span class="account-field__label">Moderation experience</span>
-                    <textarea class="account-field__input account-field__input--textarea" rows="4" name="moderationExperience" placeholder="Tell us about any moderation experience you already have." ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.moderationExperience || "")}</textarea>
+                    <span class="account-field__label">Past staff experience</span>
+                    <textarea class="account-field__input account-field__input--textarea" rows="4" name="moderationExperience" placeholder="Any staff, moderation, or support experience you already have." ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.moderationExperience || "")}</textarea>
                   </label>
                   <label class="account-field account-field--wide">
-                    <span class="account-field__label">Testing experience</span>
-                    <textarea class="account-field__input account-field__input--textarea" rows="4" name="testingExperience" placeholder="Tell us about QA, bug-reporting, or testing work you have done." ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.testingExperience || "")}</textarea>
+                    <span class="account-field__label">Anything else staff should know</span>
+                    <textarea class="account-field__input account-field__input--textarea" rows="4" name="testingExperience" placeholder="Add any extra context that helps staff review the application." ${formDisabled ? "disabled" : ""}>${escapeHtml(formValues.testingExperience || "")}</textarea>
                   </label>
                 </div>
               </div>
+            </details>
+            <div class="apply-stage__actions">
+              <button class="auth__btn auth__btn--primary" type="submit" ${formDisabled ? "disabled" : ""}>${applicationCenterState.submitting ? "Sending..." : "Send application"}</button>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket</a>
+            </div>
+          </form>
+        </section>
+      `;
 
-              <div class="auth-modal__actions">
-                <button class="auth__btn auth__btn--primary" type="submit" ${formDisabled ? "disabled" : ""}>${applicationCenterState.submitting ? "Sending..." : "Send application"}</button>
-                <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
-              </div>
-            </form>
+    const sidePanelMarkup = hasApplicationHistory
+      ? `
+        <section class="section section--stack apply-panel apply-panel--queue">
+          <div class="section__eyebrow">Your applications</div>
+          <h2>Case tracker</h2>
+          <p class="doc-p">Every application stays here with its latest status, handler, and case chat access.</p>
+          ${queueMarkup}
+        </section>
+      `
+      : `
+        <section class="section section--stack apply-panel apply-panel--notes">
+          <div class="section__eyebrow">After you send</div>
+          <h2>What happens next</h2>
+          <div class="apply-sidecard__list">
+            <div>Staff reviews your written answers and the full result from the ticket.</div>
+            <div>Your case status is updated here so you can see if it is under review, accepted, or rejected.</div>
+            <div>If more information is needed, reply inside the private application chat on this page.</div>
+          </div>
+        </section>
+      `;
+
+    setView(`
+      <div class="apply-page">
+        <section class="apply-stage">
+          <section class="section section--hero apply-stage__hero">
+            <div class="section__eyebrow">Staff applications</div>
+            <h2>Apply for staff</h2>
+            <p class="doc-p">Send one clear application here. If staff needs anything else, they update the status and continue the conversation in your private case chat on this page.</p>
+            <div class="apply-stage__statusRow">
+              <span class="apply-sidecard__pill">Signed in</span>
+              ${openApplication ? renderApplicationStatusPill(openApplication.status) : `<span class="apply-sidecard__pill">Ready to send</span>`}
+            </div>
+            ${processMarkup}
           </section>
-
-          <aside class="section section--stack apply-summary">
-            <div class="section__eyebrow">Your cases</div>
-            <h2>Applications</h2>
-            ${applicationCenterState.loading ? `<div class="apply-empty">Loading your applications...</div>` : renderApplicantApplicationCards(applicationCenterState.items, activeApplication?.publicId || "")}
+          <aside class="section section--stack apply-sidecard">
+            <div class="section__eyebrow">Signed in as</div>
+            <h2>${escapeHtml(displayName)}</h2>
+            <div class="apply-sidecard__account">${escapeHtml(account.discordUsername ? `@${account.discordUsername}` : displayName)}</div>
+            <div class="apply-sidecard__list">
+              <div>Use the ticket channel first if you still need your ban history.</div>
+              <div>Only one open application is allowed at a time.</div>
+              <div>When staff needs more from you, reply in the private case chat below.</div>
+            </div>
+            <div class="apply-stage__actions">
+              <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket</a>
+            </div>
           </aside>
-        </div>
+        </section>
 
-        ${renderApplicantChat(detail)}
+        <section class="apply-layout">
+          <div class="apply-main">
+            ${primaryPanelMarkup}
+            ${activeApplication ? renderApplicantChat(detail) : ""}
+          </div>
+          <aside class="apply-rail">
+            ${sidePanelMarkup}
+          </aside>
+        </section>
       </div>
     `);
   };
