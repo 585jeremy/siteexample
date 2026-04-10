@@ -6491,7 +6491,7 @@ body.is-apply .content{
 .apply-stage__hero .doc-p{
   max-width: 60ch;
   margin: 0;
-  color: rgba(226,216,199,.78);
+  color: rgba(223,234,248,.78);
 }
 
 .apply-stage__hero::after{
@@ -6500,8 +6500,8 @@ body.is-apply .content{
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 12% 18%, rgba(205,151,90,.10), transparent 24%),
-    radial-gradient(circle at 88% 12%, rgba(172,78,67,.08), transparent 22%);
+    radial-gradient(circle at 12% 18%, rgba(88,153,255,.12), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(120,147,182,.10), transparent 22%);
 }
 
 .apply-stage__steps{
@@ -6522,8 +6522,8 @@ body.is-apply .content{
   align-items: start;
   padding: 15px 16px;
   border-radius: 18px;
-  border: 1px solid rgba(183,137,85,.12);
-  background: linear-gradient(180deg, rgba(24,20,18,.92), rgba(10,10,12,.96));
+  border: 1px solid rgba(120,147,182,.14);
+  background: linear-gradient(180deg, rgba(15,21,31,.92), rgba(8,12,18,.96));
 }
 
 .apply-stage__stepIndex{
@@ -6532,9 +6532,9 @@ body.is-apply .content{
   width: 48px;
   min-height: 48px;
   border-radius: 15px;
-  border: 1px solid rgba(201,149,87,.18);
-  background: linear-gradient(180deg, rgba(92,59,28,.32), rgba(24,18,16,.94));
-  color: rgba(248,234,208,.94);
+  border: 1px solid rgba(88,153,255,.24);
+  background: linear-gradient(180deg, rgba(56,84,134,.34), rgba(14,19,30,.94));
+  color: rgba(231,241,255,.96);
   font-size: 15px;
   font-weight: 800;
   letter-spacing: .04em;
@@ -6543,7 +6543,7 @@ body.is-apply .content{
 .apply-stage__step strong{
   display: block;
   margin-bottom: 4px;
-  color: rgba(247,240,229,.96);
+  color: rgba(245,249,255,.96);
   font-size: 15px;
 }
 
@@ -6551,7 +6551,7 @@ body.is-apply .content{
 .apply-sidecard__account,
 .apply-sidecard__list,
 .apply-activeCase__meta{
-  color: rgba(226,216,199,.76);
+  color: rgba(213,227,245,.76);
   line-height: 1.55;
 }
 
@@ -6578,9 +6578,9 @@ body.is-apply .content{
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(183,137,85,.14);
-  background: rgba(255,255,255,.04);
-  color: rgba(245,236,221,.92);
+  border: 1px solid rgba(88,153,255,.18);
+  background: rgba(88,153,255,.09);
+  color: rgba(231,240,252,.92);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .14em;
@@ -6595,8 +6595,8 @@ body.is-apply .content{
 .apply-sidecard__list > div{
   padding: 14px 15px;
   border-radius: 16px;
-  border: 1px solid rgba(183,137,85,.12);
-  background: linear-gradient(180deg, rgba(37,27,18,.28), rgba(11,11,13,.94));
+  border: 1px solid rgba(120,147,182,.12);
+  background: linear-gradient(180deg, rgba(18,25,36,.40), rgba(10,12,18,.94));
 }
 
 .apply-layout{
@@ -6630,18 +6630,52 @@ body.is-apply .content{
   gap: 14px;
   padding: 18px;
   border-radius: 20px;
-  border: 1px solid rgba(183,137,85,.12);
-  background: linear-gradient(180deg, rgba(18,17,18,.96), rgba(10,10,12,.98));
+  border: 1px solid rgba(120,147,182,.14);
+  background: linear-gradient(180deg, rgba(13,19,28,.96), rgba(9,12,18,.98));
+}
+
+.apply-panel .account-field__label{
+  color: rgba(191,210,236,.62);
 }
 
 .apply-panel .account-field__input{
+  border-color: rgba(120,147,182,.12);
   background: rgba(255,255,255,.035);
+  color: rgba(241,246,252,.96);
+}
+
+.apply-panel .account-field__input::placeholder{
+  color: rgba(191,210,236,.34);
+}
+
+.apply-panel .account-field__input:focus{
+  border-color: rgba(88,153,255,.30);
+  box-shadow: 0 0 0 3px rgba(88,153,255,.10);
+}
+
+.apply-panel select.account-field__input:invalid{
+  color: rgba(191,210,236,.72);
+  -webkit-text-fill-color: rgba(191,210,236,.72);
+}
+
+.apply-panel select.account-field__input:valid{
+  color: rgba(241,246,252,.96);
+  -webkit-text-fill-color: rgba(241,246,252,.96);
+}
+
+.apply-panel select.account-field__input option{
+  color: rgba(241,246,252,.96);
+  background: #111821;
+}
+
+.apply-panel select.account-field__input option[value=""]{
+  color: rgba(191,210,236,.72);
 }
 
 .apply-optional{
   border-radius: 20px;
-  border: 1px solid rgba(183,137,85,.12);
-  background: linear-gradient(180deg, rgba(16,15,16,.96), rgba(10,10,12,.98));
+  border: 1px solid rgba(120,147,182,.12);
+  background: linear-gradient(180deg, rgba(13,18,27,.96), rgba(9,12,18,.98));
   overflow: hidden;
 }
 
@@ -6649,7 +6683,7 @@ body.is-apply .content{
   cursor: pointer;
   list-style: none;
   padding: 16px 18px;
-  color: rgba(246,236,219,.92);
+  color: rgba(233,241,252,.92);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .08em;
@@ -6677,12 +6711,28 @@ body.is-apply .content{
   align-items: center;
   padding: 16px 18px;
   border-radius: 18px;
-  border: 1px solid rgba(183,137,85,.12);
-  background: linear-gradient(180deg, rgba(37,27,18,.34), rgba(11,11,13,.94));
+  border: 1px solid rgba(120,147,182,.12);
+  background: linear-gradient(180deg, rgba(18,25,36,.42), rgba(10,12,18,.94));
 }
 
 .apply-chat{
   margin-top: 2px;
+}
+
+.apply-page .account-feedback{
+  border-color: rgba(120,147,182,.12);
+  background: linear-gradient(180deg, rgba(14,22,33,.94), rgba(10,12,18,.96));
+  color: rgba(240,246,252,.92);
+}
+
+.apply-page .account-feedback--success{
+  border-color: rgba(92,162,120,.24);
+  background: linear-gradient(180deg, rgba(28,66,48,.32), rgba(10,16,13,.94));
+}
+
+.apply-page .account-feedback--error{
+  border-color: rgba(190,92,92,.24);
+  background: linear-gradient(180deg, rgba(72,28,28,.34), rgba(16,12,14,.94));
 }
 
 @media (max-width: 980px){
