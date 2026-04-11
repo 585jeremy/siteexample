@@ -1,6 +1,6 @@
 window.SGCNR_SERVER_CONFIG = {
   name: "SGCNR",
-  joinCode: "pbe6gy",
+  joinCode: "",
   joinUrl: "",
   discordUrl: "https://discord.gg/Y8HNFPtxkE",
   discordGuildId: "1463273636353015870",

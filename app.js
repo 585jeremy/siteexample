@@ -15,7 +15,7 @@ const AUTH_SESSION_KEY = "sgcnr_demo_session_v1";
 const STORE_CART_KEY = "sgcnr_store_cart_v1";
 const DEFAULT_SERVER_CONFIG = {
   name: "SGCNR",
-  joinCode: "pbe6gy",
+  joinCode: "",
   joinUrl: "",
   discordUrl: "https://discord.gg/Y8HNFPtxkE",
   discordGuildId: "",
@@ -60,7 +60,7 @@ const SERVER_CONFIG = {
 const DISCORD_INVITE_URL = SERVER_CONFIG.discordUrl;
 const DISCORD_TICKET_CHANNEL_URL = SERVER_CONFIG.discordTicketChannelUrl || SERVER_CONFIG.discordSupportUrl || DISCORD_INVITE_URL;
 const SERVER_JOIN_CODE = SERVER_CONFIG.joinCode;
-const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || `https://cfx.re/join/${SERVER_JOIN_CODE}`;
+const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || (SERVER_JOIN_CODE ? `https://cfx.re/join/${SERVER_JOIN_CODE}` : "");
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
@@ -1291,8 +1291,7 @@ function renderLanding() {
             <div class="landing-hero__title">Rules, support, and map tools in one place.</div>
             <div class="landing-hero__text">A cleaner way for players to navigate the server, find answers fast, and jump straight into the essentials.</div>
             <div class="landing-hero__actions">
-              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+              <a class="auth__btn auth__btn--primary" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
             </div>
           </div>
           <div class="landing-panel">
@@ -1337,8 +1336,6 @@ function renderLanding() {
 }
 
 function renderLandingHome() {
-  const joinLinkLabel = "Coming soon";
-
   setView(`
     <div class="landing-reboot">
       <div class="landing-reboot__noise" aria-hidden="true"></div>
@@ -1355,16 +1352,7 @@ function renderLandingHome() {
           </div>
 
           <div class="landing-reboot__actions">
-            <a class="landing-reboot__action landing-reboot__action--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-            <button class="landing-reboot__action" id="homeCopyJoinBtn" type="button">Copy Join Link</button>
-            <a class="landing-reboot__action" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
-          </div>
-
-          <div class="landing-reboot__compactInfo">
-            <div class="landing-reboot__compactCard">
-              <div class="landing-reboot__label">Direct Link</div>
-              <div class="landing-reboot__value landing-reboot__value--small">${joinLinkLabel}</div>
-            </div>
+            <a class="landing-reboot__action landing-reboot__action--primary" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
           </div>
         </div>
       </section>
@@ -1397,7 +1385,7 @@ function renderStart() {
               <div class="start-flow__index">01</div>
               <div class="start-flow__copy">
                 <strong>Open FiveM</strong>
-                <span>Search for <strong>SGCNR</strong> or use the direct connect link below.</span>
+                <span>Search for <strong>SGCNR</strong> in FiveM to find the server.</span>
               </div>
             </article>
             <article class="start-flow__item">
@@ -1423,12 +1411,7 @@ function renderStart() {
             </article>
           </div>
           <div class="start-panel__actions">
-            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Direct connect</a>
-            <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
-          </div>
-          <div class="status-note">
-            <strong>Direct join:</strong>
-            <a class="info-link" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</a>
+            <a class="auth__btn auth__btn--primary" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
           </div>
         </section>
 
@@ -4770,7 +4753,7 @@ async function loadServerSnapshot() {
     return {
       online: false,
       name: SERVER_CONFIG.name,
-      description: "Server join code is not configured yet.",
+      description: "Public FiveM server data is not connected yet.",
       clients: 0,
       maxClients: 0,
       endpoint: "",
@@ -4786,7 +4769,7 @@ async function loadServerSnapshot() {
       source: "Website fallback",
       txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
       liveOps,
-      apiError: "Server join code is not configured yet.",
+      apiError: "Public FiveM server data is not connected yet.",
       refreshedAt: new Date()
     };
   }
@@ -4866,16 +4849,10 @@ function renderServerStatusShell() {
             <p class="status-live__text">Track player count, queue, uptime, restarts, rankings, active events, Discord operations, and server health from one page. The map stays separate, but everything else live belongs here.</p>
           </div>
           <div class="status-live__actions">
-            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Join Server</a>
-            <button class="auth__btn" id="statusCopyJoinBtn" type="button">Copy Join Link</button>
             <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
           </div>
         </div>
         <div class="status-live__highlights">
-          <div class="status-live__highlight">
-            <div class="status-live__label">Join Code</div>
-            <div class="status-live__value">${escapeHtml(SERVER_JOIN_CODE || "Not set")}</div>
-          </div>
           <div class="status-live__highlight">
             <div class="status-live__label">Auto Refresh</div>
             <div class="status-live__value">${escapeHtml(formatRefreshInterval(SERVER_CONFIG.statusRefreshMs))}</div>
@@ -4909,11 +4886,11 @@ function renderServerStatusLoading() {
 function renderServerStatusError(message) {
   return `
     <section class="section">
-      <div class="status-empty status-empty--warning">
+        <div class="status-empty status-empty--warning">
         <div class="status-empty__title">Live status is not available right now</div>
         <div class="status-empty__text">${escapeHtml(message || "The server API could not be reached from the website at the moment.")}</div>
           <div class="status-note">
-            <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your bought server uses a different join code, Discord invite, txAdmin hooks, backend API, or Discord bot endpoints.
+            <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your server uses a different Discord invite, txAdmin hooks, backend API, or Discord bot endpoints.
           </div>
         </div>
       </section>
@@ -5209,11 +5186,6 @@ function renderServerStatusContent(snapshot) {
           <div class="status-card__meta">Live public count</div>
         </div>
         <div class="status-card">
-          <div class="status-card__label">Join Code</div>
-          <div class="status-card__value">${escapeHtml(snapshot.joinCode || "Not set")}</div>
-          <div class="status-card__meta">Direct cfx.re connection</div>
-        </div>
-        <div class="status-card">
           <div class="status-card__label">Uptime</div>
           <div class="status-card__value">${escapeHtml(uptimeValue)}</div>
           <div class="status-card__meta">${escapeHtml(liveOps.uptime?.startedAt ? `Since ${formatServerTimestamp(liveOps.uptime.startedAt)}` : "Add an uptime endpoint to show runtime.")}</div>
@@ -5263,17 +5235,16 @@ function renderServerStatusContent(snapshot) {
         <div class="section__eyebrow">Live setup</div>
         <h2>Integration readiness</h2>
         <div class="stack-list stack-list--compact">
-          <div class="stack-list__item"><span class="stack-list__index">01</span><span>FiveM join code is wired into the website config.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Public player count and server details are fetched automatically.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">03</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">04</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">06</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">07</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">08</span><span>Discord operations are ${discordOps.configured ? "connected to live data" : "prepared for bot, guild, and support endpoints"}.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">01</span><span>Public player count and server details are fetched automatically.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">02</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">06</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">07</span><span>Discord operations are ${discordOps.configured ? "connected to live data" : "prepared for bot, guild, and support endpoints"}.</span></div>
           </div>
           <div class="status-note">
-            <strong>Next step for your bought server:</strong> replace the values in <code>server-config.js</code> with your real join code, Discord invite, and the live endpoints you want the website to use.
+            <strong>Next step for your live setup:</strong> replace the values in <code>server-config.js</code> with your real Discord invite and the live endpoints you want the website to use.
           </div>
         </aside>
     </div>
@@ -5358,33 +5329,10 @@ function filterStatusPlayers(query) {
   });
 }
 
-function copyServerJoinLink() {
-  const value = SERVER_JOIN_URL;
-  if (!value) return;
-
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(value).catch(() => {
-      window.prompt("Copy the join link:", value);
-    });
-    return;
-  }
-
-  window.prompt("Copy the join link:", value);
-}
-
 function bindLandingHomeControls() {
-  const copyBtn = document.getElementById("homeCopyJoinBtn");
-  if (copyBtn) {
-    copyBtn.onclick = () => copyServerJoinLink();
-  }
 }
 
 function bindStatusPageControls() {
-  const copyBtn = document.getElementById("statusCopyJoinBtn");
-  if (copyBtn) {
-    copyBtn.onclick = () => copyServerJoinLink();
-  }
-
   const refreshBtn = document.getElementById("statusRefreshBtn");
   if (refreshBtn) {
     refreshBtn.onclick = () => {
