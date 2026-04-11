@@ -661,7 +661,7 @@ function buildBreadcrumb(items) {
 function renderHeader(title, breadcrumbItems, options = {}) {
   const {
     showBadge = true,
-    badgeLabel = "SGCNR Portal"
+    badgeLabel = "SGCNR"
   } = options;
   const bc = breadcrumbItems?.length ? buildBreadcrumb(breadcrumbItems) : "";
   return `
