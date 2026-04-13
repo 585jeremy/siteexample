@@ -9229,3 +9229,484 @@ body.is-wiki .content{
     grid-template-columns: 1fr;
   }
 }
+
+/* 2026-04-13 final public cleanup */
+.meta{
+  display: none !important;
+}
+
+.landing-hub{
+  display: grid;
+  gap: 18px;
+}
+
+.landing-hub__hero{
+  display: grid;
+  gap: 16px;
+  border-radius: 28px !important;
+  border: 1px solid rgba(188,136,82,.14) !important;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(153,103,54,.16), transparent 24%),
+    radial-gradient(circle at 18% 20%, rgba(197,147,93,.10), transparent 18%),
+    linear-gradient(180deg, rgba(14,12,11,.98), rgba(7,7,8,.99)) !important;
+}
+
+.landing-hub__eyebrow{
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(206,179,142,.62);
+}
+
+.landing-hub__title{
+  margin: 0;
+  font-size: clamp(40px, 5vw, 66px);
+  line-height: .94;
+  letter-spacing: -.05em;
+  color: rgba(248,241,229,.98);
+}
+
+.landing-hub__text{
+  max-width: 64ch;
+  margin: 0;
+  color: rgba(220,204,181,.76);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.landing-hub__actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.landing-hub__grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.landing-hub__card{
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(188,136,82,.12);
+  background: linear-gradient(180deg, rgba(20,16,13,.96), rgba(9,9,10,.98));
+  transition: transform .18s ease, border-color .18s ease;
+}
+
+.landing-hub__card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(210,157,96,.22);
+}
+
+.landing-hub__cardLabel,
+.start-clean__linkLabel,
+.live-minimal__label,
+.wiki-ledger__directoryGroupTop,
+.wiki-ledger__metaCard span{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(207,178,142,.58);
+}
+
+.landing-hub__cardTitle,
+.start-clean__linkTitle{
+  color: rgba(248,240,228,.95);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.landing-hub__cardText{
+  color: rgba(218,203,180,.72);
+  line-height: 1.6;
+}
+
+.start-clean{
+  display: grid;
+  gap: 18px;
+}
+
+.start-clean__flow{
+  display: grid;
+  gap: 12px;
+}
+
+.start-clean__step{
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(188,136,82,.10);
+  background: linear-gradient(180deg, rgba(18,15,13,.94), rgba(9,9,10,.98));
+}
+
+.start-clean__stepIndex{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid rgba(210,157,96,.18);
+  background: rgba(166,111,60,.12);
+  color: rgba(249,239,225,.94);
+  font-weight: 700;
+}
+
+.start-clean__stepCopy{
+  display: grid;
+  gap: 6px;
+}
+
+.start-clean__stepCopy strong{
+  color: rgba(248,240,228,.95);
+  font-size: 20px;
+}
+
+.start-clean__stepCopy span{
+  color: rgba(218,203,180,.72);
+  line-height: 1.6;
+}
+
+.start-clean__links{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.start-clean__linkCard{
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(188,136,82,.10);
+  background: linear-gradient(180deg, rgba(17,14,12,.96), rgba(9,9,10,.98));
+}
+
+.live-minimal{
+  display: grid;
+  gap: 16px;
+}
+
+.live-minimal__hero{
+  display: grid;
+  gap: 14px;
+}
+
+.live-minimal__grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.live-minimal__card{
+  display: grid;
+  gap: 10px;
+  min-height: 220px;
+  align-content: start;
+  border-radius: 24px !important;
+}
+
+.live-minimal__card--online{
+  border-color: rgba(88,146,110,.30) !important;
+}
+
+.live-minimal__card--offline{
+  border-color: rgba(166,95,79,.30) !important;
+}
+
+.live-minimal__card--pending{
+  border-color: rgba(188,136,82,.18) !important;
+}
+
+.live-minimal__value{
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: .95;
+  letter-spacing: -.05em;
+  color: rgba(249,241,228,.98);
+}
+
+.live-minimal__text{
+  color: rgba(218,203,180,.74);
+  line-height: 1.65;
+}
+
+.live-minimal__meta{
+  margin-top: auto;
+  color: rgba(205,179,142,.58);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body.is-wiki{
+  background:
+    radial-gradient(circle at 18% 12%, rgba(182,132,84,.10), transparent 24%),
+    linear-gradient(180deg, #090909 0%, #120f0c 50%, #080808 100%) !important;
+}
+
+body.is-wiki::before,
+body.is-wiki::after{
+  content: none !important;
+  display: none !important;
+}
+
+body.is-wiki .content{
+  width: min(1480px, calc(100% - 26px)) !important;
+  padding: 18px 0 134px !important;
+  background: transparent !important;
+}
+
+.wiki-ledger{
+  display: grid;
+  gap: 22px;
+}
+
+.wiki-ledger__masthead{
+  border-radius: 28px !important;
+  border: 1px solid rgba(188,136,82,.14) !important;
+  background:
+    radial-gradient(circle at 84% 18%, rgba(137,89,48,.18), transparent 22%),
+    linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,9,.99)) !important;
+}
+
+.wiki-ledger__mastheadGrid{
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-ledger__mastheadCopy{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-ledger__mastheadCopy h2,
+.wiki-ledger__body h3{
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  color: rgba(248,240,227,.97);
+}
+
+.wiki-ledger__mastheadCopy h2{
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: .96;
+}
+
+.wiki-ledger__mastheadCopy .doc-p{
+  max-width: 66ch;
+  margin: 0;
+  color: rgba(219,204,183,.74);
+  line-height: 1.7;
+}
+
+.wiki-ledger__mastheadMeta{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-ledger__metaCard{
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(188,136,82,.12);
+  background: linear-gradient(180deg, rgba(24,19,16,.95), rgba(10,10,11,.98));
+}
+
+.wiki-ledger__metaCard strong{
+  color: rgba(247,239,226,.95);
+  font-size: 16px;
+}
+
+.wiki-ledger__layout{
+  display: grid;
+  grid-template-columns: minmax(250px, 290px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-ledger__directory{
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  border-radius: 24px !important;
+  border: 1px solid rgba(188,136,82,.12) !important;
+  background: linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-ledger__directoryTop{
+  display: grid;
+  gap: 10px;
+}
+
+.wiki-ledger__directoryTop .doc-p{
+  margin: 0;
+  color: rgba(217,201,180,.72);
+}
+
+.wiki-ledger__directoryGroups{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-ledger__directoryGroup{
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(188,136,82,.10);
+  background: linear-gradient(180deg, rgba(22,17,14,.96), rgba(10,10,11,.98));
+}
+
+.wiki-ledger__directoryGroupTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wiki-ledger__directoryCount{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(188,136,82,.12);
+  color: rgba(245,236,223,.88);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.wiki-ledger__directoryList{
+  display: grid;
+  gap: 8px;
+}
+
+.wiki-ledger__directoryLink{
+  display: block;
+  padding: 11px 12px;
+  border-left: 2px solid transparent;
+  color: rgba(225,212,195,.80);
+  background: rgba(255,255,255,.01);
+}
+
+.wiki-ledger__directoryLink:hover{
+  border-left-color: rgba(210,157,96,.34);
+  background: rgba(210,157,96,.06);
+}
+
+.wiki-ledger__directoryLink.is-active{
+  border-left-color: rgba(220,169,108,.78);
+  background: rgba(220,169,108,.10);
+  color: rgba(249,240,227,.96);
+}
+
+.wiki-ledger__body{
+  display: grid;
+  gap: 16px;
+}
+
+.wiki-ledger__summary,
+.wiki-ledger__document,
+.wiki-ledger__updates,
+.wiki-ledger__navigator{
+  display: grid;
+  gap: 14px;
+  border-radius: 24px !important;
+  border: 1px solid rgba(188,136,82,.12) !important;
+  background: linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-ledger__body h3{
+  font-size: 30px;
+}
+
+.wiki-ledger .wiki-facts{
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.wiki-ledger .wiki-fact,
+.wiki-ledger .wiki-card,
+.wiki-ledger .wiki-sectionBlock,
+.wiki-ledger .wiki-pager__card{
+  border-radius: 18px !important;
+  border: 1px solid rgba(188,136,82,.10) !important;
+  background: linear-gradient(180deg, rgba(24,19,16,.95), rgba(10,10,11,.98)) !important;
+  box-shadow: none !important;
+}
+
+.wiki-ledger .wiki-fact__label,
+.wiki-ledger .wiki-pager__eyebrow{
+  color: rgba(205,179,142,.56);
+}
+
+.wiki-ledger .wiki-fact__value,
+.wiki-ledger .wiki-card__title,
+.wiki-ledger .wiki-sectionBlock__title,
+.wiki-ledger .wiki-pager__title{
+  color: rgba(247,239,226,.96);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.wiki-ledger .wiki-card__text,
+.wiki-ledger .wiki-pager__text,
+.wiki-ledger .doc-p,
+.wiki-ledger .doc-list li{
+  color: rgba(219,210,194,.76);
+}
+
+.wiki-ledger .wiki-grid,
+.wiki-ledger .wiki-pager{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wiki-ledger .wiki-sectionBlock{
+  padding: 22px;
+  border-left: 3px solid rgba(208,156,95,.26) !important;
+}
+
+@media (max-width: 1080px){
+  .landing-hub__grid,
+  .start-clean__links,
+  .live-minimal__grid,
+  .wiki-ledger__mastheadGrid,
+  .wiki-ledger__layout{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-ledger__directory{
+    position: static;
+  }
+}
+
+@media (max-width: 720px){
+  .landing-hub__title{
+    font-size: 38px;
+  }
+
+  .start-clean__step{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-ledger .wiki-grid,
+  .wiki-ledger .wiki-pager{
+    grid-template-columns: 1fr;
+  }
+}

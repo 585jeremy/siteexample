@@ -15,90 +15,50 @@
 
   renderStart = function renderStartEnhanced() {
     const quickLinks = [
-      { label: "Read the rules", href: "#/rules" },
-      { label: "View the map", href: "#/map" },
-      { label: "Check live status", href: "#/live" }
+      { label: "Rules", detail: "Learn the basics before you join.", href: "/rules" },
+      { label: "Map", detail: "Keep the city layout nearby.", href: "/map" },
+      { label: "Live", detail: "Check the server and bot state fast.", href: "/live" }
     ];
 
     setView(`
       <div>
         ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
-        <div class="content-grid content-grid--sidebar">
-          <section class="section section--hero start-panel">
-            <div class="section__eyebrow">New player entry</div>
-            <h2>Join in four clean steps</h2>
-            <div class="doc-p">
-              Start here if you are new. This page keeps the join flow, support route, and core links together without the extra clutter from before.
-            </div>
-            <div class="start-flow">
-              <article class="start-flow__item">
-                <div class="start-flow__index">01</div>
-                <div class="start-flow__copy">
-                  <strong>Open FiveM</strong>
-                  <span>Search for <strong>SGCNR</strong> or use the direct connect link below.</span>
-                </div>
-              </article>
-              <article class="start-flow__item">
-                <div class="start-flow__index">02</div>
-                <div class="start-flow__copy">
-                  <strong>Read the basics first</strong>
-                  <span>Use the Rules page before you jump into the city.</span>
-                </div>
-              </article>
-              <article class="start-flow__item">
-                <div class="start-flow__index">03</div>
-                <div class="start-flow__copy">
-                  <strong>Use Discord tickets for staff help</strong>
-                  <span>Ticket creation should go through the direct Discord ticket channel so staff can track it properly.</span>
-                </div>
-              </article>
-              <article class="start-flow__item">
-                <div class="start-flow__index">04</div>
-                <div class="start-flow__copy">
-                  <strong>Keep Live and Map nearby</strong>
-                  <span>The Live and Map tabs stay on the dock whenever you need current info or locations.</span>
-                </div>
-              </article>
-            </div>
-            <div class="start-panel__actions">
-              <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">Direct connect</a>
-              <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
-            </div>
-            <div class="status-note">
-              <strong>Direct join:</strong>
-              <a class="info-link" href="${escapeHtml(SERVER_JOIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(`cfx.re/join/${SERVER_JOIN_CODE}`)}</a>
-            </div>
-          </section>
-
-          <aside class="section section--stack start-sidecard">
-            <div class="section__eyebrow">Useful links</div>
-            <h2>Quick access</h2>
-            <div class="start-linklist">
-              ${quickLinks.map((item) => `
-                <a class="start-linklist__item" href="${escapeHtml(item.href)}">
-                  <span>${escapeHtml(item.label)}</span>
-                  <span aria-hidden="true">+</span>
-                </a>
-              `).join("")}
-            </div>
-            <div class="start-ticket-panel">
-              <div class="start-ticket-panel__label">Support route</div>
-              <div class="start-ticket-panel__title">Ticket creation lives in Discord</div>
-              <div class="start-ticket-panel__text">If someone needs help, a ban-history request, or application prep, send them to the ticket channel directly.</div>
-              <a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
-            </div>
-          </aside>
-        </div>
-
-        <section class="section section--timeline">
-          <div class="section__eyebrow">Essentials</div>
-          <h2>New player checklist</h2>
-          <div class="stack-list">
-            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Read the Rules and follow the category that applies to what you're doing.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions, punishments, appeals, and support guidance.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Use the Discord ticket channel when you need staff help or ban-history access.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Be respectful and keep it fair. Staff decisions are based on evidence.</span></div>
+        <section class="section section--hero start-clean">
+          <div class="section__eyebrow">New player entry</div>
+          <h2>Get into the city without missing the basics.</h2>
+          <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+          <div class="start-clean__flow">
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">01</span>
+              <div class="start-clean__stepCopy">
+                <strong>Find SGCNR in FiveM</strong>
+                <span>Search for the server in FiveM and join from there.</span>
+              </div>
+            </article>
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">02</span>
+              <div class="start-clean__stepCopy">
+                <strong>Read the rules first</strong>
+                <span>Use the Rules page before you jump into active situations in the city.</span>
+              </div>
+            </article>
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">03</span>
+              <div class="start-clean__stepCopy">
+                <strong>Use Discord for support</strong>
+                <span>Tickets, ban history, and staff help stay in Discord so everything is tracked properly.</span>
+              </div>
+            </article>
           </div>
+        </section>
+
+        <section class="start-clean__links" aria-label="Start shortcuts">
+          ${quickLinks.map((item) => `
+            <a class="start-clean__linkCard" href="${escapeHtml(item.href)}">
+              <span class="start-clean__linkLabel">${escapeHtml(item.label)}</span>
+              <strong class="start-clean__linkTitle">${escapeHtml(item.detail)}</strong>
+            </a>
+          `).join("")}
         </section>
       </div>
     `);
@@ -1249,8 +1209,8 @@
     if (reason === "not_authenticated") return "Sign in with Discord before you apply.";
     if (reason === "active_application_exists") return "You already have an open application. Use the live chat below instead of sending a second one.";
     if (reason === "missing_fields") return "Please fill in all required application fields first.";
-    if (reason === "applications_not_configured") return "The application backend is not connected yet.";
-    return "Your application could not be sent right now.";
+    if (reason === "applications_not_configured") return "The application backend is not connected on the live site yet.";
+    return "Your application could not be written to the live database. Check the live DB credentials and make sure the website user can create, alter, insert, and select in the application tables.";
   }
 
   function getApplicationMessageErrorMessage(error) {
@@ -1263,8 +1223,8 @@
 
   function getApplicationLoadErrorMessage(error, fallbackMessage) {
     const reason = error?.payload?.error || error?.message || "application_load_failed";
-    if (reason === "applications_not_configured") return "The application backend is not connected yet.";
-    if (reason === "applications_query_failed") return "The application database could not be reached right now.";
+    if (reason === "applications_not_configured") return "The application backend is not connected on the live site yet.";
+    if (reason === "applications_query_failed") return "The application database could not be reached. Check the live DB credentials and make sure the website user can create, alter, select, and insert into the application tables.";
     if (reason === "application_detail_failed") return "The selected application could not be opened right now.";
     return fallbackMessage;
   }
@@ -1572,67 +1532,51 @@
 
   renderStart = function renderStartEnhancedClean() {
     const quickLinks = [
-      { label: "Read the rules", href: "/rules" },
-      { label: "View the map", href: "/map" },
-      { label: "Check live status", href: "/live" }
+      { label: "Rules", detail: "Learn the basics before you join.", href: "/rules" },
+      { label: "Map", detail: "Keep the city layout nearby.", href: "/map" },
+      { label: "Live", detail: "Check the server and bot state fast.", href: "/live" }
     ];
 
     setView(`
       <div>
         ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
-        <div class="content-grid content-grid--sidebar">
-          <section class="section section--hero start-panel">
-            <div class="section__eyebrow">New player entry</div>
-            <h2>Start clean</h2>
-            <p class="doc-p">Everything important is kept in one place here: the basics, the key links, and the direct Discord ticket route for support.</p>
-            <div class="start-flow">
-              <article class="start-flow__item">
-                <div class="start-flow__index">01</div>
-                <div class="start-flow__copy">
-                  <strong>Find SGCNR in FiveM</strong>
-                  <span>Search for the server inside FiveM and keep the Rules page nearby while you join.</span>
-                </div>
-              </article>
-              <article class="start-flow__item">
-                <div class="start-flow__index">02</div>
-                <div class="start-flow__copy">
-                  <strong>Read the basics first</strong>
-                  <span>Use the Rules, Map, and Live tabs before jumping into the city.</span>
-                </div>
-              </article>
-              <article class="start-flow__item">
-                <div class="start-flow__index">03</div>
-                <div class="start-flow__copy">
-                  <strong>Use Discord tickets for support</strong>
-                  <span>Support, ban history, and player issues should go through the Discord ticket channel so staff can track everything properly.</span>
-                </div>
-              </article>
-            </div>
-            <div class="start-panel__actions">
-              <a class="auth__btn auth__btn--primary" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
-              <a class="auth__btn" href="/apply">Open applications</a>
-            </div>
-          </section>
+        <section class="section section--hero start-clean">
+          <div class="section__eyebrow">New player entry</div>
+          <h2>Get into the city without missing the basics.</h2>
+          <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+          <div class="start-clean__flow">
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">01</span>
+              <div class="start-clean__stepCopy">
+                <strong>Find SGCNR in FiveM</strong>
+                <span>Search for the server in FiveM and join from there.</span>
+              </div>
+            </article>
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">02</span>
+              <div class="start-clean__stepCopy">
+                <strong>Read the rules first</strong>
+                <span>Use the Rules page before you jump into active situations in the city.</span>
+              </div>
+            </article>
+            <article class="start-clean__step">
+              <span class="start-clean__stepIndex">03</span>
+              <div class="start-clean__stepCopy">
+                <strong>Use Discord for support</strong>
+                <span>Tickets, ban history, and staff help stay in Discord so everything is tracked properly.</span>
+              </div>
+            </article>
+          </div>
+        </section>
 
-          <aside class="section section--stack start-sidecard">
-            <div class="section__eyebrow">Useful links</div>
-            <h2>Quick access</h2>
-            <div class="start-linklist">
-              ${quickLinks.map((item) => `
-                <a class="start-linklist__item" href="${escapeHtml(item.href)}">
-                  <span>${escapeHtml(item.label)}</span>
-                  <span aria-hidden="true">+</span>
-                </a>
-              `).join("")}
-            </div>
-            <div class="start-ticket-panel">
-              <div class="start-ticket-panel__label">Support route</div>
-              <div class="start-ticket-panel__title">Ticket creation lives in Discord</div>
-              <div class="start-ticket-panel__text">If someone needs help, report support, or ban history, send them to the Discord ticket channel directly.</div>
-              <a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
-            </div>
-          </aside>
-        </div>
+        <section class="start-clean__links" aria-label="Start shortcuts">
+          ${quickLinks.map((item) => `
+            <a class="start-clean__linkCard" href="${escapeHtml(item.href)}">
+              <span class="start-clean__linkLabel">${escapeHtml(item.label)}</span>
+              <strong class="start-clean__linkTitle">${escapeHtml(item.detail)}</strong>
+            </a>
+          `).join("")}
+        </section>
       </div>
     `);
   };
@@ -1675,32 +1619,32 @@
 
   function renderWikiJournalRail(categories, pages, currentSlug, updatedAt) {
     return `
-      <aside class="section section--stack wiki-journal__rail">
-        <div class="wiki-journal__railTop">
-          <div class="section__eyebrow">Handbook</div>
-          <h2>Wiki directory</h2>
-          <p class="doc-p">Same handbook content, cleaner reading layout. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+      <aside class="section section--stack wiki-ledger__directory">
+        <div class="wiki-ledger__directoryTop">
+          <div class="section__eyebrow">Guide directory</div>
+          <h2>Wiki pages</h2>
+          <p class="doc-p">Browse every guide page from one slim index. Updated ${escapeHtml(updatedAt || "recently")}.</p>
         </div>
-        <div class="wiki-journal__railGroups">
+        <div class="wiki-ledger__directoryGroups">
           ${categories.map((category) => {
             const links = (category.pages || []).map((slug) => {
               const page = pages[slug];
               if (!page) return "";
               const isActive = slug === currentSlug ? " is-active" : "";
               return `
-                <a class="wiki-journal__railLink${isActive}" href="#/wiki/${escapeHtml(slug)}">
+                <a class="wiki-ledger__directoryLink${isActive}" href="/wiki/${escapeHtml(slug)}">
                   ${escapeHtml(page.navLabel || page.title)}
                 </a>
               `;
             }).join("");
 
             return `
-              <section class="wiki-journal__railGroup">
-                <div class="wiki-journal__railGroupTop">
+              <section class="wiki-ledger__directoryGroup">
+                <div class="wiki-ledger__directoryGroupTop">
                   <span>${escapeHtml(category.title)}</span>
-                  <span class="wiki-journal__railCount">${escapeHtml(String((category.pages || []).length))}</span>
+                  <span class="wiki-ledger__directoryCount">${escapeHtml(String((category.pages || []).length))}</span>
                 </div>
-                <div class="wiki-journal__railList">${links}</div>
+                <div class="wiki-ledger__directoryList">${links}</div>
               </section>
             `;
           }).join("")}
@@ -1711,23 +1655,23 @@
 
   function renderWikiJournalHero(page, category, updatedAt, currentIndex, totalPages) {
     return `
-      <section class="section section--hero wiki-journal__hero">
-        <div class="wiki-journal__heroGrid">
-          <div class="wiki-journal__heroCopy">
+      <section class="section section--hero wiki-ledger__masthead">
+        <div class="wiki-ledger__mastheadGrid">
+          <div class="wiki-ledger__mastheadCopy">
             <div class="section__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
             <h2>${escapeHtml(page.title)}</h2>
             <p class="doc-p">${escapeHtml(page.summary || "")}</p>
           </div>
-          <div class="wiki-journal__heroMeta">
-            <article class="wiki-journal__metaCard">
+          <div class="wiki-ledger__mastheadMeta">
+            <article class="wiki-ledger__metaCard">
               <span>Category</span>
               <strong>${escapeHtml(category?.title || "Wiki")}</strong>
             </article>
-            <article class="wiki-journal__metaCard">
+            <article class="wiki-ledger__metaCard">
               <span>Page</span>
               <strong>${escapeHtml(String(currentIndex + 1))} / ${escapeHtml(String(totalPages))}</strong>
             </article>
-            <article class="wiki-journal__metaCard">
+            <article class="wiki-ledger__metaCard">
               <span>Updated</span>
               <strong>${escapeHtml(updatedAt || "2026-04-01")}</strong>
             </article>
@@ -1751,7 +1695,7 @@
 
     if (!page) {
       setView(`
-        <div class="wiki-journal">
+        <div class="wiki-ledger">
           ${renderHeader("Wiki", [{ label: "Wiki" }])}
           <section class="section">
             <div class="empty">Wiki data is missing right now.</div>
@@ -1773,22 +1717,34 @@
     const pager = renderWikiPager(categories, pages, currentSlug);
 
     setView(`
-      <div class="wiki-journal">
+      <div class="wiki-ledger">
         ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
         ${renderWikiJournalHero(page, category, wiki.updatedAt, currentIndex, order.length || 1)}
-        <div class="wiki-journal__layout">
+        <div class="wiki-ledger__layout">
           ${sidebar}
-          <section class="section wiki-journal__article">
-            <div class="wiki-journal__articleLead">
+          <div class="wiki-ledger__body">
+            <section class="section wiki-ledger__summary">
+              <div class="section__eyebrow">Overview</div>
+              <h3>Quick reference</h3>
+              ${facts}
+              ${overview}
+            </section>
+            <section class="section wiki-ledger__document">
               <div class="section__eyebrow">Guide content</div>
-              <p class="doc-p">Everything below stays in the original order. Only the presentation has been rebuilt.</p>
-            </div>
-            ${facts}
-            ${overview}
-            ${content}
-            ${updates}
-            ${pager}
-          </section>
+              <h3>${escapeHtml(page.title)}</h3>
+              ${content}
+            </section>
+            <section class="section wiki-ledger__updates">
+              <div class="section__eyebrow">Recent notes</div>
+              <h3>Updates</h3>
+              ${updates || `<div class="empty">No update notes are listed for this page.</div>`}
+            </section>
+            <section class="section wiki-ledger__navigator">
+              <div class="section__eyebrow">Continue</div>
+              <h3>Next guide</h3>
+              ${pager}
+            </section>
+          </div>
         </div>
       </div>
     `);
@@ -1796,8 +1752,8 @@
 
   function getApplicationLoadErrorMessage(error, fallbackMessage) {
     const reason = error?.payload?.error || error?.message || "application_load_failed";
-    if (reason === "applications_not_configured") return "Applications are not connected yet.";
-    if (reason === "applications_query_failed") return "Applications are temporarily unavailable. Please try again shortly or use Discord tickets.";
+    if (reason === "applications_not_configured") return "Applications are not connected on the live site yet.";
+    if (reason === "applications_query_failed") return "Applications could not read from the live database. Check the live DB credentials and make sure the website user can create, alter, select, and insert into the application tables.";
     if (reason === "application_detail_failed") return "That application could not be opened right now.";
     return fallbackMessage;
   }

@@ -1703,24 +1703,33 @@ function renderLanding() {
 
 function renderLandingHome() {
   setView(`
-    <div class="landing-reboot">
-      <div class="landing-reboot__noise" aria-hidden="true"></div>
-      <div class="landing-reboot__glow landing-reboot__glow--blue" aria-hidden="true"></div>
-      <div class="landing-reboot__glow landing-reboot__glow--red" aria-hidden="true"></div>
-
-      <section class="landing-reboot__hero" aria-label="Welcome">
-        <div class="landing-reboot__lead">
-          <div class="landing-reboot__intro">
-            <div class="landing-reboot__kicker">Official Server Portal</div>
-            <div class="landing-reboot__line" aria-hidden="true"></div>
-            <h1 class="landing-reboot__title">Step into SGCNR.</h1>
-            <p class="landing-reboot__text">Fast entry for joining the server and getting into the city without extra clutter.</p>
-          </div>
-
-          <div class="landing-reboot__actions">
-            <a class="landing-reboot__action landing-reboot__action--primary" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
-          </div>
+    <div class="landing-hub">
+      <section class="section section--hero landing-hub__hero" aria-label="Welcome">
+        <div class="landing-hub__eyebrow">Official SGCNR</div>
+        <h1 class="landing-hub__title">Everything important, one clean stop.</h1>
+        <p class="landing-hub__text">Use the public site to get started, read the rules, check the map, track live status, and apply without having to dig through filler pages.</p>
+        <div class="landing-hub__actions">
+          <a class="auth__btn auth__btn--primary" href="/start">Open Start</a>
+          <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
         </div>
+      </section>
+
+      <section class="landing-hub__grid" aria-label="Portal shortcuts">
+        <a class="landing-hub__card" href="/rules">
+          <span class="landing-hub__cardLabel">Rules</span>
+          <strong class="landing-hub__cardTitle">Know the basics before you join</strong>
+          <span class="landing-hub__cardText">The rulebook, category flow, and direct search stay one click away.</span>
+        </a>
+        <a class="landing-hub__card" href="/map">
+          <span class="landing-hub__cardLabel">Map</span>
+          <strong class="landing-hub__cardTitle">Keep the city layout nearby</strong>
+          <span class="landing-hub__cardText">Use the live city map as a quick reference instead of guessing locations.</span>
+        </a>
+        <a class="landing-hub__card" href="/live">
+          <span class="landing-hub__cardLabel">Live</span>
+          <strong class="landing-hub__cardTitle">Check server and bot state fast</strong>
+          <span class="landing-hub__cardText">The live page now stays focused on the two status checks that actually matter.</span>
+        </a>
       </section>
     </div>
   `);
@@ -1730,85 +1739,50 @@ function renderLandingHome() {
 
 function renderStart() {
   const quickLinks = [
-    { label: "Read the rules", href: "#/rules" },
-    { label: "View the map", href: "#/map" },
-    { label: "Check live status", href: "#/live" }
+    { label: "Rules", detail: "Learn the basics before you join.", href: "/rules" },
+    { label: "Map", detail: "Keep the city layout nearby.", href: "/map" },
+    { label: "Live", detail: "Check the server and bot state fast.", href: "/live" }
   ];
 
   setView(`
     <div>
       ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
-      <div class="content-grid content-grid--sidebar">
-        <section class="section section--hero start-panel">
-          <div class="section__eyebrow">New player entry</div>
-          <h2>Join in four clean steps</h2>
-          <div class="doc-p">
-            Start here if you are new. This page keeps the join flow, support route, and core links together without the extra clutter from before.
-          </div>
-          <div class="start-flow">
-            <article class="start-flow__item">
-              <div class="start-flow__index">01</div>
-              <div class="start-flow__copy">
-                <strong>Open FiveM</strong>
-                <span>Search for <strong>SGCNR</strong> in FiveM to find the server.</span>
-              </div>
-            </article>
-            <article class="start-flow__item">
-              <div class="start-flow__index">02</div>
-              <div class="start-flow__copy">
-                <strong>Read the basics first</strong>
-                <span>Use the Rules page before you jump into the city.</span>
-              </div>
-            </article>
-            <article class="start-flow__item">
-              <div class="start-flow__index">03</div>
-              <div class="start-flow__copy">
-                <strong>Use Discord tickets for staff help</strong>
-                <span>Ticket creation should go through the direct Discord ticket channel so staff can track it properly.</span>
-              </div>
-            </article>
-            <article class="start-flow__item">
-              <div class="start-flow__index">04</div>
-              <div class="start-flow__copy">
-                <strong>Keep Live and Map nearby</strong>
-                <span>The Live and Map tabs stay on the dock whenever you need current info or locations.</span>
-              </div>
-            </article>
-          </div>
-          <div class="start-panel__actions">
-            <a class="auth__btn auth__btn--primary" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
-          </div>
-        </section>
-
-        <aside class="section section--stack start-sidecard">
-          <div class="section__eyebrow">Useful links</div>
-          <h2>Quick access</h2>
-          <div class="start-linklist">
-            ${quickLinks.map((item) => `
-              <a class="start-linklist__item" href="${escapeHtml(item.href)}">
-                <span>${escapeHtml(item.label)}</span>
-                <span aria-hidden="true">+</span>
-              </a>
-            `).join("")}
-          </div>
-          <div class="start-ticket-panel">
-            <div class="start-ticket-panel__label">Support route</div>
-            <div class="start-ticket-panel__title">Ticket creation lives in Discord</div>
-            <div class="start-ticket-panel__text">If someone needs help, a ban-history request, or application prep, send them to the ticket channel directly.</div>
-            <a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
-          </div>
-        </aside>
-      </div>
-
-      <section class="section section--timeline">
-        <div class="section__eyebrow">Essentials</div>
-        <h2>New player checklist</h2>
-        <div class="stack-list">
-          <div class="stack-list__item"><span class="stack-list__index">01</span><span>Read the Rules and follow the category that applies to what you're doing.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions, punishments, appeals, and support guidance.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Use the Discord ticket channel when you need staff help or ban-history access.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">04</span><span>Be respectful and keep it fair — staff decisions are based on evidence.</span></div>
+      <section class="section section--hero start-clean">
+        <div class="section__eyebrow">New player entry</div>
+        <h2>Get into the city without missing the basics.</h2>
+        <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+        <div class="start-clean__flow">
+          <article class="start-clean__step">
+            <span class="start-clean__stepIndex">01</span>
+            <div class="start-clean__stepCopy">
+              <strong>Find SGCNR in FiveM</strong>
+              <span>Search for the server in FiveM and join from there.</span>
+            </div>
+          </article>
+          <article class="start-clean__step">
+            <span class="start-clean__stepIndex">02</span>
+            <div class="start-clean__stepCopy">
+              <strong>Read the rules first</strong>
+              <span>Use the Rules page before you jump into active situations in the city.</span>
+            </div>
+          </article>
+          <article class="start-clean__step">
+            <span class="start-clean__stepIndex">03</span>
+            <div class="start-clean__stepCopy">
+              <strong>Use Discord for support</strong>
+              <span>Tickets, ban history, and staff help stay in Discord so everything is tracked properly.</span>
+            </div>
+          </article>
         </div>
+      </section>
+
+      <section class="start-clean__links" aria-label="Start shortcuts">
+        ${quickLinks.map((item) => `
+          <a class="start-clean__linkCard" href="${escapeHtml(item.href)}">
+            <span class="start-clean__linkLabel">${escapeHtml(item.label)}</span>
+            <strong class="start-clean__linkTitle">${escapeHtml(item.detail)}</strong>
+          </a>
+        `).join("")}
       </section>
     </div>
   `);
@@ -2383,7 +2357,7 @@ function renderAdminDashboard(account) {
                   `).join("")}
                 </div>`
               : `<div class="empty">No Discord website logins have been recorded yet.</div>`
-            : `<div class="empty">Website login history will appear here once the backend writes sessions into the database.</div>`}
+            : `<div class="empty">Login history needs live database access for the <code>web_sessions</code> table. The live auth database user still needs create, alter, insert, and select access there.</div>`}
         </section>
 
         <aside class="section section--stack">
@@ -2408,7 +2382,7 @@ function renderAdminDashboard(account) {
                   </div>`
                 : `<div class="empty">No applications are stored yet.</div>`}
             `
-            : `<div class="empty">The applications backend is not connected yet. Once it is live, this panel will show live intake and review counts here.</div>`}
+            : `<div class="empty">Applications need live database access for <code>staff_applications</code> and <code>staff_application_messages</code>, plus an optional Discord webhook if you want staff notifications.</div>`}
         </aside>
       </div>
     </div>
@@ -5300,45 +5274,27 @@ async function loadServerSnapshot() {
 
 function renderServerStatusShell() {
   return `
-    <div class="status-page">
+    <div class="status-page status-page--minimal">
       ${renderHeader("Live", [{ label: "Live" }])}
-      <section class="section status-live status-live--hero">
-        <div class="status-live__head">
-          <div class="status-live__copy">
-            <div class="section__eyebrow">Live operations hub</div>
-            <h2>${escapeHtml(SERVER_CONFIG.name)}</h2>
-            <p class="status-live__text">Track player count, queue, uptime, restarts, rankings, active events, Discord operations, and server health from one page. The map stays separate, but everything else live belongs here.</p>
-          </div>
-          <div class="status-live__actions">
-            <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
-          </div>
+      <section class="section section--hero live-minimal__hero">
+        <div class="section__eyebrow">Live checks</div>
+        <h2>${escapeHtml(SERVER_CONFIG.name)} status</h2>
+        <p class="doc-p">This page stays intentionally small: one check for the game server, one check for the Discord bot, and nothing else fighting for attention.</p>
+        <div class="status-live__actions">
+          <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
         </div>
-        <div class="status-live__highlights">
-          <div class="status-live__highlight">
-            <div class="status-live__label">Auto Refresh</div>
-            <div class="status-live__value">${escapeHtml(formatRefreshInterval(SERVER_CONFIG.statusRefreshMs))}</div>
-          </div>
-          <div class="status-live__highlight">
-            <div class="status-live__label">Live Source</div>
-            <div class="status-live__value">FiveM + Ops</div>
-          </div>
-          <div class="status-live__highlight">
-              <div class="status-live__label">Live Ops</div>
-              <div class="status-live__value">${SERVER_CONFIG.liveOpsUrl || SERVER_CONFIG.livePlayerMapUrl || SERVER_CONFIG.leaderboardUrl || SERVER_CONFIG.uptimeStatusUrl || SERVER_CONFIG.restartInfoUrl || SERVER_CONFIG.discordStatusUrl || SERVER_CONFIG.serverHealthUrl || SERVER_CONFIG.websiteHealthUrl ? "Connected" : "Ready"}</div>
-            </div>
-          </div>
-        </section>
-        <div id="serverStatusMount">${renderServerStatusLoading()}</div>
+      </section>
+      <div id="serverStatusMount">${renderServerStatusLoading()}</div>
     </div>
   `;
 }
 
 function renderServerStatusLoading() {
   return `
-    <section class="section">
+    <section class="section live-minimal__loading">
       <div class="status-empty">
-        <div class="status-empty__title">Loading live server data</div>
-        <div class="status-empty__text">Checking the live status feed and preparing the latest snapshot.</div>
+        <div class="status-empty__title">Loading live checks</div>
+        <div class="status-empty__text">Checking the server and Discord bot status feeds.</div>
       </div>
     </section>
   `;
@@ -5581,204 +5537,57 @@ function renderDiscordLinking(discord) {
 }
 
 function renderServerStatusContent(snapshot) {
-  const onlineLabel = snapshot.online ? "Online" : "Offline";
-  const playerValue = snapshot.maxClients
-    ? `${snapshot.clients}/${snapshot.maxClients}`
-    : `${snapshot.clients}`;
   const liveOps = snapshot.liveOps || {};
-  const leaderboardMetric = parseRoute().metric || liveOps.leaderboard?.metric || "kd";
   const discordOps = liveOps.discord || normaliseDiscordOpsPayload(null);
-  const uptimeValue = liveOps.uptime?.uptimeSeconds != null
-    ? formatDurationCompact(liveOps.uptime.uptimeSeconds)
-    : "Pending";
-  const restartValue = liveOps.restart?.nextRestartAt
-    ? formatRestartCountdown(liveOps.restart.nextRestartAt)
-    : "Pending";
-  const liveMapCount = liveOps.liveMap?.players?.length ?? 0;
-  const queueValue = liveOps.queue?.count != null ? String(liveOps.queue.count) : "Pending";
-  const restartBanner = `
-    <section class="section status-banner">
-      <div class="status-banner__kicker">${escapeHtml(liveOps.restart?.label || SERVER_CONFIG.nextRestartLabel || "Scheduled restart")}</div>
-      <div class="status-banner__value">${escapeHtml(restartValue)}</div>
-      <div class="status-banner__meta">${escapeHtml(liveOps.restart?.nextRestartAt ? `Target ${formatServerTimestamp(liveOps.restart.nextRestartAt)}` : "Connect a restart endpoint to show the next timed reboot.")}</div>
-    </section>
-  `;
-  const tags = snapshot.tags?.length
-    ? `<div class="status-tags">${snapshot.tags.slice(0, 6).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
-    : "";
-  const liveOpsErrors = Array.isArray(liveOps.errors) && liveOps.errors.length
-    ? `
-      <div class="status-note">
-        <strong>Live ops note:</strong> ${escapeHtml(liveOps.errors[0])}
-      </div>
-    `
-    : "";
-  const apiErrorNote = snapshot.apiError
-    ? `
-      <div class="status-note">
-        <strong>FiveM status note:</strong> ${escapeHtml(snapshot.apiError)}
-      </div>
-    `
-    : "";
-  const statusLink = liveOps.publicStatusUrl
-    ? `
-      <div class="status-note">
-        <strong>Public status page:</strong> <a class="info-link" href="${escapeHtml(liveOps.publicStatusUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(liveOps.publicStatusUrl)}</a>
-      </div>
-    `
+  const serverStatus = normaliseHealthPayload(
+    liveOps.serverHealth || {
+      status: snapshot.online ? "online" : "offline",
+      message: snapshot.online
+        ? "The public game server check is responding."
+        : (snapshot.apiError || "The public game server check is not responding right now.")
+    },
+    "Game Server"
+  );
+  const botStatus = {
+    ...(discordOps?.botStatus || normaliseHealthPayload(null, "Discord Bot")),
+    label: "Discord Bot"
+  };
+
+  const serverValue = serverStatus.status === "online"
+    ? "Online"
+    : serverStatus.status === "offline"
+      ? "Offline"
+      : "Pending";
+  const botValue = botStatus.status === "online"
+    ? "Online"
+    : botStatus.status === "offline"
+      ? "Offline"
+      : "Pending";
+  const liveNote = Array.isArray(liveOps.errors) && liveOps.errors.length
+    ? liveOps.errors[0]
     : "";
 
   return `
-    ${restartBanner}
-    <section class="section">
-      <div class="status-head">
-        <div class="status-head__left">
-          <div class="section__eyebrow">Live snapshot</div>
-          <h2>${escapeHtml(snapshot.name)}</h2>
-          <div class="status-meta">${escapeHtml(snapshot.description || "Connected to the live FiveM server feed.")}</div>
-        </div>
-        <div class="status-pill status-pill--${snapshot.online ? "online" : "offline"}">${onlineLabel}</div>
+    <section class="live-minimal">
+      <div class="live-minimal__grid">
+        <article class="section live-minimal__card live-minimal__card--${escapeHtml(serverStatus.status || "pending")}">
+          <div class="live-minimal__label">Server status</div>
+          <div class="live-minimal__value">${escapeHtml(serverValue)}</div>
+          <div class="live-minimal__text">${escapeHtml(serverStatus.message || "Waiting for the live server feed.")}</div>
+          <div class="live-minimal__meta">${escapeHtml(snapshot.refreshedAt ? `Last refresh ${formatServerTimestamp(snapshot.refreshedAt)}` : "No refresh time recorded yet.")}</div>
+        </article>
+
+        <article class="section live-minimal__card live-minimal__card--${escapeHtml(botStatus.status || "pending")}">
+          <div class="live-minimal__label">Discord bot status</div>
+          <div class="live-minimal__value">${escapeHtml(botValue)}</div>
+          <div class="live-minimal__text">${escapeHtml(botStatus.message || "Waiting for the Discord bot live push.")}</div>
+          <div class="live-minimal__meta">${escapeHtml(botStatus.latencyMs != null ? `${botStatus.latencyMs} ms latency` : (discordOps.lastPushAt ? `Last push ${formatServerTimestamp(discordOps.lastPushAt)}` : "Connect WEB_API_URL and WEB_API_SECRET to enable live bot data."))}</div>
+        </article>
       </div>
-      ${tags}
-      <div class="status-grid">
-        <div class="status-card">
-          <div class="status-card__label">Players</div>
-          <div class="status-card__value">${escapeHtml(playerValue)}</div>
-          <div class="status-card__meta">Live public count</div>
-        </div>
-        <div class="status-card">
-          <div class="status-card__label">Uptime</div>
-          <div class="status-card__value">${escapeHtml(uptimeValue)}</div>
-          <div class="status-card__meta">${escapeHtml(liveOps.uptime?.startedAt ? `Since ${formatServerTimestamp(liveOps.uptime.startedAt)}` : "Add an uptime endpoint to show runtime.")}</div>
-        </div>
-        <div class="status-card">
-          <div class="status-card__label">Next Restart</div>
-          <div class="status-card__value">${escapeHtml(restartValue)}</div>
-          <div class="status-card__meta">${escapeHtml(liveOps.restart?.label || SERVER_CONFIG.nextRestartLabel || "Scheduled restart")}</div>
-        </div>
-        <div class="status-card">
-          <div class="status-card__label">Live Map Feed</div>
-          <div class="status-card__value">${escapeHtml(String(liveMapCount))}</div>
-          <div class="status-card__meta">${escapeHtml(liveOps.liveMap?.configured ? (liveOps.liveMap?.requiresOptIn ? `${liveOps.liveMap.hiddenPlayers || 0} hidden until opt-in is enabled in-game` : "Tracked players ready for map overlay") : "Add a live player map endpoint")}</div>
-        </div>
-        ${renderStatusMetricCard("Queue", queueValue, liveOps.queue?.estimatedWaitMinutes != null ? `About ${liveOps.queue.estimatedWaitMinutes} minutes wait` : "Queue feed ready for live numbers")}
-        <div class="status-card">
-          <div class="status-card__label">Game Mode</div>
-          <div class="status-card__value">${escapeHtml(snapshot.gameType)}</div>
-          <div class="status-card__meta">${escapeHtml(snapshot.mapName)}</div>
-        </div>
-        ${renderHealthSummaryCard("Server Status", liveOps.serverHealth || { status: "pending", message: "Pending" })}
-        ${renderHealthSummaryCard("Website Status", liveOps.websiteHealth || { status: "pending", message: "Pending" })}
-        <div class="status-card">
-          <div class="status-card__label">Server Features</div>
-          <div class="status-card__value">${escapeHtml(snapshot.onesync || "Unknown")}</div>
-          <div class="status-card__meta">${escapeHtml(snapshot.resources != null ? `${snapshot.resources} resources loaded` : "Resource count unavailable")}</div>
-        </div>
-        <div class="status-card">
-          <div class="status-card__label">Last Refresh</div>
-          <div class="status-card__value">${escapeHtml(formatServerTimestamp(snapshot.refreshedAt))}</div>
-          <div class="status-card__meta">${escapeHtml(snapshot.source)}</div>
-        </div>
-      </div>
-      ${apiErrorNote}
-      ${liveOpsErrors}
-      ${statusLink}
+      ${liveNote ? `<div class="status-note"><strong>Live note:</strong> ${escapeHtml(liveNote)}</div>` : ""}
     </section>
-
-    <div class="content-grid content-grid--sidebar">
-      <section class="section">
-        <div class="section__eyebrow">Live players</div>
-        <h2>Online player list</h2>
-        ${renderStatusPlayers(snapshot.players)}
-      </section>
-
-      <aside class="section section--stack">
-        <div class="section__eyebrow">Live setup</div>
-        <h2>Integration readiness</h2>
-        <div class="stack-list stack-list--compact">
-          <div class="stack-list__item"><span class="stack-list__index">01</span><span>Public player count and server details are fetched automatically.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">02</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in the live website settings.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">03</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">06</span><span>Live map visibility is ${liveOps.liveMap?.requiresOptIn ? `set to opt-in only via ${liveOps.liveMap.settingLabel || "the in-game setting"}` : "currently not restricted by an opt-in setting"}.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">07</span><span>Discord operations are ${discordOps.configured ? "connected to live data" : "prepared for bot, guild, and support endpoints"}.</span></div>
-          </div>
-          <div class="status-note">
-            <strong>Next step for your live setup:</strong> replace the placeholder live settings with your real Discord invite and the live feeds you want the website to use.
-          </div>
-        </aside>
-    </div>
-
-    <section class="section">
-      <div class="section__eyebrow">Live rankings</div>
-      <h2>Leaderboard</h2>
-      ${renderLiveLeaderboardSection(leaderboardMetric, liveOps.leaderboard || { configured: false, rows: [] }, snapshot.players)}
-    </section>
-
-    <div class="content-grid content-grid--sidebar">
-      <section class="section">
-        <div class="section__eyebrow">Department counts</div>
-        <h2>Ops breakdown</h2>
-        ${renderOpsCounts(liveOps.counts)}
-      </section>
-
-      <section class="section">
-        <div class="section__eyebrow">Active events</div>
-        <h2>Current city activity</h2>
-        ${renderEventsList(liveOps.events)}
-      </section>
-    </div>
-
-    <div class="content-grid content-grid--sidebar">
-      <section class="section">
-        <div class="section__eyebrow">History</div>
-        <h2>Uptime and outages</h2>
-        ${renderHistoryList(liveOps.history)}
-      </section>
-
-        <section class="section">
-          <div class="section__eyebrow">Heatmap</div>
-          <h2>Hottest zones</h2>
-          ${renderHotZonesList(liveOps.hotZones)}
-        </section>
-      </div>
-
-      <div class="content-grid content-grid--sidebar">
-        <section class="section">
-          <div class="section__eyebrow">Discord operations</div>
-          <h2>Guild and bot snapshot</h2>
-          ${renderDiscordOpsGrid(discordOps)}
-        </section>
-
-        <section class="section">
-          <div class="section__eyebrow">Discord feed</div>
-          <h2>Announcements and updates</h2>
-          ${renderDiscordAnnouncements(discordOps)}
-        </section>
-      </div>
-
-      <div class="content-grid content-grid--sidebar">
-        <section class="section">
-          <div class="section__eyebrow">Account linking</div>
-          <h2>Discord connection readiness</h2>
-          ${renderDiscordLinking(discordOps)}
-        </section>
-
-        <section class="section section--stack">
-          <div class="section__eyebrow">What this unlocks</div>
-          <h2>Website to Discord features</h2>
-          <div class="stack-list stack-list--compact">
-            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Discord account linking for website profiles, tickets, and role-based access.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Live bot status, guild activity, ticket counts, and announcement sync.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Role rewards and whitelisting that instantly sync between Discord and the website.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>Staff dashboards for reports, support queues, punishments, and application review.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">05</span><span>Automated event announcements, restart alerts, and leaderboard highlight posts.</span></div>
-          </div>
-        </section>
-      </div>
-    `;
-  }
+  `;
+}
 
 function filterStatusPlayers(query) {
   const list = document.getElementById("statusPlayersList");
@@ -5869,49 +5678,37 @@ function getWikiPageOrder(categories) {
 }
 
 function renderWikiSidebar(categories, pages, currentSlug, updatedAt) {
-  const totalPages = Object.keys(pages).length;
-  const groups = categories.map((category) => {
-    const links = (category.pages || []).map((slug) => {
-      const page = pages[slug];
-      if (!page) return "";
-      const isActive = slug === currentSlug ? " is-active" : "";
-      const label = page.navLabel || page.title;
-      return `<a class="wiki-nav__item${isActive}" href="#/wiki/${escapeHtml(slug)}">${escapeHtml(label)}</a>`;
-    }).join("");
-
-    return `
-      <div class="wiki-nav__group">
-        <div class="wiki-nav__title">
-          <span>${escapeHtml(category.title)}</span>
-          <span class="wiki-nav__count">${escapeHtml(String((category.pages || []).length))}</span>
-        </div>
-        <div class="wiki-nav__list">${links}</div>
-      </div>
-    `;
-  }).join("");
-
   return `
-    <aside class="section section--stack wiki-sidebar">
-      <div class="wiki-sidebar__meta">
-        <div class="section__eyebrow">Navigation</div>
+    <aside class="section section--stack wiki-ledger__directory">
+      <div class="wiki-ledger__directoryTop">
+        <div class="section__eyebrow">Guide directory</div>
         <h2>Wiki pages</h2>
-        <p class="doc-p">Browse the full SGCNR handbook by role, activity, and system.</p>
-        <div class="wiki-sidebar__stats">
-          <div class="wiki-sidebar__stat">
-            <span class="wiki-sidebar__statLabel">Pages</span>
-            <span class="wiki-sidebar__statValue">${escapeHtml(String(totalPages))}</span>
-          </div>
-          <div class="wiki-sidebar__stat">
-            <span class="wiki-sidebar__statLabel">Groups</span>
-            <span class="wiki-sidebar__statValue">${escapeHtml(String(categories.length))}</span>
-          </div>
-          <div class="wiki-sidebar__stat">
-            <span class="wiki-sidebar__statLabel">Updated</span>
-            <span class="wiki-sidebar__statValue">${escapeHtml(updatedAt || "2026-04-01")}</span>
-          </div>
-        </div>
+        <p class="doc-p">Browse every guide page from one slim index. Updated ${escapeHtml(updatedAt || "recently")}.</p>
       </div>
-      <div class="wiki-nav">${groups}</div>
+      <div class="wiki-ledger__directoryGroups">
+        ${categories.map((category) => {
+          const links = (category.pages || []).map((slug) => {
+            const page = pages[slug];
+            if (!page) return "";
+            const isActive = slug === currentSlug ? " is-active" : "";
+            return `
+              <a class="wiki-ledger__directoryLink${isActive}" href="/wiki/${escapeHtml(slug)}">
+                ${escapeHtml(page.navLabel || page.title)}
+              </a>
+            `;
+          }).join("");
+
+          return `
+            <section class="wiki-ledger__directoryGroup">
+              <div class="wiki-ledger__directoryGroupTop">
+                <span>${escapeHtml(category.title)}</span>
+                <span class="wiki-ledger__directoryCount">${escapeHtml(String((category.pages || []).length))}</span>
+              </div>
+              <div class="wiki-ledger__directoryList">${links}</div>
+            </section>
+          `;
+        }).join("")}
+      </div>
     </aside>
   `;
 }
@@ -5930,7 +5727,7 @@ function renderWikiPager(categories, pages, currentSlug) {
     const page = pages[slug];
     const label = direction === "prev" ? "Previous page" : "Next page";
     return `
-      <a class="wiki-pager__card" href="#/wiki/${escapeHtml(slug)}">
+      <a class="wiki-pager__card" href="/wiki/${escapeHtml(slug)}">
         <div class="wiki-pager__eyebrow">${escapeHtml(label)}</div>
         <div class="wiki-pager__title">${escapeHtml(page.navLabel || page.title)}</div>
         <div class="wiki-pager__text">${escapeHtml(page.eyebrow || "Wiki page")}</div>
@@ -6026,7 +5823,7 @@ function renderWiki(pageSlug) {
 
   if (!page) {
     setView(`
-      <div class="wiki-shell">
+      <div class="wiki-ledger">
         ${renderHeader("Wiki", [{ label: "Wiki" }])}
         <section class="section">
           <div class="empty">Wiki data is missing right now.</div>
@@ -6046,26 +5843,56 @@ function renderWiki(pageSlug) {
   const pager = renderWikiPager(categories, pages, currentSlug);
 
   setView(`
-    <div class="wiki-shell">
+    <div class="wiki-ledger">
       ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
-      <div class="wiki-layout">
-        ${sidebar}
-        <section class="section wiki-article">
-          <div class="wiki-hero">
-            <div class="wiki-intro__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
+      <section class="section section--hero wiki-ledger__masthead">
+        <div class="wiki-ledger__mastheadGrid">
+          <div class="wiki-ledger__mastheadCopy">
+            <div class="section__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
             <h2>${escapeHtml(page.title)}</h2>
             <p class="doc-p">${escapeHtml(page.summary || "")}</p>
-            <div class="wiki-hero__meta">
-              <span class="tag">${escapeHtml(category?.title || "Wiki")}</span>
-              <span class="tag">Updated ${escapeHtml(wiki.updatedAt || "2026-04-01")}</span>
-            </div>
           </div>
-          ${facts}
-          ${overview}
-          ${content}
-          ${updates}
-          ${pager}
-        </section>
+          <div class="wiki-ledger__mastheadMeta">
+            <article class="wiki-ledger__metaCard">
+              <span>Category</span>
+              <strong>${escapeHtml(category?.title || "Wiki")}</strong>
+            </article>
+            <article class="wiki-ledger__metaCard">
+              <span>Page</span>
+              <strong>${escapeHtml(String(getWikiPageOrder(categories).filter((slug) => pages[slug]).indexOf(currentSlug) + 1))} / ${escapeHtml(String(getWikiPageOrder(categories).filter((slug) => pages[slug]).length || 1))}</strong>
+            </article>
+            <article class="wiki-ledger__metaCard">
+              <span>Updated</span>
+              <strong>${escapeHtml(wiki.updatedAt || "2026-04-01")}</strong>
+            </article>
+          </div>
+        </div>
+      </section>
+      <div class="wiki-ledger__layout">
+        ${sidebar}
+        <div class="wiki-ledger__body">
+          <section class="section wiki-ledger__summary">
+            <div class="section__eyebrow">Overview</div>
+            <h3>Quick reference</h3>
+            ${facts}
+            ${overview}
+          </section>
+          <section class="section wiki-ledger__document">
+            <div class="section__eyebrow">Guide content</div>
+            <h3>${escapeHtml(page.title)}</h3>
+            ${content}
+          </section>
+          <section class="section wiki-ledger__updates">
+            <div class="section__eyebrow">Recent notes</div>
+            <h3>Updates</h3>
+            ${updates || `<div class="empty">No update notes are listed for this page.</div>`}
+          </section>
+          <section class="section wiki-ledger__navigator">
+            <div class="section__eyebrow">Continue</div>
+            <h3>Next guide</h3>
+            ${pager}
+          </section>
+        </div>
       </div>
     </div>
   `);
