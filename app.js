@@ -4983,9 +4983,26 @@ function normaliseDiscordOpsPayload(payload) {
     };
   }
 
+  const hasFlatDiscordKeys = [
+    "bot_status",
+    "bot_latency",
+    "bot_message",
+    "total_members",
+    "online_members",
+    "verified_members",
+    "open_tickets",
+    "pending_reports",
+    "pending_applications",
+    "linked_accounts",
+    "sync_roles",
+    "linking_enabled",
+    "oauth_url",
+    "support_url"
+  ].some((key) => Object.prototype.hasOwnProperty.call(payload, key));
+
   const guild = payload.guild && typeof payload.guild === "object" ? payload.guild : payload;
-  const support = payload.support && typeof payload.support === "object" ? payload.support : {};
-  const linking = payload.linking && typeof payload.linking === "object" ? payload.linking : {};
+  const support = payload.support && typeof payload.support === "object" ? payload.support : payload;
+  const linking = payload.linking && typeof payload.linking === "object" ? payload.linking : payload;
   const meta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
   const announcementSource = Array.isArray(payload.announcements)
     ? payload.announcements
@@ -4995,9 +5012,23 @@ function normaliseDiscordOpsPayload(payload) {
         ? payload.updates
         : [];
 
-  const syncRolesRaw = pickFirstDefined(linking, ["syncRoles", "roleSync", "rolesLinked"]);
-  const linkingEnabledRaw = pickFirstDefined(linking, ["enabled", "linkingEnabled", "oauthEnabled"]);
-  const botStatus = normaliseHealthPayload(payload.botStatus || payload.bot || payload.health, "Discord Bot");
+  const syncRolesRaw = pickFirstDefined(linking, ["syncRoles", "roleSync", "rolesLinked", "sync_roles"]);
+  const linkingEnabledRaw = pickFirstDefined(linking, ["enabled", "linkingEnabled", "oauthEnabled", "linking_enabled"]);
+  const botStatusSource =
+    payload.botStatus ||
+    payload.bot ||
+    payload.health ||
+    (
+      hasFlatDiscordKeys
+        ? {
+            status: pickFirstDefined(payload, ["bot_status", "status"]),
+            latencyMs: pickFirstDefined(payload, ["bot_latency", "latency", "latencyMs"]),
+            message: pickFirstDefined(payload, ["bot_message", "message"]),
+            checkedAt: pickFirstDefined(meta, ["lastPushAt", "lastSyncAt"])
+          }
+        : null
+    );
+  const botStatus = normaliseHealthPayload(botStatusSource, "Discord Bot");
 
   return {
     configured: true,
@@ -5005,20 +5036,20 @@ function normaliseDiscordOpsPayload(payload) {
       ...botStatus,
       label: "Discord Bot"
     },
-    guildName: pickFirstDefined(guild, ["name", "guildName", "serverName"]) || `${SERVER_CONFIG.name} Discord`,
-    onlineMembers: toFiniteNumber(pickFirstDefined(guild, ["onlineMembers", "membersOnline", "presenceCount", "online"])),
-    totalMembers: toFiniteNumber(pickFirstDefined(guild, ["totalMembers", "members", "memberCount"])),
-    verifiedMembers: toFiniteNumber(pickFirstDefined(guild, ["verifiedMembers", "linkedMembers", "whitelistedMembers"])),
+    guildName: pickFirstDefined(guild, ["name", "guildName", "serverName", "guild_name"]) || `${SERVER_CONFIG.name} Discord`,
+    onlineMembers: toFiniteNumber(pickFirstDefined(guild, ["onlineMembers", "membersOnline", "presenceCount", "online", "online_members"])),
+    totalMembers: toFiniteNumber(pickFirstDefined(guild, ["totalMembers", "members", "memberCount", "total_members"])),
+    verifiedMembers: toFiniteNumber(pickFirstDefined(guild, ["verifiedMembers", "linkedMembers", "whitelistedMembers", "verified_members"])),
     openTickets: toFiniteNumber(pickFirstDefined(support, ["openTickets", "open_tickets", "ticketsOpen", "tickets"])),
     pendingReports: toFiniteNumber(pickFirstDefined(support, ["pendingReports", "pending_reports", "reportsOpen", "reports"])),
-    pendingApplications: toFiniteNumber(pickFirstDefined(support, ["pendingApplications", "applicationsOpen", "applications"])),
-    linkedAccounts: toFiniteNumber(pickFirstDefined(linking, ["linkedAccounts", "linkedUsers", "connections"])),
+    pendingApplications: toFiniteNumber(pickFirstDefined(support, ["pendingApplications", "applicationsOpen", "applications", "pending_applications"])),
+    linkedAccounts: toFiniteNumber(pickFirstDefined(linking, ["linkedAccounts", "linkedUsers", "connections", "linked_accounts"])),
     syncRoles: syncRolesRaw == null ? false : Boolean(syncRolesRaw),
     linkingEnabled: linkingEnabledRaw == null ? Boolean(SERVER_CONFIG.discordOAuthUrl) : Boolean(linkingEnabledRaw),
     lastPushAt: parseSnapshotDate(pickFirstDefined(meta, ["lastPushAt", "lastSyncAt"])),
     lastSource: pickFirstDefined(meta, ["lastSource", "source"]) || "",
-    oauthUrl: pickFirstDefined(linking, ["oauthUrl", "connectUrl", "linkUrl"]) || SERVER_CONFIG.discordOAuthUrl || "",
-    supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl"]) || DISCORD_TICKET_CHANNEL_URL,
+    oauthUrl: pickFirstDefined(linking, ["oauthUrl", "connectUrl", "linkUrl", "oauth_url"]) || SERVER_CONFIG.discordOAuthUrl || "",
+    supportUrl: pickFirstDefined(support, ["supportUrl", "ticketUrl", "dashboardUrl", "support_url"]) || DISCORD_TICKET_CHANNEL_URL,
     botInviteUrl: pickFirstDefined(payload, ["botInviteUrl", "inviteUrl"]) || SERVER_CONFIG.discordBotInviteUrl || "",
     announcements: announcementSource.map((entry, index) => ({
       id: pickFirstDefined(entry, ["id", "slug"]) || `discord-announcement-${index + 1}`,
@@ -5143,7 +5174,24 @@ async function loadLiveOpsSnapshot() {
   const events = normaliseEventsPayload(combined.events || combined.activeEvents);
   const history = normaliseHistoryPayload(combined.history);
   const hotZones = normaliseHotZonesPayload(combined.hotZones || combined.zones || combined.heatmap);
-  const discord = normaliseDiscordOpsPayload(combined.discord || combined.community || discordResult.data);
+  const hasTopLevelDiscordKeys = [
+    "bot_status",
+    "bot_latency",
+    "bot_message",
+    "guild_name",
+    "total_members",
+    "online_members",
+    "verified_members",
+    "open_tickets",
+    "pending_reports",
+    "pending_applications",
+    "linked_accounts",
+    "sync_roles",
+    "linking_enabled",
+    "oauth_url",
+    "support_url"
+  ].some((key) => Object.prototype.hasOwnProperty.call(combined, key));
+  const discord = normaliseDiscordOpsPayload(combined.discord || combined.community || (hasTopLevelDiscordKeys ? combined : null) || discordResult.data);
   const serverHealth = normaliseHealthPayload(combined.serverHealth || combined.server || serverHealthResult.data, "Game Server");
   const websiteHealth = normaliseHealthPayload(combined.websiteHealth || combined.website || websiteHealthResult.data, SERVER_CONFIG.websiteName || "Website");
 

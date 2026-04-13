@@ -77,6 +77,22 @@ function sgcnr_bot_bridge_query_count(PDO $pdo, string $sql, array $params = [])
     }
 }
 
+function sgcnr_bot_bridge_query_count_first(PDO $pdo, array $queries): ?int
+{
+    foreach ($queries as $query) {
+        if (!is_array($query) || empty($query['sql'])) {
+            continue;
+        }
+
+        $count = sgcnr_bot_bridge_query_count($pdo, (string) $query['sql'], (array) ($query['params'] ?? []));
+        if ($count !== null) {
+            return $count;
+        }
+    }
+
+    return null;
+}
+
 function sgcnr_bot_bridge_fetch_identity(PDO $pdo, string $discordId): array
 {
     $identity = [
@@ -116,14 +132,25 @@ function sgcnr_bot_bridge_fetch_identity(PDO $pdo, string $discordId): array
     try {
         $verifiedStmt = $pdo->prepare(
             'SELECT discord_id, fivem_name, fivem_license, verified_at
-             FROM verified
+             FROM verified_players
              WHERE discord_id = ?
              LIMIT 1'
         );
         $verifiedStmt->execute([$discordId]);
         $verified = $verifiedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (Throwable $error) {
-        $verified = null;
+        try {
+            $verifiedStmt = $pdo->prepare(
+                'SELECT discord_id, fivem_name, fivem_license, verified_at
+                 FROM verified
+                 WHERE discord_id = ?
+                 LIMIT 1'
+            );
+            $verifiedStmt->execute([$discordId]);
+            $verified = $verifiedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Throwable $innerError) {
+            $verified = null;
+        }
     }
 
     if (!$player && !$verified) {
@@ -151,8 +178,16 @@ function sgcnr_bot_bridge_fetch_counts(PDO $pdo): array
 {
     return [
         'linkedAccounts' => sgcnr_bot_bridge_query_count($pdo, 'SELECT COUNT(*) FROM players'),
-        'verifiedAccounts' => sgcnr_bot_bridge_query_count($pdo, 'SELECT COUNT(*) FROM verified'),
-        'openTickets' => sgcnr_bot_bridge_query_count($pdo, "SELECT COUNT(*) FROM tickets WHERE status = 'open'"),
+        'verifiedAccounts' => sgcnr_bot_bridge_query_count_first($pdo, [
+            ['sql' => 'SELECT COUNT(*) FROM verified_players'],
+            ['sql' => 'SELECT COUNT(*) FROM verified'],
+        ]),
+        'openTickets' => sgcnr_bot_bridge_query_count_first($pdo, [
+            ['sql' => "SELECT COUNT(*) FROM active_tickets WHERE status = 'open'"],
+            ['sql' => 'SELECT COUNT(*) FROM active_tickets'],
+            ['sql' => "SELECT COUNT(*) FROM tickets WHERE status = 'open'"],
+            ['sql' => 'SELECT COUNT(*) FROM tickets'],
+        ]),
     ];
 }
 
