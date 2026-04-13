@@ -503,6 +503,7 @@ let applicationCenterState = {
   sending: false,
   error: "",
   success: "",
+  historyUnavailable: false,
   items: [],
   activeId: "",
   detail: null,

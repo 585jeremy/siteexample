@@ -2,6 +2,38 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
+function auth_applications_table_exists(PDO $pdo, string $table): bool
+{
+    $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
+    $stmt->execute([$table]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function auth_applications_column_exists(PDO $pdo, string $table, string $column): bool
+{
+    if (!auth_applications_table_exists($pdo, $table)) {
+        return false;
+    }
+
+    $stmt = $pdo->prepare(sprintf('SHOW COLUMNS FROM `%s` LIKE ?', $table));
+    $stmt->execute([$column]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function auth_applications_add_column_if_missing(PDO $pdo, string $table, string $column, string $definition): void
+{
+    if (auth_applications_column_exists($pdo, $table, $column)) {
+        return;
+    }
+
+    $pdo->exec(sprintf(
+        'ALTER TABLE `%s` ADD COLUMN `%s` %s',
+        $table,
+        $column,
+        $definition
+    ));
+}
+
 function auth_applications_ensure_schema(PDO $pdo): void
 {
     static $schemaReady = false;
@@ -59,6 +91,47 @@ function auth_applications_ensure_schema(PDO $pdo): void
                 ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
+
+    $applicationColumns = [
+        'public_id' => "VARCHAR(24) NOT NULL DEFAULT '' AFTER `id`",
+        'discord_id' => "VARCHAR(32) NOT NULL DEFAULT '' AFTER `public_id`",
+        'discord_username' => "VARCHAR(100) NOT NULL DEFAULT '' AFTER `discord_id`",
+        'discord_display_name' => "VARCHAR(120) NOT NULL DEFAULT '' AFTER `discord_username`",
+        'guild_nickname' => "VARCHAR(120) NOT NULL DEFAULT '' AFTER `discord_display_name`",
+        'applicant_name' => "VARCHAR(120) NOT NULL DEFAULT '' AFTER `guild_nickname`",
+        'applicant_level' => "INT UNSIGNED DEFAULT NULL AFTER `applicant_name`",
+        'playtime_hours' => "INT UNSIGNED DEFAULT NULL AFTER `applicant_level`",
+        'timezone_label' => "VARCHAR(80) NOT NULL DEFAULT '' AFTER `playtime_hours`",
+        'role_requested' => "VARCHAR(120) NOT NULL DEFAULT '' AFTER `timezone_label`",
+        'availability' => "TEXT NOT NULL AFTER `role_requested`",
+        'ban_history' => "TEXT NOT NULL AFTER `availability`",
+        'moderation_experience' => "TEXT NOT NULL AFTER `ban_history`",
+        'testing_experience' => "TEXT NOT NULL AFTER `moderation_experience`",
+        'fit_reason' => "TEXT NOT NULL AFTER `testing_experience`",
+        'status' => "VARCHAR(24) NOT NULL DEFAULT 'submitted' AFTER `fit_reason`",
+        'assigned_staff_id' => "VARCHAR(64) DEFAULT NULL AFTER `status`",
+        'assigned_staff_name' => "VARCHAR(120) DEFAULT NULL AFTER `assigned_staff_id`",
+        'last_message_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `assigned_staff_name`",
+        'last_staff_reply_at' => "DATETIME DEFAULT NULL AFTER `last_message_at`",
+        'created_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `last_staff_reply_at`",
+        'updated_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`",
+    ];
+
+    foreach ($applicationColumns as $column => $definition) {
+        auth_applications_add_column_if_missing($pdo, 'staff_applications', $column, $definition);
+    }
+
+    $messageColumns = [
+        'application_id' => "BIGINT UNSIGNED NOT NULL AFTER `id`",
+        'sender_type' => "VARCHAR(24) NOT NULL DEFAULT 'system' AFTER `application_id`",
+        'sender_name' => "VARCHAR(120) NOT NULL DEFAULT 'System' AFTER `sender_type`",
+        'message' => "TEXT NOT NULL AFTER `sender_name`",
+        'created_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `message`",
+    ];
+
+    foreach ($messageColumns as $column => $definition) {
+        auth_applications_add_column_if_missing($pdo, 'staff_application_messages', $column, $definition);
+    }
 
     $schemaReady = true;
 }

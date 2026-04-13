@@ -352,6 +352,7 @@
       const payload = await requestJson(`${APPLICATION_API.detail}?applicationId=${encodeURIComponent(publicId)}`);
       if (requestId !== applicationCenterState.requestId) return;
       applicationCenterState.detail = normaliseApplicationDetail(payload);
+      applicationCenterState.historyUnavailable = false;
     } catch (error) {
       if (requestId !== applicationCenterState.requestId) return;
       applicationCenterState.detail = null;
@@ -370,6 +371,7 @@
 
     if (!account) {
       applicationCenterState.loading = false;
+      applicationCenterState.historyUnavailable = false;
       applicationCenterState.items = [];
       applicationCenterState.activeId = "";
       applicationCenterState.detail = null;
@@ -394,6 +396,7 @@
 
       applicationCenterState.items = items;
       applicationCenterState.loading = false;
+      applicationCenterState.historyUnavailable = Boolean(payload?.unavailable);
 
       const keepSelection = options.keepSelection !== false && items.some((item) => item.publicId === applicationCenterState.activeId);
       applicationCenterState.activeId = options.selectedId || (keepSelection ? applicationCenterState.activeId : (items[0]?.publicId || ""));
@@ -412,7 +415,11 @@
       applicationCenterState.items = [];
       applicationCenterState.activeId = "";
       applicationCenterState.detail = null;
-      if (error?.payload?.error !== "not_authenticated") {
+      if (error?.payload?.error === "applications_query_failed") {
+        applicationCenterState.historyUnavailable = true;
+        applicationCenterState.error = "";
+      } else if (error?.payload?.error !== "not_authenticated") {
+        applicationCenterState.historyUnavailable = false;
         applicationCenterState.error = getApplicationLoadErrorMessage(error, "Application data could not be loaded right now.");
       }
       if (getApplicationRouteActive()) renderApply();
@@ -534,6 +541,7 @@
     const activeApplication = applicationCenterState.items.find((item) => item.publicId === applicationCenterState.activeId) || applicationCenterState.items[0] || null;
     const openApplication = applicationCenterState.items.find((item) => isApplicationOpenStatus(item.status)) || null;
     const hasApplicationHistory = applicationCenterState.loading || applicationCenterState.items.length > 0;
+    const historyUnavailable = Boolean(applicationCenterState.historyUnavailable);
     const detail = applicationCenterState.detail?.application?.publicId === activeApplication?.publicId
       ? applicationCenterState.detail
       : null;
@@ -709,6 +717,7 @@
         <section class="section section--stack apply-panel apply-panel--notes">
           <div class="section__eyebrow">After you send</div>
           <h2>What happens next</h2>
+          ${historyUnavailable ? `<div class="account-feedback">Previous application history is not available right now. You can still send a new application below.</div>` : ""}
           <div class="apply-sidecard__list">
             <div>Staff reviews your written answers and the full result from the ticket.</div>
             <div>Your case status is updated here so you can see if it is under review, accepted, or rejected.</div>
