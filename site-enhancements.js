@@ -105,55 +105,283 @@
     `);
   };
 
-  renderWikiSidebar = function renderWikiSidebarEnhanced(categories, pages, currentSlug, updatedAt) {
+  function getWikiSectionAnchor(index) {
+    return `wiki-reboot-section-${index + 1}`;
+  }
+
+  function renderWikiRebootLibrary(categories, pages, currentSlug, updatedAt) {
     const totalPages = Object.keys(pages).length;
     const groups = categories.map((category) => {
-      const links = (category.pages || []).map((slug) => {
+      const entries = (category.pages || []).map((slug, index) => {
         const page = pages[slug];
         if (!page) return "";
         const isActive = slug === currentSlug ? " is-active" : "";
         const label = page.navLabel || page.title;
-        return `<a class="wiki-nav__item${isActive}" href="#/wiki/${escapeHtml(slug)}">${escapeHtml(label)}</a>`;
+        return `
+          <a class="wiki-reboot__libraryItem${isActive}" href="#/wiki/${escapeHtml(slug)}">
+            <span class="wiki-reboot__libraryIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+            <span class="wiki-reboot__libraryLabel">${escapeHtml(label)}</span>
+          </a>
+        `;
       }).join("");
 
       return `
-        <div class="wiki-nav__group">
-          <div class="wiki-nav__title">
+        <section class="wiki-reboot__libraryGroup">
+          <div class="wiki-reboot__libraryHead">
             <span>${escapeHtml(category.title)}</span>
-            <span class="wiki-nav__count">${escapeHtml(String((category.pages || []).length))}</span>
+            <span class="wiki-reboot__libraryCount">${escapeHtml(String((category.pages || []).length))}</span>
           </div>
-          <div class="wiki-nav__list">${links}</div>
-        </div>
+          <div class="wiki-reboot__libraryList">${entries}</div>
+        </section>
       `;
     }).join("");
 
     return `
-      <aside class="section section--stack wiki-sidebar">
-        <div class="wiki-sidebar__meta">
-          <div class="section__eyebrow">Navigation</div>
-          <h2>Wiki pages</h2>
-          <p class="doc-p">Browse the full SGCNR handbook by role, activity, and system.</p>
-          <div class="wiki-sidebar__stats">
-            <div class="wiki-sidebar__stat">
-              <span class="wiki-sidebar__statLabel">Pages</span>
-              <span class="wiki-sidebar__statValue">${escapeHtml(String(totalPages))}</span>
-            </div>
-            <div class="wiki-sidebar__stat">
-              <span class="wiki-sidebar__statLabel">Groups</span>
-              <span class="wiki-sidebar__statValue">${escapeHtml(String(categories.length))}</span>
-            </div>
-            <div class="wiki-sidebar__stat">
-              <span class="wiki-sidebar__statLabel">Updated</span>
-              <span class="wiki-sidebar__statValue">${escapeHtml(updatedAt || "2026-04-01")}</span>
-            </div>
-          </div>
+      <aside class="section section--stack wiki-reboot__rail">
+        <div class="wiki-reboot__railIntro">
+          <div class="section__eyebrow">Guide library</div>
+          <h2>Wiki index</h2>
+          <p class="doc-p">Move through systems, roles, and procedures from one cleaner library view.</p>
         </div>
-        <div class="wiki-sidebar__hint">Scroll the guide list to jump faster between pages.</div>
-        <div class="wiki-sidebar__navWrap">
-          <div class="wiki-nav">${groups}</div>
+        <div class="wiki-reboot__railStats">
+          <article class="wiki-reboot__railStat">
+            <span>Pages</span>
+            <strong>${escapeHtml(String(totalPages))}</strong>
+          </article>
+          <article class="wiki-reboot__railStat">
+            <span>Groups</span>
+            <strong>${escapeHtml(String(categories.length))}</strong>
+          </article>
+          <article class="wiki-reboot__railStat">
+            <span>Updated</span>
+            <strong>${escapeHtml(updatedAt || "2026-04-01")}</strong>
+          </article>
+        </div>
+        <div class="wiki-reboot__library">
+          ${groups}
         </div>
       </aside>
     `;
+  }
+
+  function renderWikiRebootHero(page, category, updatedAt, currentIndex, totalPages) {
+    const overview = Array.isArray(page?.overviewCards) ? page.overviewCards.slice(0, 3) : [];
+    const chips = [
+      category?.title || "Wiki",
+      `Page ${currentIndex + 1} of ${totalPages}`,
+      `Updated ${updatedAt || "2026-04-01"}`
+    ];
+
+    return `
+      <section class="section section--hero wiki-reboot__hero">
+        <div class="wiki-reboot__heroBody">
+          <div class="wiki-reboot__heroIntro">
+            <div class="section__eyebrow">${escapeHtml(page.eyebrow || "Wiki entry")}</div>
+            <h2>${escapeHtml(page.title)}</h2>
+            <p class="doc-p">${escapeHtml(page.summary || "")}</p>
+            <div class="wiki-reboot__heroTags">
+              ${chips.map((chip) => `<span class="wiki-reboot__heroTag">${escapeHtml(chip)}</span>`).join("")}
+            </div>
+          </div>
+          <div class="wiki-reboot__heroPanels">
+            ${(overview.length ? overview : [
+              { title: "Scope", text: "This guide is structured for fast reading and section-by-section jumping." },
+              { title: "Use", text: "Keep this page open while you handle the matching in-game or staff task." },
+              { title: "Flow", text: "Read the summary first, then jump directly into the section you need." }
+            ]).map((card) => `
+              <article class="wiki-reboot__heroCard">
+                <div class="wiki-reboot__heroCardTitle">${escapeHtml(card.title || "Guide note")}</div>
+                <div class="wiki-reboot__heroCardText">${escapeHtml(card.text || "")}</div>
+              </article>
+            `).join("")}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiRebootFacts(page) {
+    const facts = Array.isArray(page?.facts) ? page.facts : [];
+    if (!facts.length) return "";
+
+    return `
+      <section class="wiki-reboot__factStrip">
+        ${facts.map(([label, value]) => `
+          <article class="wiki-reboot__factTile">
+            <span class="wiki-reboot__factLabel">${escapeHtml(label)}</span>
+            <strong class="wiki-reboot__factValue">${escapeHtml(value)}</strong>
+          </article>
+        `).join("")}
+      </section>
+    `;
+  }
+
+  function renderWikiRebootJumpList(sections) {
+    const items = Array.isArray(sections) ? sections : [];
+    if (!items.length) return "";
+
+    return `
+      <section class="section section--stack wiki-reboot__jumpCard">
+        <div class="section__eyebrow">On this page</div>
+        <h2>Section jump</h2>
+        <div class="wiki-reboot__jumpList">
+          ${items.map((section, index) => `
+            <button class="wiki-reboot__jumpBtn" type="button" data-wiki-jump="${escapeHtml(getWikiSectionAnchor(index))}">
+              <span class="wiki-reboot__jumpIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+              <span class="wiki-reboot__jumpLabel">${escapeHtml(section.title || `Section ${index + 1}`)}</span>
+            </button>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiRebootSections(sections) {
+    const entries = Array.isArray(sections) ? sections : [];
+    return entries.map((section, index) => {
+      const paragraphs = (section.paragraphs || []).map((paragraph) => `<p class="doc-p">${escapeHtml(paragraph)}</p>`).join("");
+      const bullets = Array.isArray(section.bullets) && section.bullets.length
+        ? `
+          <ul class="wiki-reboot__bulletList">
+            ${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        `
+        : "";
+
+      return `
+        <section class="wiki-reboot__sectionCard" id="${escapeHtml(getWikiSectionAnchor(index))}">
+          <div class="wiki-reboot__sectionIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</div>
+          <div class="wiki-reboot__sectionBody">
+            <h3 class="wiki-reboot__sectionTitle">${escapeHtml(section.title)}</h3>
+            ${paragraphs}
+            ${bullets}
+          </div>
+        </section>
+      `;
+    }).join("");
+  }
+
+  function renderWikiRebootUpdates(items) {
+    const entries = Array.isArray(items) ? items : [];
+    if (!entries.length) return "";
+
+    return `
+      <section class="section section--stack wiki-reboot__updates">
+        <div class="section__eyebrow">Current direction</div>
+        <h2>Important notes</h2>
+        <div class="wiki-reboot__updateList">
+          ${entries.map((item, index) => `
+            <article class="wiki-reboot__updateItem">
+              <span class="wiki-reboot__updateIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+              <span>${escapeHtml(item)}</span>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiRebootPager(categories, pages, currentSlug) {
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = order.indexOf(currentSlug);
+    if (currentIndex === -1) return "";
+
+    const previousSlug = order[currentIndex - 1] || null;
+    const nextSlug = order[currentIndex + 1] || null;
+
+    const renderLink = (slug, label, direction) => {
+      if (!slug || !pages[slug]) {
+        return `<div class="wiki-reboot__pagerCard wiki-reboot__pagerCard--ghost"></div>`;
+      }
+
+      const page = pages[slug];
+      return `
+        <a class="wiki-reboot__pagerCard" href="#/wiki/${escapeHtml(slug)}">
+          <div class="wiki-reboot__pagerEyebrow">${escapeHtml(label)}</div>
+          <div class="wiki-reboot__pagerTitle">${escapeHtml(page.navLabel || page.title)}</div>
+          <div class="wiki-reboot__pagerArrow">${direction === "prev" ? "Previous guide" : "Next guide"}</div>
+        </a>
+      `;
+    };
+
+    return `
+      <section class="wiki-reboot__pager">
+        ${renderLink(previousSlug, "Back", "prev")}
+        ${renderLink(nextSlug, "Continue", "next")}
+      </section>
+    `;
+  }
+
+  function bindWikiRebootControls() {
+    document.querySelectorAll("[data-wiki-jump]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-wiki-jump");
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  }
+
+  renderWikiSidebar = function renderWikiSidebarEnhanced(categories, pages, currentSlug, updatedAt) {
+    return renderWikiRebootLibrary(categories, pages, currentSlug, updatedAt);
+  };
+
+  renderWiki = function renderWikiEnhanced(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="wiki-reboot">
+          ${renderHeader("Wiki", [{ label: "Wiki" }])}
+          <section class="section">
+            <div class="empty">Wiki data is missing right now.</div>
+          </section>
+        </div>
+      `);
+      return;
+    }
+
+    const category = findWikiCategoryForPage(categories, currentSlug);
+    const heading = page.navLabel || page.title;
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = Math.max(0, order.indexOf(currentSlug));
+    const facts = renderWikiRebootFacts(page);
+    const sectionJump = renderWikiRebootJumpList(page.sections);
+    const content = renderWikiRebootSections(page.sections);
+    const updates = renderWikiRebootUpdates(page.updates);
+    const pager = renderWikiRebootPager(categories, pages, currentSlug);
+
+    setView(`
+      <div class="wiki-reboot">
+        ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+        <div class="wiki-reboot__layout">
+          ${renderWikiRebootLibrary(categories, pages, currentSlug, wiki.updatedAt)}
+          <div class="wiki-reboot__content">
+            ${renderWikiRebootHero(page, category, wiki.updatedAt, currentIndex, order.length || 1)}
+            ${facts}
+            <div class="wiki-reboot__articleGrid">
+              <div class="wiki-reboot__articleColumn">
+                ${content}
+                ${updates}
+                ${pager}
+              </div>
+              <aside class="wiki-reboot__sideColumn">
+                ${sectionJump}
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    bindWikiRebootControls();
   };
 
   const APPLICATION_ROLE_OPTIONS = [
