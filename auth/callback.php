@@ -88,19 +88,15 @@ $_SESSION['discord_staff_guild_id'] = $staffGuildId !== '' ? $staffGuildId : $gu
 $_SESSION['discord_staff_member_found'] = isset($staffMember['roles']);
 $_SESSION['discord_staff_roles'] = $staffRoles;
 $_SESSION['logged_in'] = true;
+$_SESSION['logged_in_at'] = gmdate('c');
 $_SESSION['last_verified_at'] = gmdate('c');
 unset($_SESSION['oauth_state']);
 unset($_SESSION['oauth_return_to']);
 
 try {
     if (!empty(auth_config('mysql_dsn')) && !empty(auth_config('mysql_user'))) {
-        $pdo = new PDO(
-            auth_config('mysql_dsn'),
-            auth_config('mysql_user'),
-            auth_config('mysql_password', ''),
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
-
+        $pdo = auth_mysql_pdo();
+        auth_ensure_web_sessions_schema($pdo);
         $stmt = $pdo->prepare(
             'INSERT INTO web_sessions (discord_id, username, avatar, roles, last_seen)
              VALUES (?, ?, ?, ?, NOW())

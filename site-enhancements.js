@@ -758,6 +758,118 @@
     `);
   };
 
+  renderStart = function renderStartEnhancedClean() {
+    const quickLinks = [
+      { label: "Read the rules", href: "/rules" },
+      { label: "Open commands", href: "/commands" },
+      { label: "View the map", href: "/map" },
+      { label: "Check live status", href: "/live" }
+    ];
+
+    setView(`
+      <div>
+        ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
+        <div class="content-grid content-grid--sidebar">
+          <section class="section section--hero start-panel">
+            <div class="section__eyebrow">New player entry</div>
+            <h2>Start clean</h2>
+            <p class="doc-p">Everything important is kept in one place here: the basics, the key links, and the direct Discord ticket route for support.</p>
+            <div class="start-flow">
+              <article class="start-flow__item">
+                <div class="start-flow__index">01</div>
+                <div class="start-flow__copy">
+                  <strong>Find SGCNR in FiveM</strong>
+                  <span>Search for the server inside FiveM and keep the Rules and Commands pages nearby while you join.</span>
+                </div>
+              </article>
+              <article class="start-flow__item">
+                <div class="start-flow__index">02</div>
+                <div class="start-flow__copy">
+                  <strong>Read the basics first</strong>
+                  <span>Use the Rules, Commands, Map, and Live tabs before jumping into the city.</span>
+                </div>
+              </article>
+              <article class="start-flow__item">
+                <div class="start-flow__index">03</div>
+                <div class="start-flow__copy">
+                  <strong>Use Discord tickets for support</strong>
+                  <span>Support, ban history, and player issues should go through the Discord ticket channel so staff can track everything properly.</span>
+                </div>
+              </article>
+            </div>
+            <div class="start-panel__actions">
+              <a class="auth__btn auth__btn--primary" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
+              <a class="auth__btn" href="/apply">Open applications</a>
+            </div>
+          </section>
+
+          <aside class="section section--stack start-sidecard">
+            <div class="section__eyebrow">Useful links</div>
+            <h2>Quick access</h2>
+            <div class="start-linklist">
+              ${quickLinks.map((item) => `
+                <a class="start-linklist__item" href="${escapeHtml(item.href)}">
+                  <span>${escapeHtml(item.label)}</span>
+                  <span aria-hidden="true">+</span>
+                </a>
+              `).join("")}
+            </div>
+            <div class="start-ticket-panel">
+              <div class="start-ticket-panel__label">Support route</div>
+              <div class="start-ticket-panel__title">Ticket creation lives in Discord</div>
+              <div class="start-ticket-panel__text">If someone needs help, report support, or ban history, send them to the Discord ticket channel directly.</div>
+              <a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open ticket channel</a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    `);
+  };
+
+  renderWikiSidebar = function renderWikiSidebarEnhancedClean(categories, pages, currentSlug, updatedAt) {
+    const totalPages = Object.keys(pages).length;
+    const groups = categories.map((category) => {
+      const links = (category.pages || []).map((slug) => {
+        const page = pages[slug];
+        if (!page) return "";
+        const isActive = slug === currentSlug ? " is-active" : "";
+        const label = page.navLabel || page.title;
+        return `<a class="wiki-nav__item${isActive}" href="#/wiki/${escapeHtml(slug)}">${escapeHtml(label)}</a>`;
+      }).join("");
+
+      return `
+        <div class="wiki-nav__group">
+          <div class="wiki-nav__title">
+            <span>${escapeHtml(category.title)}</span>
+            <span class="wiki-nav__count">${escapeHtml(String((category.pages || []).length))}</span>
+          </div>
+          <div class="wiki-nav__list">${links}</div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <aside class="section section--stack wiki-sidebar">
+        <div class="wiki-sidebar__meta">
+          <div class="section__eyebrow">Guide index</div>
+          <h2>SGCNR Wiki</h2>
+          <p class="doc-p">${escapeHtml(String(totalPages))} pages across ${escapeHtml(String(categories.length))} groups. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+        </div>
+        <div class="wiki-sidebar__navWrap">
+          <div class="wiki-nav">${groups}</div>
+        </div>
+      </aside>
+    `;
+  };
+
+  function getApplicationLoadErrorMessage(error, fallbackMessage) {
+    const reason = error?.payload?.error || error?.message || "application_load_failed";
+    if (reason === "applications_not_configured") return "Applications are not connected yet.";
+    if (reason === "applications_query_failed") return "Applications are temporarily unavailable. Please try again shortly or use Discord tickets.";
+    if (reason === "application_detail_failed") return "That application could not be opened right now.";
+    return fallbackMessage;
+  }
+
   document.addEventListener("submit", (event) => {
     const submitForm = event.target.closest('[data-form="application-submit"]');
     if (submitForm) {

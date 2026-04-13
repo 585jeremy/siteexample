@@ -125,7 +125,7 @@ window.addEventListener("load", async function () {
     if (typeof updateAuthUi === "function") updateAuthUi();
     if (typeof route === "function" && typeof parseRoute === "function") {
       const routeName = parseRoute().name;
-      if (routeName === "account" || routeName === "apply") {
+      if (routeName === "account" || routeName === "apply" || routeName === "admin") {
         route();
       }
     }
@@ -134,7 +134,7 @@ window.addEventListener("load", async function () {
     if (typeof updateAuthUi === "function") updateAuthUi();
     if (typeof route === "function" && typeof parseRoute === "function") {
       const routeName = parseRoute().name;
-      if (routeName === "account" || routeName === "apply") {
+      if (routeName === "account" || routeName === "apply" || routeName === "admin") {
         route();
       }
     }

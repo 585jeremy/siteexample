@@ -151,6 +151,141 @@ function auth_expire_session_cookie(): void
     ]);
 }
 
+function auth_role_ids_from_session(): array
+{
+    $sources = [
+        $_SESSION['discord_roles'] ?? [],
+        $_SESSION['discord_staff_roles'] ?? [],
+    ];
+
+    $roles = [];
+    foreach ($sources as $source) {
+        if (is_string($source)) {
+            $source = array_map('trim', explode(',', $source));
+        }
+
+        if (!is_array($source)) {
+            continue;
+        }
+
+        foreach ($source as $role) {
+            $value = trim((string) $role);
+            if ($value !== '') {
+                $roles[] = $value;
+            }
+        }
+    }
+
+    return array_values(array_unique($roles));
+}
+
+function auth_admin_panel_roles(): array
+{
+    $configured = auth_config('admin_panel_roles', [
+        '1463277998189838427',
+        '1463277637911970065',
+    ]);
+
+    if (is_string($configured)) {
+        $configured = array_map('trim', explode(',', $configured));
+    }
+
+    if (!is_array($configured)) {
+        return [];
+    }
+
+    return array_values(array_unique(array_filter(array_map(
+        static fn ($role) => trim((string) $role),
+        $configured
+    ))));
+}
+
+function auth_user_has_admin_panel_access(): bool
+{
+    if (empty($_SESSION['logged_in'])) {
+        return false;
+    }
+
+    $requiredRoles = auth_admin_panel_roles();
+    if (!$requiredRoles) {
+        return false;
+    }
+
+    return (bool) array_intersect(auth_role_ids_from_session(), $requiredRoles);
+}
+
+function auth_require_admin_panel_access(): void
+{
+    if (empty($_SESSION['logged_in'])) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'not_authenticated',
+        ], 401);
+    }
+
+    if (!auth_user_has_admin_panel_access()) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'forbidden',
+        ], 403);
+    }
+}
+
+function auth_mysql_pdo(): PDO
+{
+    static $pdo = null;
+
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    $dsn = trim((string) auth_config('mysql_dsn', ''));
+    $user = trim((string) auth_config('mysql_user', ''));
+    $password = (string) auth_config('mysql_password', '');
+
+    if ($dsn === '' || $user === '') {
+        throw new RuntimeException('mysql_not_configured');
+    }
+
+    $pdo = new PDO($dsn, $user, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+
+    return $pdo;
+}
+
+function auth_table_exists(PDO $pdo, string $tableName): bool
+{
+    $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
+    $stmt->execute([$tableName]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function auth_ensure_web_sessions_schema(PDO $pdo): void
+{
+    static $schemaReady = false;
+
+    if ($schemaReady) {
+        return;
+    }
+
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS web_sessions (
+            discord_id VARCHAR(32) NOT NULL,
+            username VARCHAR(100) NOT NULL,
+            avatar VARCHAR(255) NOT NULL DEFAULT '',
+            roles LONGTEXT NOT NULL,
+            last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (discord_id),
+            KEY idx_web_sessions_last_seen (last_seen)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    $schemaReady = true;
+}
+
 function auth_send_json(array $payload, int $statusCode = 200): void
 {
     http_response_code($statusCode);
@@ -178,6 +313,22 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
     session_set_cookie_params(auth_session_cookie_params());
     session_start();
+}
+
+if (!empty($_SESSION['logged_in'])) {
+    $_SESSION['last_seen_at'] = time();
+
+    if ($sessionCookieLifetime > 0 && ini_get('session.use_cookies')) {
+        $params = auth_session_cookie_params();
+        setcookie(session_name(), session_id(), [
+            'expires' => time() + $params['lifetime'],
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
+    }
 }
 
 function auth_discord_request(string $url, string $method = 'GET', ?array $data = null, ?string $token = null): array

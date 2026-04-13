@@ -6746,3 +6746,376 @@ body.is-apply .content{
     top: auto;
   }
 }
+
+/* 2026-04-13 public account/admin/wiki/apply cleanup */
+.account-hero--compact{
+  max-width: 780px;
+}
+
+.account-ui{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+}
+
+.account-menu,
+.account-sheet,
+.account-sheet__backdrop{
+  pointer-events: auto;
+}
+
+.account-menu{
+  position: absolute;
+  top: 82px;
+  right: 24px;
+  width: min(360px, calc(100vw - 32px));
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(196,146,89,.18);
+  background: linear-gradient(180deg, rgba(18,15,14,.98), rgba(10,9,10,.98));
+  box-shadow: 0 28px 60px rgba(0,0,0,.44);
+}
+
+.account-menu__head{
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.account-menu__avatar{
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid rgba(196,146,89,.22);
+}
+
+.account-menu__avatar--fallback{
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(117,78,40,.48), rgba(30,22,16,.96));
+  color: rgba(244,235,220,.96);
+  font-weight: 800;
+}
+
+.account-menu__copy{
+  display: grid;
+  gap: 4px;
+}
+
+.account-menu__name{
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(245,236,222,.96);
+}
+
+.account-menu__meta{
+  color: rgba(214,194,167,.68);
+  font-size: 13px;
+}
+
+.account-menu__list{
+  display: grid;
+  gap: 10px;
+}
+
+.account-menu__item{
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid rgba(196,146,89,.10);
+  background: linear-gradient(180deg, rgba(28,22,18,.86), rgba(14,12,12,.94));
+  color: rgba(241,233,221,.94);
+}
+
+.account-menu__item:hover{
+  border-color: rgba(196,146,89,.26);
+  transform: translateY(-1px);
+}
+
+.account-menu__itemLabel{
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.account-menu__itemMeta{
+  color: rgba(209,188,160,.62);
+  font-size: 12px;
+}
+
+.account-sheet__backdrop{
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0,0,0,.46);
+}
+
+.account-sheet{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(440px, 100vw);
+  height: 100%;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 24px;
+  border-left: 1px solid rgba(196,146,89,.14);
+  background: linear-gradient(180deg, rgba(17,14,13,.99), rgba(9,8,9,.99));
+  box-shadow: -24px 0 60px rgba(0,0,0,.34);
+  overflow: auto;
+}
+
+.account-sheet__top{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-sheet__back,
+.account-sheet__close{
+  border: 0;
+  background: transparent;
+  color: rgba(231,214,190,.76);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.account-sheet__close{
+  font-size: 24px;
+  line-height: 1;
+}
+
+.account-sheet__eyebrow{
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(198,159,112,.72);
+}
+
+.account-sheet__title{
+  margin: 0;
+  font-size: 30px;
+  color: rgba(247,240,228,.96);
+}
+
+.account-sheet__copy{
+  margin: 0;
+  color: rgba(214,194,167,.74);
+}
+
+.account-services{
+  display: grid;
+  gap: 12px;
+}
+
+.account-service{
+  display: grid;
+  gap: 4px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(196,146,89,.10);
+  background: linear-gradient(180deg, rgba(25,20,17,.92), rgba(12,11,11,.96));
+}
+
+.account-service__label{
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(198,159,112,.72);
+}
+
+.account-service__value{
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(246,238,225,.96);
+}
+
+.account-service__meta{
+  color: rgba(209,188,160,.64);
+}
+
+.admin-metrics{
+  margin-top: 6px;
+}
+
+.admin-list{
+  display: grid;
+  gap: 12px;
+}
+
+.admin-list__item{
+  display: grid;
+  gap: 4px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(196,146,89,.10);
+  background: linear-gradient(180deg, rgba(25,20,17,.92), rgba(12,11,11,.96));
+}
+
+.admin-list__title{
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(246,238,225,.96);
+}
+
+.admin-list__meta{
+  color: rgba(209,188,160,.66);
+  font-size: 13px;
+}
+
+.admin-counts{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-counts__item{
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(196,146,89,.10);
+  background: linear-gradient(180deg, rgba(25,20,17,.92), rgba(12,11,11,.96));
+}
+
+.admin-counts__item strong{
+  font-size: 22px;
+  color: rgba(247,239,225,.96);
+}
+
+.admin-counts__item span{
+  color: rgba(209,188,160,.68);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+
+.wiki-sidebar__meta .doc-p{
+  margin: 0;
+  color: rgba(216,198,172,.72);
+}
+
+.wiki-sidebar__navWrap{
+  border-radius: 20px;
+  border: 1px solid rgba(196,146,89,.10);
+  background: linear-gradient(180deg, rgba(19,15,13,.96), rgba(9,8,9,.98));
+  padding: 10px;
+}
+
+.wiki-nav{
+  gap: 12px;
+}
+
+.wiki-nav__group{
+  gap: 10px;
+}
+
+.wiki-nav__title{
+  padding: 0 4px;
+  color: rgba(236,226,210,.86);
+}
+
+.wiki-nav__count{
+  min-width: 28px;
+  border-color: rgba(196,146,89,.18);
+  background: rgba(196,146,89,.08);
+  color: rgba(244,235,220,.88);
+}
+
+.wiki-nav__item{
+  padding: 13px 14px;
+  border-color: rgba(196,146,89,.08);
+  background: linear-gradient(180deg, rgba(25,20,17,.92), rgba(12,11,11,.96));
+}
+
+.wiki-nav__item.is-active{
+  border-color: rgba(208,156,95,.30);
+  background: linear-gradient(180deg, rgba(78,55,29,.34), rgba(20,14,11,.98));
+}
+
+.apply-stage__hero::after{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(194,145,84,.16), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgba(122,86,49,.18), transparent 24%);
+}
+
+.apply-stage__hero .doc-p,
+.apply-stage__step span,
+.apply-sidecard__account,
+.apply-sidecard__list,
+.apply-activeCase__meta{
+  color: rgba(217,197,171,.76);
+}
+
+.apply-stage__step,
+.apply-sidecard__list > div,
+.apply-form__group,
+.apply-optional,
+.apply-activeCase{
+  border-color: rgba(196,146,89,.12);
+  background: linear-gradient(180deg, rgba(24,19,16,.96), rgba(10,10,11,.98));
+}
+
+.apply-stage__stepIndex{
+  border-color: rgba(196,146,89,.24);
+  background: linear-gradient(180deg, rgba(105,72,38,.42), rgba(24,18,14,.96));
+  color: rgba(244,235,220,.96);
+}
+
+.apply-sidecard__pill{
+  border-color: rgba(196,146,89,.20);
+  background: rgba(196,146,89,.09);
+  color: rgba(242,232,215,.92);
+}
+
+.apply-panel .account-field__label{
+  color: rgba(198,159,112,.68);
+}
+
+.apply-panel .account-field__input{
+  border-color: rgba(196,146,89,.12);
+  background: rgba(255,255,255,.03);
+  color: rgba(244,237,226,.96);
+}
+
+.apply-panel .account-field__input::placeholder{
+  color: rgba(206,184,152,.34);
+}
+
+.apply-panel .account-field__input:focus{
+  border-color: rgba(196,146,89,.30);
+  box-shadow: 0 0 0 3px rgba(196,146,89,.10);
+}
+
+.apply-panel select.account-field__input option{
+  color: rgba(244,237,226,.96);
+  background: #13100f;
+}
+
+.apply-page .account-feedback{
+  border-color: rgba(196,146,89,.12);
+  background: linear-gradient(180deg, rgba(27,20,16,.96), rgba(10,10,11,.98));
+  color: rgba(241,233,221,.92);
+}
+
+@media (max-width: 980px){
+  .account-menu{
+    top: 74px;
+    right: 16px;
+  }
+
+  .account-sheet{
+    width: 100vw;
+  }
+
+  .admin-counts{
+    grid-template-columns: 1fr;
+  }
+}

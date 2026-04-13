@@ -496,6 +496,7 @@ const APPLICATION_STATUS_LABELS = {
   closed: "Closed"
 };
 const APPLICATION_OPEN_STATUSES = ["submitted", "in_review", "needs_info", "interview"];
+const ADMIN_OVERVIEW_API = "./auth/admin-overview.php";
 let applicationCenterState = {
   loading: false,
   submitting: false,
@@ -508,6 +509,21 @@ let applicationCenterState = {
   formValues: {},
   pollTimer: null,
   requestId: 0
+};
+let adminOverviewState = {
+  loading: false,
+  loaded: false,
+  error: "",
+  data: null
+};
+let accountUiState = {
+  menuOpen: false,
+  panel: "",
+  feedback: {
+    profile: { tone: "", text: "" },
+    settings: { tone: "", text: "" },
+    services: { tone: "", text: "" }
+  }
 };
 
 function normalize(s) {
@@ -561,6 +577,42 @@ async function requestJson(url, options = {}) {
   return payload;
 }
 
+function isAdminRouteActive() {
+  try {
+    return parseRoute().name === "admin";
+  } catch {
+    return false;
+  }
+}
+
+async function loadAdminOverview(options = {}) {
+  const { force = false } = options;
+
+  if (adminOverviewState.loading) return;
+  if (adminOverviewState.loaded && !force) return;
+
+  adminOverviewState.loading = true;
+  adminOverviewState.error = "";
+  if (isAdminRouteActive()) renderAdminDashboard(getCurrentAccount());
+
+  try {
+    adminOverviewState.data = await requestJson(ADMIN_OVERVIEW_API);
+    adminOverviewState.loaded = true;
+  } catch (error) {
+    const reason = error?.payload?.error || error?.message || "admin_overview_failed";
+    if (reason === "forbidden") {
+      adminOverviewState.error = "Your Discord role does not allow this admin overview.";
+    } else if (reason === "not_authenticated") {
+      adminOverviewState.error = "Sign in again to refresh the admin overview.";
+    } else {
+      adminOverviewState.error = "The admin overview could not be loaded right now.";
+    }
+  } finally {
+    adminOverviewState.loading = false;
+    if (isAdminRouteActive()) renderAdminDashboard(getCurrentAccount());
+  }
+}
+
 function normalizeRouteTarget(target) {
   let value = String(target || "/").trim();
   if (!value) return "/";
@@ -597,6 +649,7 @@ function navigateTo(target, options = {}) {
   }
 
   closeAuthModal();
+  closeAccountUi();
   route();
 
   if (scroll !== false) {
@@ -1013,6 +1066,310 @@ function openAuthModal(mode, values = {}, error = "") {
   bindAuthModalControls();
 }
 
+function getAccountUiRoot() {
+  let root = document.getElementById("accountUiRoot");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "accountUiRoot";
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+function accountFeedbackMarkup(section) {
+  const entry = accountUiState.feedback?.[section];
+  if (!entry?.text) return "";
+  return `<div class="account-feedback account-feedback--${escapeHtml(entry.tone || "success")}">${escapeHtml(entry.text)}</div>`;
+}
+
+function clearAccountUiFeedback() {
+  accountUiState.feedback = {
+    profile: { tone: "", text: "" },
+    settings: { tone: "", text: "" },
+    services: { tone: "", text: "" }
+  };
+}
+
+function setAccountUiFeedback(section, tone, text) {
+  if (!accountUiState.feedback[section]) {
+    accountUiState.feedback[section] = { tone: "", text: "" };
+  }
+  accountUiState.feedback[section] = { tone, text };
+}
+
+function closeAccountUi() {
+  accountUiState.menuOpen = false;
+  accountUiState.panel = "";
+  clearAccountUiFeedback();
+  const root = document.getElementById("accountUiRoot");
+  if (root) {
+    root.innerHTML = "";
+  }
+  document.body.classList.remove("is-account-ui-open");
+}
+
+function buildAuthRedirectUrl(baseUrl) {
+  try {
+    const url = new URL(baseUrl, window.location.href);
+    url.searchParams.set("return_to", window.location.href);
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
+function performLogout() {
+  clearSession();
+  closeAccountUi();
+  const logoutUrl = SERVER_CONFIG.authLogoutUrl || "./auth/logout.php";
+  window.location.href = buildAuthRedirectUrl(logoutUrl);
+}
+
+function getLinkedServicesRows(account) {
+  return [
+    {
+      label: "Discord account",
+      value: account?.discordUsername ? `@${account.discordUsername}` : "Pending",
+      meta: account?.discordLinked ? "Linked to website login" : "Not linked"
+    },
+    {
+      label: "Guild nickname",
+      value: account?.guildNickname || account?.discordDisplayName || "Pending",
+      meta: account?.guildNickname ? "Taken from SGCNR Discord" : "No guild nickname synced"
+    },
+    {
+      label: "Verified identity",
+      value: account?.verifiedIdentity || "Pending sync",
+      meta: account?.verificationStatus === "verified" ? "Game identity verified" : "Waiting for verification bridge"
+    },
+    {
+      label: "FiveM record",
+      value: account?.fivemId || account?.fivemLicense || "No record yet",
+      meta: account?.fivemLicense ? "Bot database link found" : "No license synced yet"
+    },
+    {
+      label: "Role sync",
+      value: getDiscordRoleList(account).length ? `${getDiscordRoleList(account).length} role(s)` : "Pending",
+      meta: SERVER_CONFIG.discordRoleSyncUrl ? "Website can read Discord role sync" : "Role sync endpoint missing"
+    },
+    {
+      label: "Website session",
+      value: account?.discordId ? "Active" : "Offline",
+      meta: account?.discordId ? `Discord ID ${account.discordId}` : "No Discord session"
+    }
+  ];
+}
+
+function renderAccountPanelContent(account, panel) {
+  if (panel === "profile") {
+    return `
+      <div class="account-sheet__eyebrow">Edit profile</div>
+      <h2 class="account-sheet__title">Profile</h2>
+      <p class="account-sheet__copy">Keep the website-side basics tidy. Your Discord identity still stays the main source of truth.</p>
+      ${accountFeedbackMarkup("profile")}
+      <form class="account-form account-sheet__form" data-account-sheet-form="profile" autocomplete="off">
+        <div class="account-form__grid">
+          <label class="account-field">
+            <span class="account-field__label">Display name</span>
+            <input class="account-field__input" name="displayName" value="${escapeHtml(account?.displayName || "")}" required />
+          </label>
+          <label class="account-field">
+            <span class="account-field__label">Region</span>
+            <input class="account-field__input" name="region" value="${escapeHtml(account?.region || SERVER_CONFIG.region || "EU")}" />
+          </label>
+          <label class="account-field account-field--wide">
+            <span class="account-field__label">Bio</span>
+            <textarea class="account-field__input account-field__input--textarea" name="bio" rows="4" placeholder="A short website bio if you want one.">${escapeHtml(account?.bio || "")}</textarea>
+          </label>
+        </div>
+        <div class="auth-modal__actions">
+          <button class="auth__btn auth__btn--primary" type="submit">Save profile</button>
+        </div>
+      </form>
+    `;
+  }
+
+  if (panel === "settings") {
+    return `
+      <div class="account-sheet__eyebrow">Website settings</div>
+      <h2 class="account-sheet__title">Settings</h2>
+      <p class="account-sheet__copy">Control small website preferences without opening a full account page.</p>
+      ${accountFeedbackMarkup("settings")}
+      <form class="account-form account-sheet__form" data-account-sheet-form="settings" autocomplete="off">
+        <label class="account-toggle">
+          <input type="checkbox" name="trackingOptIn" ${account?.trackingOptIn ? "checked" : ""} />
+          <span>Allow live website tracking once the in-game opt-in system is connected</span>
+        </label>
+        <label class="account-toggle">
+          <input type="checkbox" name="emailUpdates" ${account?.emailUpdates ? "checked" : ""} />
+          <span>Receive website-related updates by email if that flow is added later</span>
+        </label>
+        <div class="auth-modal__actions">
+          <button class="auth__btn auth__btn--primary" type="submit">Save settings</button>
+        </div>
+      </form>
+    `;
+  }
+
+  const services = getLinkedServicesRows(account);
+  return `
+    <div class="account-sheet__eyebrow">Linked services</div>
+    <h2 class="account-sheet__title">Connected services</h2>
+    <p class="account-sheet__copy">This is the live website view of what your Discord login and game sync are currently exposing.</p>
+    ${accountFeedbackMarkup("services")}
+    <div class="account-services">
+      ${services.map((service) => `
+        <article class="account-service">
+          <div class="account-service__label">${escapeHtml(service.label)}</div>
+          <div class="account-service__value">${escapeHtml(service.value)}</div>
+          <div class="account-service__meta">${escapeHtml(service.meta)}</div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAccountUi() {
+  const root = getAccountUiRoot();
+  const account = getCurrentAccount();
+
+  if (!account || (!accountUiState.menuOpen && !accountUiState.panel)) {
+    root.innerHTML = "";
+    document.body.classList.remove("is-account-ui-open");
+    return;
+  }
+
+  const menuItems = [
+    { action: "profile", label: "Edit Profile", meta: "Display name, region, bio" },
+    { action: "settings", label: "Settings", meta: "Tracking and website preferences" },
+    { action: "services", label: "Linked Services", meta: "Discord, verification, FiveM sync" },
+    ...(hasAdminAccess(account) ? [{ action: "admin", label: "Admin Panel", meta: "Open the manager tools" }] : []),
+    { action: "logout", label: "Sign Out", meta: "End the current website session" }
+  ];
+
+  const avatarUrl = getAccountAvatarUrl(account, 96);
+  const displayName = getAccountDisplayName(account);
+  const rootMarkup = `
+    <div class="account-ui">
+      ${accountUiState.panel ? `<button class="account-sheet__backdrop" type="button" data-account-action="close"></button>` : ""}
+      ${accountUiState.menuOpen ? `
+        <div class="account-menu" role="menu" aria-label="Profile menu">
+          <div class="account-menu__head">
+            ${avatarUrl
+              ? `<img class="account-menu__avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" />`
+              : `<div class="account-menu__avatar account-menu__avatar--fallback">${escapeHtml((displayName || "A").charAt(0).toUpperCase())}</div>`}
+            <div class="account-menu__copy">
+              <div class="account-menu__name">${escapeHtml(displayName)}</div>
+              <div class="account-menu__meta">${escapeHtml(account?.discordUsername ? `@${account.discordUsername}` : "Discord linked")}</div>
+            </div>
+          </div>
+          <div class="account-menu__list">
+            ${menuItems.map((item) => `
+              <button class="account-menu__item" type="button" data-account-action="${escapeHtml(item.action)}">
+                <span class="account-menu__itemLabel">${escapeHtml(item.label)}</span>
+                <span class="account-menu__itemMeta">${escapeHtml(item.meta)}</span>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      ` : ""}
+      ${accountUiState.panel ? `
+        <aside class="account-sheet" aria-label="Account panel">
+          <div class="account-sheet__top">
+            <button class="account-sheet__back" type="button" data-account-action="menu">Back</button>
+            <button class="account-sheet__close" type="button" data-account-action="close" aria-label="Close">×</button>
+          </div>
+          ${renderAccountPanelContent(account, accountUiState.panel)}
+        </aside>
+      ` : ""}
+    </div>
+  `;
+
+  root.innerHTML = rootMarkup;
+  document.body.classList.add("is-account-ui-open");
+}
+
+function openAccountPanel(panel) {
+  accountUiState.menuOpen = false;
+  accountUiState.panel = panel;
+  renderAccountUi();
+}
+
+function toggleAccountMenu() {
+  const account = getCurrentAccount();
+  if (!account) {
+    openAuthModal("login");
+    return;
+  }
+
+  if (accountUiState.menuOpen && !accountUiState.panel) {
+    closeAccountUi();
+    return;
+  }
+
+  clearAccountUiFeedback();
+  accountUiState.menuOpen = true;
+  accountUiState.panel = "";
+  renderAccountUi();
+}
+
+function saveAccountProfileChanges(account, values) {
+  const accounts = readAccounts();
+  const updatedAccount = normaliseAccountRecord(account.username, {
+    ...account,
+    displayName: values.displayName,
+    region: values.region,
+    bio: values.bio,
+    updatedAt: new Date().toISOString()
+  });
+
+  accounts[account.username] = updatedAccount;
+  writeAccounts(accounts);
+  updateAuthUi();
+  return updatedAccount;
+}
+
+function saveAccountSettingsChanges(account, values) {
+  const accounts = readAccounts();
+  const updatedAccount = normaliseAccountRecord(account.username, {
+    ...account,
+    trackingOptIn: values.trackingOptIn === "on" || values.trackingOptIn === true,
+    emailUpdates: values.emailUpdates === "on" || values.emailUpdates === true,
+    updatedAt: new Date().toISOString()
+  });
+  accounts[account.username] = updatedAccount;
+  writeAccounts(accounts);
+  updateAuthUi();
+  return updatedAccount;
+}
+
+function saveAccountPasswordChanges(account, values) {
+  const currentPassword = String(values.currentPassword || "");
+  const newPassword = String(values.newPassword || "");
+  const confirmPassword = String(values.confirmPassword || "");
+
+  if (currentPassword !== account.password) {
+    throw new Error("Current password does not match.");
+  }
+  if (newPassword.length < 6) {
+    throw new Error("Use a password with at least 6 characters.");
+  }
+  if (newPassword !== confirmPassword) {
+    throw new Error("The new password confirmation does not match.");
+  }
+
+  const accounts = readAccounts();
+  const updatedAccount = normaliseAccountRecord(account.username, {
+    ...account,
+    password: newPassword,
+    updatedAt: new Date().toISOString()
+  });
+  accounts[account.username] = updatedAccount;
+  writeAccounts(accounts);
+  updateAuthUi();
+  return updatedAccount;
+}
+
 function handleRegister(values) {
   const accounts = readAccounts();
   const username = String(values.username || "").trim();
@@ -1174,9 +1531,20 @@ function updateAuthUi() {
     }
     accountBtn.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
   }
-  if (logoutBtn) logoutBtn.style.display = isIn ? "inline-flex" : "none";
+  if (logoutBtn) logoutBtn.style.display = "none";
   if (authArea) authArea.title = isIn ? `Signed in as ${getAccountDisplayName(account)}` : "Account";
   updateAdminDockVisibility(account);
+  if (!isIn) {
+    adminOverviewState = {
+      loading: false,
+      loaded: false,
+      error: "",
+      data: null
+    };
+    closeAccountUi();
+  } else {
+    renderAccountUi();
+  }
 }
 
 function initAuth() {
@@ -1192,16 +1560,13 @@ function initAuth() {
 
   if (accountBtn) {
     accountBtn.addEventListener("click", () => {
-      navigateTo("/account");
+      toggleAccountMenu();
     });
   }
 
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
-      clearSession();
-      updateAuthUi();
-      closeAuthModal();
-      route();
+      performLogout();
     });
   }
 }
@@ -1721,30 +2086,14 @@ function renderAccountGuest() {
   return `
     <div>
       ${renderHeader("Account", [{ label: "Account" }])}
-      <div class="content-grid content-grid--sidebar">
-        <section class="section section--hero account-hero">
-          <div class="section__eyebrow">Discord account</div>
-          <h2>Login with Discord only</h2>
-          <p class="doc-p">The website should use Discord as the only account source, so the same verified Discord name and Discord profile picture can later match your in-game identity, role sync, and community access.</p>
-          <div class="status-actions">
-            ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
-          </div>
-          <div class="status-note">
-            <strong>Current state:</strong> the website uses Discord-only account access. The final avatar, visible name, and role sync depend on the live PHP auth endpoints and Discord callback configuration.
-          </div>
-        </section>
-
-        <aside class="section section--stack">
-          <div class="section__eyebrow">Identity flow</div>
-          <h2>How it should work</h2>
-          <div class="stack-list stack-list--compact">
-            <div class="stack-list__item"><span class="stack-list__index">01</span><span>Player selects Discord login on the website.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span>Backend verifies the Discord OAuth token securely.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">03</span><span>Bot or Discord API confirms the player roles inside SGCNR.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">04</span><span>The verified Discord identity becomes the website account name, avatar source, and role source.</span></div>
-          </div>
-        </aside>
-      </div>
+      <section class="section section--hero account-hero account-hero--compact">
+        <div class="section__eyebrow">Discord account</div>
+        <h2>Sign in with Discord</h2>
+        <p class="doc-p">Use your Discord identity to unlock linked services, applications, and synced community access on the website.</p>
+        <div class="status-actions">
+          ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
+        </div>
+      </section>
     </div>
   `;
 }
@@ -2016,6 +2365,114 @@ function renderAdminDashboard(account) {
   `);
 }
 
+function renderAdminDashboard(account) {
+  const label = SERVER_CONFIG.adminPanelLabel || "Manager";
+  const payload = adminOverviewState.data || {};
+  const recentLogins = Array.isArray(payload?.recentLogins?.items) ? payload.recentLogins.items : [];
+  const applicationCounts = payload?.applications?.counts || {};
+  const recentApplications = Array.isArray(payload?.applications?.recent) ? payload.applications.recent : [];
+  const loading = adminOverviewState.loading && !adminOverviewState.loaded;
+
+  if (!adminOverviewState.loading && !adminOverviewState.loaded) {
+    loadAdminOverview();
+  }
+
+  const metricCards = [
+    {
+      label: "Recent website logins",
+      value: payload?.recentLogins?.available ? String(recentLogins.length) : "—",
+      meta: "Latest Discord-authenticated sessions"
+    },
+    {
+      label: "Open applications",
+      value: payload?.applications?.available ? String(applicationCounts.open || 0) : "—",
+      meta: "Submitted, review, info, interview"
+    },
+    {
+      label: "Pending review",
+      value: payload?.applications?.available ? String((applicationCounts.in_review || 0) + (applicationCounts.needs_info || 0)) : "—",
+      meta: "Needs staff attention"
+    },
+    {
+      label: "Signed in as",
+      value: getAccountDisplayName(account),
+      meta: account?.verifiedIdentity || "Discord linked"
+    }
+  ];
+
+  setView(`
+    <div class="admin-page">
+      ${renderHeader(`${label} Mode`, [{ label: label }])}
+
+      <section class="section section--hero admin-hero">
+        <div class="section__eyebrow">Website control</div>
+        <h2>${escapeHtml(label)} dashboard</h2>
+        <p class="doc-p">Keep an eye on website Discord logins, applications, and the main shortcuts staff actually needs instead of digging through a placeholder page.</p>
+        <div class="status-grid admin-metrics">
+          ${metricCards.map((card) => `
+            <div class="status-card">
+              <div class="status-card__label">${escapeHtml(card.label)}</div>
+              <div class="status-card__value">${escapeHtml(card.value)}</div>
+              <div class="status-card__meta">${escapeHtml(card.meta)}</div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="status-actions">
+          <a class="auth__btn auth__btn--primary" href="#/apply">Applications</a>
+          <a class="auth__btn" href="#/live">Live page</a>
+          <a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordTicketChannelUrl || SERVER_CONFIG.discordUrl || "#")}" target="_blank" rel="noopener noreferrer">Discord tickets</a>
+        </div>
+        ${loading ? `<div class="status-note">Loading the admin overview…</div>` : ""}
+        ${adminOverviewState.error ? `<div class="status-note"><strong>Admin overview:</strong> ${escapeHtml(adminOverviewState.error)}</div>` : ""}
+      </section>
+
+      <div class="content-grid content-grid--sidebar">
+        <section class="section section--stack">
+          <div class="section__eyebrow">Who signed in</div>
+          <h2>Recent Discord logins</h2>
+          ${payload?.recentLogins?.available
+            ? recentLogins.length
+              ? `<div class="admin-list">
+                  ${recentLogins.map((entry) => `
+                    <article class="admin-list__item">
+                      <div class="admin-list__title">${escapeHtml(entry.username || entry.discordId || "Unknown account")}</div>
+                      <div class="admin-list__meta">${escapeHtml(entry.discordId || "No Discord ID")} · ${escapeHtml(formatServerTimestamp(entry.lastSeen || "") || "Recently")}</div>
+                    </article>
+                  `).join("")}
+                </div>`
+              : `<div class="empty">No Discord website logins have been recorded yet.</div>`
+            : `<div class="empty">Website login history will appear here once the backend writes sessions into the database.</div>`}
+        </section>
+
+        <aside class="section section--stack">
+          <div class="section__eyebrow">Application review</div>
+          <h2>Application activity</h2>
+          ${payload?.applications?.available
+            ? `
+              <div class="admin-counts">
+                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.submitted || 0))}</strong><span>Submitted</span></div>
+                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.in_review || 0))}</strong><span>In review</span></div>
+                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.needs_info || 0))}</strong><span>Needs info</span></div>
+                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.interview || 0))}</strong><span>Interview</span></div>
+              </div>
+              ${recentApplications.length
+                ? `<div class="admin-list">
+                    ${recentApplications.map((entry) => `
+                      <article class="admin-list__item">
+                        <div class="admin-list__title">${escapeHtml(entry.publicId || "Application")} · ${escapeHtml(entry.roleRequested || "Role")}</div>
+                        <div class="admin-list__meta">${escapeHtml(entry.applicantName || "Unknown applicant")} · ${escapeHtml(APPLICATION_STATUS_LABELS[entry.status] || entry.status || "Open")}</div>
+                      </article>
+                    `).join("")}
+                  </div>`
+                : `<div class="empty">No applications are stored yet.</div>`}
+            `
+            : `<div class="empty">The applications backend is not connected yet. Once it is live, this panel will show live intake and review counts here.</div>`}
+        </aside>
+      </div>
+    </div>
+  `);
+}
+
 function bindAccountPageControls() {
   const loginCta = document.getElementById("accountLoginCta");
   if (loginCta) {
@@ -2151,7 +2608,21 @@ function renderAccount() {
     return;
   }
 
-  setView(renderAccountDashboard(account));
+  setView(`
+    <div>
+      ${renderHeader("Account", [{ label: "Account" }])}
+      <section class="section section--hero account-hero account-hero--compact">
+        <div class="section__eyebrow">Website account</div>
+        <h2>${escapeHtml(getAccountDisplayName(account))}</h2>
+        <p class="doc-p">Your account tools now live behind the profile button in the top bar. Use it for profile edits, settings, linked services, and admin tools if your Discord role allows them.</p>
+        <div class="status-actions">
+          <button class="auth__btn auth__btn--primary" type="button" data-account-action="profile">Edit profile</button>
+          <button class="auth__btn" type="button" data-account-action="settings">Settings</button>
+          <button class="auth__btn" type="button" data-account-action="services">Linked services</button>
+        </div>
+      </section>
+    </div>
+  `);
   bindAccountPageControls();
 }
 
@@ -6268,8 +6739,94 @@ document.addEventListener("click", (e) => {
   }
 });
 
+document.addEventListener("click", (event) => {
+  const actionButton = event.target && typeof event.target.closest === "function"
+    ? event.target.closest("[data-account-action]")
+    : null;
+
+  if (actionButton) {
+    event.preventDefault();
+    const action = actionButton.dataset.accountAction || "";
+
+    if (action === "close") {
+      closeAccountUi();
+      return;
+    }
+
+    if (action === "menu") {
+      accountUiState.menuOpen = true;
+      accountUiState.panel = "";
+      renderAccountUi();
+      return;
+    }
+
+    if (action === "profile" || action === "settings" || action === "services") {
+      openAccountPanel(action);
+      return;
+    }
+
+    if (action === "admin") {
+      closeAccountUi();
+      navigateTo("/admin");
+      return;
+    }
+
+    if (action === "logout") {
+      performLogout();
+      return;
+    }
+  }
+
+  const clickedInsideUi = event.target && typeof event.target.closest === "function"
+    ? event.target.closest(".account-menu, .account-sheet, #accountBtn")
+    : null;
+
+  if (!clickedInsideUi && (accountUiState.menuOpen || accountUiState.panel)) {
+    closeAccountUi();
+  }
+});
+
+document.addEventListener("submit", (event) => {
+  const form = event.target && typeof event.target.closest === "function"
+    ? event.target.closest("[data-account-sheet-form]")
+    : null;
+  if (!form) return;
+
+  event.preventDefault();
+  const account = getCurrentAccount();
+  if (!account) {
+    closeAccountUi();
+    openAuthModal("login");
+    return;
+  }
+
+  const mode = form.dataset.accountSheetForm || "";
+  const values = Object.fromEntries(new FormData(form).entries());
+
+  try {
+    if (mode === "profile") {
+      saveAccountProfileChanges(account, values);
+      setAccountUiFeedback("profile", "success", "Profile updated.");
+    } else if (mode === "settings") {
+      saveAccountSettingsChanges(account, values);
+      setAccountUiFeedback("settings", "success", "Settings updated.");
+    }
+    renderAccountUi();
+  } catch (error) {
+    setAccountUiFeedback(mode, "error", error?.message || "That change could not be saved right now.");
+    renderAccountUi();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && (accountUiState.menuOpen || accountUiState.panel)) {
+    closeAccountUi();
+  }
+});
+
 window.addEventListener("popstate", () => {
   closeAuthModal();
+  closeAccountUi();
   route();
   window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   const contentEl = document.querySelector(".content");
