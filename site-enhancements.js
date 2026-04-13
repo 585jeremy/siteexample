@@ -16,7 +16,6 @@
   renderStart = function renderStartEnhanced() {
     const quickLinks = [
       { label: "Read the rules", href: "#/rules" },
-      { label: "Open commands", href: "#/commands" },
       { label: "View the map", href: "#/map" },
       { label: "Check live status", href: "#/live" }
     ];
@@ -43,7 +42,7 @@
                 <div class="start-flow__index">02</div>
                 <div class="start-flow__copy">
                   <strong>Read the basics first</strong>
-                  <span>Use the Rules and Commands pages before you jump into the city.</span>
+                  <span>Use the Rules page before you jump into the city.</span>
                 </div>
               </article>
               <article class="start-flow__item">
@@ -998,7 +997,6 @@
   renderStart = function renderStartEnhancedClean() {
     const quickLinks = [
       { label: "Read the rules", href: "/rules" },
-      { label: "Open commands", href: "/commands" },
       { label: "View the map", href: "/map" },
       { label: "Check live status", href: "/live" }
     ];
@@ -1016,14 +1014,14 @@
                 <div class="start-flow__index">01</div>
                 <div class="start-flow__copy">
                   <strong>Find SGCNR in FiveM</strong>
-                  <span>Search for the server inside FiveM and keep the Rules and Commands pages nearby while you join.</span>
+                  <span>Search for the server inside FiveM and keep the Rules page nearby while you join.</span>
                 </div>
               </article>
               <article class="start-flow__item">
                 <div class="start-flow__index">02</div>
                 <div class="start-flow__copy">
                   <strong>Read the basics first</strong>
-                  <span>Use the Rules, Commands, Map, and Live tabs before jumping into the city.</span>
+                  <span>Use the Rules, Map, and Live tabs before jumping into the city.</span>
                 </div>
               </article>
               <article class="start-flow__item">

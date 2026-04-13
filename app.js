@@ -1731,7 +1731,6 @@ function renderLandingHome() {
 function renderStart() {
   const quickLinks = [
     { label: "Read the rules", href: "#/rules" },
-    { label: "Open commands", href: "#/commands" },
     { label: "View the map", href: "#/map" },
     { label: "Check live status", href: "#/live" }
   ];
@@ -1758,7 +1757,7 @@ function renderStart() {
               <div class="start-flow__index">02</div>
               <div class="start-flow__copy">
                 <strong>Read the basics first</strong>
-                <span>Use the Rules and Commands pages before you jump into the city.</span>
+                <span>Use the Rules page before you jump into the city.</span>
               </div>
             </article>
             <article class="start-flow__item">
@@ -1809,64 +1808,6 @@ function renderStart() {
           <div class="stack-list__item"><span class="stack-list__index">02</span><span>Check Help for common questions, punishments, appeals, and support guidance.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>Use the Discord ticket channel when you need staff help or ban-history access.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">04</span><span>Be respectful and keep it fair — staff decisions are based on evidence.</span></div>
-        </div>
-      </section>
-    </div>
-  `);
-}
-
-function renderCommands() {
-  setView(`
-    <div>
-      ${renderHeader("Commands & Keybinds", [{ label: "Commands" }])}
-      <div class="content-grid content-grid--sidebar">
-        <section class="section section--hero">
-          <div class="section__eyebrow">Most used</div>
-          <h2>Common commands</h2>
-          <div class="doc-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Command</th>
-                  <th>What it does</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>/help</code></td>
-                  <td>Shows the most common help / basic info.</td>
-                </tr>
-                <tr>
-                  <td><code>/discord</code></td>
-                  <td>Shows the Discord link or server info.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <aside class="section section--stack">
-          <div class="section__eyebrow">Quick reference</div>
-          <h2>Starter tips</h2>
-          <div class="feature-grid feature-grid--compact">
-            <div class="feature-card">
-              <div class="feature-card__label">Starter Tip</div>
-              <div class="feature-card__value">Learn M & T first</div>
-            </div>
-            <div class="feature-card">
-              <div class="feature-card__label">Navigation</div>
-                <div class="feature-card__value">Use Navigation + Help</div>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      <section class="section section--timeline">
-        <div class="section__eyebrow">Control guide</div>
-        <h2>Current keybinds</h2>
-        <div class="stack-list">
-          <div class="stack-list__item"><span class="stack-list__index">M</span><span>Navigation menu</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">T</span><span>Chat</span></div>
         </div>
       </section>
     </div>
@@ -6342,7 +6283,6 @@ function parseRoute() {
 
   if (parts[0] === "start") return { name: "start" };
   if (parts[0] === "rules") return { name: "rules" };
-  if (parts[0] === "commands") return { name: "commands" };
   if (parts[0] === "apply" || parts[0] === "applications") return { name: "apply" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
   if (parts[0] === "account") return { name: "account" };
@@ -6405,11 +6345,6 @@ function route() {
 
   if (r.name === "start") {
     renderStart();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
-    return;
-  }
-  if (r.name === "commands") {
-    renderCommands();
     meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }

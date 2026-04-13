@@ -92,6 +92,7 @@ $_SESSION['logged_in_at'] = gmdate('c');
 $_SESSION['last_verified_at'] = gmdate('c');
 unset($_SESSION['oauth_state']);
 unset($_SESSION['oauth_return_to']);
+auth_refresh_session_cookie();
 
 try {
     if (!empty(auth_config('mysql_dsn')) && !empty(auth_config('mysql_user'))) {

@@ -151,6 +151,25 @@ function auth_expire_session_cookie(): void
     ]);
 }
 
+function auth_refresh_session_cookie(): void
+{
+    global $sessionCookieLifetime;
+
+    if ($sessionCookieLifetime <= 0 || !ini_get('session.use_cookies')) {
+        return;
+    }
+
+    $params = auth_session_cookie_params();
+    setcookie(session_name(), session_id(), [
+        'expires' => time() + $params['lifetime'],
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $params['secure'],
+        'httponly' => $params['httponly'],
+        'samesite' => $params['samesite'],
+    ]);
+}
+
 function auth_role_ids_from_session(): array
 {
     $sources = [
@@ -305,6 +324,7 @@ function auth_send_json(array $payload, int $statusCode = 200): void
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     if ($sessionCookieLifetime > 0) {
+        ini_set('session.cookie_lifetime', (string) $sessionCookieLifetime);
         $currentGcMaxLifetime = (int) ini_get('session.gc_maxlifetime');
         if ($currentGcMaxLifetime < $sessionCookieLifetime) {
             ini_set('session.gc_maxlifetime', (string) $sessionCookieLifetime);
@@ -317,18 +337,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 if (!empty($_SESSION['logged_in'])) {
     $_SESSION['last_seen_at'] = time();
-
-    if ($sessionCookieLifetime > 0 && ini_get('session.use_cookies')) {
-        $params = auth_session_cookie_params();
-        setcookie(session_name(), session_id(), [
-            'expires' => time() + $params['lifetime'],
-            'path' => $params['path'],
-            'domain' => $params['domain'],
-            'secure' => $params['secure'],
-            'httponly' => $params['httponly'],
-            'samesite' => $params['samesite'],
-        ]);
-    }
+    auth_refresh_session_cookie();
 }
 
 function auth_discord_request(string $url, string $method = 'GET', ?array $data = null, ?string $token = null): array
