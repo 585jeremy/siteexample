@@ -67,7 +67,7 @@ const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
 const SITE_ASSET_VERSION = "20260403q";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
-  : "./";
+  : `${window.location.origin}/`;
 const BRAND_LOGO_BANNER_URL = `${APP_ASSET_BASE_URL}branding/sg-cops-and-robbers.png?v=${SITE_ASSET_VERSION}`;
 const BRAND_LOGO_BADGE_URL = `${APP_ASSET_BASE_URL}branding/sgcnr-badge.png?v=${SITE_ASSET_VERSION}`;
 const MAP_SOURCE_URL = "https://gta-5-map.com?embed=light";
@@ -481,10 +481,10 @@ let leaderboardPageState = {
   requestId: 0
 };
 const APPLICATION_API = {
-  list: "./auth/applications-list.php",
-  detail: "./auth/applications-detail.php",
-  submit: "./auth/applications-submit.php",
-  message: "./auth/applications-message.php"
+  list: `${APP_ASSET_BASE_URL}auth/applications-list.php`,
+  detail: `${APP_ASSET_BASE_URL}auth/applications-detail.php`,
+  submit: `${APP_ASSET_BASE_URL}auth/applications-submit.php`,
+  message: `${APP_ASSET_BASE_URL}auth/applications-message.php`
 };
 const APPLICATION_STATUS_LABELS = {
   submitted: "Submitted",
@@ -496,7 +496,7 @@ const APPLICATION_STATUS_LABELS = {
   closed: "Closed"
 };
 const APPLICATION_OPEN_STATUSES = ["submitted", "in_review", "needs_info", "interview"];
-const ADMIN_OVERVIEW_API = "./auth/admin-overview.php";
+const ADMIN_OVERVIEW_API = `${APP_ASSET_BASE_URL}auth/admin-overview.php`;
 let applicationCenterState = {
   loading: false,
   submitting: false,
@@ -1122,7 +1122,7 @@ function buildAuthRedirectUrl(baseUrl) {
 function performLogout() {
   clearSession();
   closeAccountUi();
-  const logoutUrl = SERVER_CONFIG.authLogoutUrl || "./auth/logout.php";
+  const logoutUrl = SERVER_CONFIG.authLogoutUrl || `${APP_ASSET_BASE_URL}auth/logout.php`;
   window.location.href = buildAuthRedirectUrl(logoutUrl);
 }
 
