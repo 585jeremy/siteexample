@@ -1861,7 +1861,7 @@ function renderHelp() {
             <div class="info-faq">
               <div class="info-faq__item">
                 <div class="info-faq__q">Does the website already have a real database?</div>
-                <div class="info-faq__a">The website is now prepared for Discord-only account access. Real synced accounts across devices, ticket sync, punishments, and Discord role rewards still need a backend API and database behind it.</div>
+                <div class="info-faq__a">The website is now prepared for Discord-only account access. Real synced accounts across devices, ticket sync, punishments, and Discord role rewards still need backend services and a database behind it.</div>
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">Can the website be connected to a Discord bot later?</div>
@@ -1869,7 +1869,7 @@ function renderHelp() {
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">What is needed for real Discord linking?</div>
-                <div class="info-faq__a">You will need Discord OAuth on the website, a backend service that verifies the Discord login token, a database for linked accounts, and bot or Discord API access so roles can be confirmed safely.</div>
+                <div class="info-faq__a">You will need Discord OAuth on the website, a secure service that verifies the Discord login, a database for linked accounts, and bot-driven role checks so roles can be confirmed safely.</div>
               </div>
               <div class="info-faq__item">
                 <div class="info-faq__q">How would Discord role sync actually work?</div>
@@ -2232,7 +2232,7 @@ function renderAdminLockedPage() {
         <h2>${escapeHtml(label)} role required</h2>
         <p class="doc-p">This tab is reserved for Discord accounts with one of the configured manager/admin role IDs. Once your manager role is listed in <code>adminPanelRoles</code>, the website will unlock this tab automatically for that Discord account.</p>
         <div class="status-note">
-          <strong>Next step:</strong> add the real Discord manager role ID to <code>server-config.js</code> so the website can match your synced Discord roles against the admin access rule.
+          <strong>Next step:</strong> add the real Discord manager role ID to the live config so the website can match your synced Discord roles against the admin access rule.
         </div>
       </section>
     </div>
@@ -2273,7 +2273,7 @@ function renderAdminDashboard(account) {
           <div class="status-card">
             <div class="status-card__label">Role gate</div>
             <div class="status-card__value">${escapeHtml(label)}</div>
-            <div class="status-card__meta">Configured in <code>server-config.js</code></div>
+            <div class="status-card__meta">Configured in the live website settings</div>
           </div>
         </div>
       </section>
@@ -2299,7 +2299,7 @@ function renderAdminDashboard(account) {
             ${roleMarkup}
           </div>
           <div class="status-note">
-            <strong>Setup note:</strong> the tab only appears when your synced Discord role list contains a role ID from <code>adminPanelRoles</code> in <code>server-config.js</code>.
+            <strong>Setup note:</strong> the tab only appears when your synced Discord role list contains a role ID from the configured admin access rule.
           </div>
         </aside>
       </div>
@@ -2745,7 +2745,7 @@ function renderLeaderboardSummary(metric, rows, snapshot) {
 function renderLeaderboardEmpty(metric, snapshot) {
   const sourceText = snapshot.feedConfigured
     ? "The website is waiting for real ranked data from your leaderboard feed."
-    : "Connect a leaderboard endpoint in server-config.js and real ranked entries will appear here.";
+    : "Connect a leaderboard feed and real ranked entries will appear here.";
 
   return `
     <div class="leaderboard-empty">
@@ -3253,7 +3253,7 @@ function renderMapStageAside(location) {
     <div class="map-stage-card">
       <div class="map-stage-card__eyebrow">Live tracking</div>
       <div class="map-stage-card__title">${liveConfigured ? `${livePlayerCount} tracked players` : "Endpoint ready"}</div>
-      <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. ${optInText}` : "Add a live map endpoint in server-config.js to show player positions directly on the Los Santos map."}</div>
+      <div class="map-stage-card__body">${liveConfigured ? `Map overlay feed checked ${liveUpdatedAt}. ${optInText}` : "Add a live map feed to show player positions directly on the Los Santos map."}</div>
     </div>
   `;
   const hotZonesCard = `
@@ -5160,7 +5160,7 @@ async function loadLiveOpsSnapshot() {
         SERVER_CONFIG.serverHealthUrl ||
         SERVER_CONFIG.websiteHealthUrl
       ),
-    source: SERVER_CONFIG.liveOpsUrl ? "Custom live ops API" : "Per-feature endpoints",
+    source: SERVER_CONFIG.liveOpsUrl ? "Live sync bridge" : "Website feeds",
     publicStatusUrl: SERVER_CONFIG.publicStatusUrl || pickFirstDefined(combined, ["publicStatusUrl", "statusPageUrl", "statusUrl"]) || "",
     liveMap,
     leaderboard,
@@ -5242,7 +5242,7 @@ async function loadServerSnapshot() {
     return {
       online: false,
       name: SERVER_CONFIG.name,
-      description: "The public FiveM API did not answer, but custom health and restart panels can still be used.",
+      description: "The public FiveM status feed did not answer, but custom health and restart panels can still be used.",
       clients: 0,
       maxClients: 0,
       endpoint: "",
@@ -5258,7 +5258,7 @@ async function loadServerSnapshot() {
       source: "Website fallback",
       txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
       liveOps,
-      apiError: error?.message || "The FiveM API did not respond.",
+      apiError: error?.message || "The FiveM status feed did not respond.",
       refreshedAt: new Date()
     };
   }
@@ -5290,7 +5290,7 @@ async function loadServerSnapshot() {
     tags,
     resources: Array.isArray(data?.resources) ? data.resources.length : null,
     players,
-    source: "FiveM Public API",
+    source: "FiveM server feed",
     txAdminConfigured: Boolean(SERVER_CONFIG.txAdminStatusUrl || SERVER_CONFIG.txAdminPlayersUrl),
     liveOps,
     apiError: "",
@@ -5338,7 +5338,7 @@ function renderServerStatusLoading() {
     <section class="section">
       <div class="status-empty">
         <div class="status-empty__title">Loading live server data</div>
-        <div class="status-empty__text">Checking the server API and preparing the latest snapshot.</div>
+        <div class="status-empty__text">Checking the live status feed and preparing the latest snapshot.</div>
       </div>
     </section>
   `;
@@ -5349,9 +5349,9 @@ function renderServerStatusError(message) {
     <section class="section">
         <div class="status-empty status-empty--warning">
         <div class="status-empty__title">Live status is not available right now</div>
-        <div class="status-empty__text">${escapeHtml(message || "The server API could not be reached from the website at the moment.")}</div>
+        <div class="status-empty__text">${escapeHtml(message || "The live status feed could not be reached from the website at the moment.")}</div>
           <div class="status-note">
-            <strong>Ready for live setup:</strong> edit <code>server-config.js</code> if your server uses a different Discord invite, txAdmin hooks, backend API, or Discord bot endpoints.
+            <strong>Ready for live setup:</strong> check the live status configuration if your server uses different Discord, txAdmin, or sync connections.
           </div>
         </div>
       </section>
@@ -5556,7 +5556,7 @@ function renderDiscordLinking(discord) {
   const inviteUrl = discord?.botInviteUrl || "";
   const syncNote = discord?.lastPushAt
     ? `Last bot sync ${formatServerTimestamp(discord.lastPushAt)}${discord?.lastSource ? ` via ${discord.lastSource}` : ""}.`
-    : "The website is still waiting for the first Discord bot sync. If this stays pending, check the live ops bridge on the host.";
+    : "The website is still waiting for the first Discord bot sync. If this stays pending, check the live sync bridge on the host.";
 
   return `
     <div class="stack-list stack-list--compact">
@@ -5570,7 +5570,7 @@ function renderDiscordLinking(discord) {
       <strong>Live sync:</strong> ${escapeHtml(syncNote)}
     </div>
     <div class="status-note">
-      <strong>Backend requirement:</strong> Discord account linking, role rewards, ticket sync, punishments, verification, and bot automation need a real backend API and database behind this website.
+      <strong>Backend requirement:</strong> Discord account linking, role rewards, ticket sync, punishments, verification, and bot automation need backend services and a database behind this website.
     </div>
     <div class="status-actions">
       <a class="info-link" href="${escapeHtml(supportUrl)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
@@ -5616,7 +5616,7 @@ function renderServerStatusContent(snapshot) {
   const apiErrorNote = snapshot.apiError
     ? `
       <div class="status-note">
-        <strong>FiveM API note:</strong> ${escapeHtml(snapshot.apiError)}
+        <strong>FiveM status note:</strong> ${escapeHtml(snapshot.apiError)}
       </div>
     `
     : "";
@@ -5697,7 +5697,7 @@ function renderServerStatusContent(snapshot) {
         <h2>Integration readiness</h2>
         <div class="stack-list stack-list--compact">
           <div class="stack-list__item"><span class="stack-list__index">01</span><span>Public player count and server details are fetched automatically.</span></div>
-          <div class="stack-list__item"><span class="stack-list__index">02</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in <code>server-config.js</code>.</span></div>
+          <div class="stack-list__item"><span class="stack-list__index">02</span><span>txAdmin hooks are ${snapshot.txAdminConfigured ? "configured" : "ready to be added"} in the live website settings.</span></div>
           <div class="stack-list__item"><span class="stack-list__index">03</span><span>Live map feed is ${liveOps.liveMap?.configured ? "connected" : "ready to be connected"} for player positions.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">04</span><span>Restart and uptime panels are ${liveOps.uptime?.configured || liveOps.restart?.configured ? "reading endpoint data" : "waiting for your server endpoints"}.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">05</span><span>Website and server health cards are ${liveOps.serverHealth?.configured || liveOps.websiteHealth?.configured ? "wired to live checks" : "ready for heartbeat or status endpoints"}.</span></div>
@@ -5705,7 +5705,7 @@ function renderServerStatusContent(snapshot) {
             <div class="stack-list__item"><span class="stack-list__index">07</span><span>Discord operations are ${discordOps.configured ? "connected to live data" : "prepared for bot, guild, and support endpoints"}.</span></div>
           </div>
           <div class="status-note">
-            <strong>Next step for your live setup:</strong> replace the values in <code>server-config.js</code> with your real Discord invite and the live endpoints you want the website to use.
+            <strong>Next step for your live setup:</strong> replace the placeholder live settings with your real Discord invite and the live feeds you want the website to use.
           </div>
         </aside>
     </div>
@@ -5837,7 +5837,7 @@ async function refreshServerStatus(options = {}) {
     scheduleServerStatusRefresh();
   } catch (error) {
     if (!getServerStatusRouteActive()) return;
-    mount.innerHTML = renderServerStatusError(error?.message || "The server API did not respond.");
+    mount.innerHTML = renderServerStatusError(error?.message || "The live status feed did not respond.");
     bindStatusPageControls();
     scheduleServerStatusRefresh();
   }

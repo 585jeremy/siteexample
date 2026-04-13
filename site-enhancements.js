@@ -876,6 +876,118 @@
     bindWikiDossierControls();
   };
 
+  function renderWikiArchiveSidebar(categories, pages, currentSlug, updatedAt) {
+    const groups = categories.map((category) => {
+      const links = (category.pages || []).map((slug) => {
+        const page = pages[slug];
+        if (!page) return "";
+        const isActive = slug === currentSlug ? " is-active" : "";
+        const label = page.navLabel || page.title;
+        return `<a class="wiki-nav__item${isActive}" href="#/wiki/${escapeHtml(slug)}">${escapeHtml(label)}</a>`;
+      }).join("");
+
+      return `
+        <div class="wiki-nav__group">
+          <div class="wiki-nav__title">
+            <span>${escapeHtml(category.title)}</span>
+            <span class="wiki-nav__count">${escapeHtml(String((category.pages || []).length))}</span>
+          </div>
+          <div class="wiki-nav__list">${links}</div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <aside class="section section--stack wiki-sidebar">
+        <div class="wiki-sidebar__meta">
+          <div class="section__eyebrow">SGCNR handbook</div>
+          <h2>Wiki directory</h2>
+          <p class="doc-p">Browse the original handbook pages by group. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+        </div>
+        <div class="wiki-sidebar__navWrap">
+          <div class="wiki-nav">${groups}</div>
+        </div>
+      </aside>
+    `;
+  }
+
+  renderWikiSidebar = function renderWikiArchiveSidebarOverride(categories, pages, currentSlug, updatedAt) {
+    return renderWikiArchiveSidebar(categories, pages, currentSlug, updatedAt);
+  };
+
+  renderWiki = function renderWikiArchive(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="wiki-shell wiki-archive">
+          ${renderHeader("Wiki", [{ label: "Wiki" }])}
+          <section class="section">
+            <div class="empty">Wiki data is missing right now.</div>
+          </section>
+        </div>
+      `);
+      return;
+    }
+
+    const category = findWikiCategoryForPage(categories, currentSlug);
+    const heading = page.navLabel || page.title;
+    const sidebar = renderWikiArchiveSidebar(categories, pages, currentSlug, wiki.updatedAt);
+    const facts = renderWikiFacts(page);
+    const overview = renderWikiOverviewCards(page.overviewCards);
+    const updates = renderWikiUpdates(page.updates);
+    const content = renderWikiSections(page.sections);
+    const pager = renderWikiPager(categories, pages, currentSlug);
+
+    setView(`
+      <div class="wiki-shell wiki-archive">
+        ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+        <section class="section section--hero wiki-archive__hero">
+          <div class="wiki-archive__heroBody">
+            <div class="wiki-archive__heroCopy">
+              <div class="section__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
+              <h2>${escapeHtml(page.title)}</h2>
+              <p class="doc-p">${escapeHtml(page.summary || "")}</p>
+            </div>
+            <div class="wiki-archive__heroMeta">
+              <article class="wiki-archive__metaCard">
+                <span>Category</span>
+                <strong>${escapeHtml(category?.title || "Wiki")}</strong>
+              </article>
+              <article class="wiki-archive__metaCard">
+                <span>Updated</span>
+                <strong>${escapeHtml(wiki.updatedAt || "2026-04-01")}</strong>
+              </article>
+              <article class="wiki-archive__metaCard">
+                <span>Sections</span>
+                <strong>${escapeHtml(String((page.sections || []).length || 0))}</strong>
+              </article>
+            </div>
+          </div>
+        </section>
+        <div class="wiki-layout wiki-archive__layout">
+          ${sidebar}
+          <section class="section wiki-article wiki-archive__article">
+            <div class="wiki-archive__articleTop">
+              <div class="section__eyebrow">Guide content</div>
+              <p class="doc-p">Everything below stays in the original handbook order. Only the presentation has been cleaned up.</p>
+            </div>
+            ${facts}
+            ${overview}
+            ${content}
+            ${updates}
+            ${pager}
+          </section>
+        </div>
+      </div>
+    `);
+  };
+
   function clearApplicationCenterPoll() {
     if (applicationCenterState.pollTimer) {
       window.clearTimeout(applicationCenterState.pollTimer);

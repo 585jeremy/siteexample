@@ -8673,3 +8673,270 @@ body.is-wiki .content{
     display: none;
   }
 }
+
+/* 2026-04-13 wiki archive bronze reset */
+body.is-wiki{
+  background:
+    radial-gradient(circle at 18% 12%, rgba(190,136,78,.10), transparent 24%),
+    radial-gradient(circle at 84% 18%, rgba(118,77,44,.12), transparent 26%),
+    linear-gradient(180deg, #090909 0%, #120f0d 46%, #080808 100%) !important;
+}
+
+body.is-wiki::before,
+body.is-wiki::after{
+  content: none !important;
+  display: none !important;
+}
+
+body.is-wiki .content{
+  width: min(1380px, calc(100% - 28px)) !important;
+  padding: 16px 0 128px !important;
+  background: transparent !important;
+}
+
+.wiki-archive{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-archive__hero{
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    radial-gradient(circle at 84% 18%, rgba(130,87,49,.16), transparent 24%),
+    radial-gradient(circle at 14% 20%, rgba(201,149,87,.12), transparent 20%),
+    linear-gradient(180deg, rgba(18,14,12,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-archive__heroBody{
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-archive__heroCopy{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-archive__heroCopy h2{
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos", "Segoe UI", sans-serif;
+  font-size: clamp(38px, 5vw, 62px);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: -.05em;
+  color: rgba(248,241,230,.98);
+}
+
+.wiki-archive__heroCopy .doc-p{
+  max-width: 64ch;
+  margin: 0;
+  color: rgba(223,205,178,.74);
+}
+
+.wiki-archive__heroMeta{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-archive__metaCard{
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(183,137,85,.12);
+  background: linear-gradient(180deg, rgba(29,22,18,.88), rgba(10,10,11,.98));
+}
+
+.wiki-archive__metaCard span{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(205,179,142,.56);
+}
+
+.wiki-archive__metaCard strong{
+  color: rgba(247,239,226,.95);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.wiki-archive__layout{
+  grid-template-columns: minmax(260px, 310px) minmax(0, 1fr) !important;
+  gap: 18px !important;
+}
+
+.wiki-archive .wiki-sidebar{
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  border-radius: 24px !important;
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(17,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-archive .wiki-sidebar__meta{
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.wiki-archive .wiki-sidebar__meta .doc-p{
+  margin: 0;
+  color: rgba(216,198,172,.72);
+}
+
+.wiki-archive .wiki-sidebar__navWrap{
+  border-radius: 18px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(23,18,15,.96), rgba(10,10,11,.98));
+  padding: 10px;
+}
+
+.wiki-archive .wiki-nav{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-archive .wiki-nav__group{
+  display: grid;
+  gap: 10px;
+}
+
+.wiki-archive .wiki-nav__title{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px;
+  color: rgba(236,226,210,.86);
+}
+
+.wiki-archive .wiki-nav__count{
+  min-width: 28px;
+  border-color: rgba(183,137,85,.18);
+  background: rgba(183,137,85,.08);
+  color: rgba(244,235,220,.88);
+}
+
+.wiki-archive .wiki-nav__list{
+  display: grid;
+  gap: 8px;
+}
+
+.wiki-archive .wiki-nav__item{
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(183,137,85,.08);
+  background: linear-gradient(180deg, rgba(27,21,18,.96), rgba(11,11,12,.98));
+  color: rgba(228,216,199,.82);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.wiki-archive .wiki-nav__item:hover{
+  transform: translateY(-1px);
+  border-color: rgba(200,150,92,.18);
+  background: linear-gradient(180deg, rgba(37,28,23,.98), rgba(12,12,14,.98));
+}
+
+.wiki-archive .wiki-nav__item.is-active{
+  border-color: rgba(208,156,95,.30);
+  background: linear-gradient(180deg, rgba(78,55,29,.34), rgba(20,14,11,.98));
+  color: rgba(248,240,228,.95);
+}
+
+.wiki-archive .wiki-article{
+  display: grid;
+  gap: 16px;
+  border-radius: 24px !important;
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(17,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-archive__articleTop{
+  display: grid;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(183,137,85,.08);
+}
+
+.wiki-archive__articleTop .doc-p{
+  margin: 0;
+  color: rgba(216,198,172,.72);
+}
+
+.wiki-archive .wiki-facts{
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.wiki-archive .wiki-fact,
+.wiki-archive .wiki-card,
+.wiki-archive .wiki-sectionBlock,
+.wiki-archive .wiki-pager__card{
+  border-color: rgba(183,137,85,.10) !important;
+  background: linear-gradient(180deg, rgba(23,18,15,.96), rgba(10,10,11,.98)) !important;
+}
+
+.wiki-archive .wiki-fact__label,
+.wiki-archive .wiki-pager__eyebrow{
+  color: rgba(205,179,142,.56);
+}
+
+.wiki-archive .wiki-fact__value,
+.wiki-archive .wiki-sectionBlock__title,
+.wiki-archive .wiki-pager__title{
+  color: rgba(247,239,226,.95);
+}
+
+.wiki-archive .wiki-card__text,
+.wiki-archive .wiki-pager__text,
+.wiki-archive .doc-p,
+.wiki-archive .doc-list li{
+  color: rgba(219,210,194,.74);
+}
+
+.wiki-archive .wiki-sectionBlock{
+  gap: 12px;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.wiki-archive .wiki-pager{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wiki-archive .wiki-pager__card:hover{
+  border-color: rgba(206,150,92,.18) !important;
+  background: linear-gradient(180deg, rgba(36,28,23,.96), rgba(12,12,14,.98)) !important;
+}
+
+@media (max-width: 980px){
+  .wiki-archive__heroBody,
+  .wiki-archive__layout{
+    grid-template-columns: 1fr !important;
+  }
+
+  .wiki-archive .wiki-sidebar{
+    position: static;
+  }
+}
+
+@media (max-width: 760px){
+  body.is-wiki .content{
+    width: min(100%, calc(100% - 18px)) !important;
+    padding: 14px 0 124px !important;
+  }
+
+  .wiki-archive .wiki-facts,
+  .wiki-archive .wiki-pager{
+    grid-template-columns: 1fr;
+  }
+}
