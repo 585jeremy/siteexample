@@ -7701,6 +7701,499 @@ body.is-wiki .content{
   }
 }
 
+/* 2026-04-13 wiki atlas redesign */
+body.is-wiki{
+  background:
+    linear-gradient(180deg, #080808 0%, #0b0a09 100%) !important;
+}
+
+body.is-wiki::before{
+  opacity: 1 !important;
+  background:
+    radial-gradient(1200px 700px at 8% 0%, rgba(119,89,57,.16), transparent 58%),
+    radial-gradient(900px 520px at 92% 0%, rgba(60,42,31,.18), transparent 50%),
+    linear-gradient(180deg, rgba(9,8,7,.92), rgba(8,8,8,.96)) !important;
+}
+
+body.is-wiki::after{
+  opacity: .018 !important;
+}
+
+body.is-wiki .content{
+  width: min(1380px, calc(100% - 30px)) !important;
+  padding: 18px 0 126px !important;
+}
+
+.wiki-atlas{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-atlas .section__eyebrow,
+.wiki-atlas__eyebrow,
+.wiki-atlas__sheetLabel,
+.wiki-atlas__pagerLabel,
+.wiki-atlas__editionLabel{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(109,81,54,.70);
+}
+
+.wiki-atlas__masthead{
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 360px;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 30px;
+  border: 1px solid rgba(201,173,137,.10);
+  background:
+    linear-gradient(180deg, rgba(233,226,212,.98), rgba(213,203,186,.98));
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.34);
+  color: #151311;
+}
+
+.wiki-atlas__edition{
+  display: grid;
+  gap: 10px;
+  padding-right: 12px;
+  border-right: 1px solid rgba(84,60,39,.14);
+}
+
+.wiki-atlas__editionValue{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  line-height: 1.05;
+  color: #181410;
+}
+
+.wiki-atlas__editionMeta{
+  color: rgba(43,32,23,.72);
+  line-height: 1.55;
+}
+
+.wiki-atlas__headline{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-atlas__headline h2{
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: .92;
+  letter-spacing: -.06em;
+  color: #15120f;
+}
+
+.wiki-atlas__headline p{
+  margin: 0;
+  max-width: 58ch;
+  color: rgba(34,26,19,.76);
+  line-height: 1.72;
+}
+
+.wiki-atlas__briefing{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-atlas__briefCard{
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(56,40,27,.12);
+  background: rgba(255,255,255,.36);
+}
+
+.wiki-atlas__briefIndex{
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  border-radius: 14px;
+  background: #161310;
+  color: rgba(244,234,218,.92);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wiki-atlas__briefBody{
+  display: grid;
+  gap: 6px;
+}
+
+.wiki-atlas__briefBody strong{
+  color: #171310;
+}
+
+.wiki-atlas__briefBody span{
+  color: rgba(37,28,21,.72);
+  line-height: 1.55;
+}
+
+.wiki-atlas__shelf{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-atlas__group{
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(204,175,138,.10);
+  background:
+    linear-gradient(180deg, rgba(16,13,11,.96), rgba(10,10,10,.98));
+}
+
+.wiki-atlas__groupTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wiki-atlas__groupTitle{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(240,228,211,.88);
+}
+
+.wiki-atlas__groupCount{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(233,220,202,.10);
+  color: rgba(242,232,217,.88);
+}
+
+.wiki-atlas__groupLinks{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wiki-atlas__link{
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(235,224,208,.08);
+  background: rgba(255,255,255,.03);
+  color: rgba(230,219,203,.74);
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.wiki-atlas__link:hover{
+  transform: translateY(-1px);
+  border-color: rgba(211,181,142,.18);
+  background: rgba(255,255,255,.05);
+}
+
+.wiki-atlas__link.is-active{
+  border-color: rgba(205,176,136,.28);
+  background: linear-gradient(180deg, rgba(232,222,205,.16), rgba(96,72,48,.14));
+  color: rgba(247,239,228,.96);
+}
+
+.wiki-atlas__linkLabel{
+  line-height: 1.35;
+}
+
+.wiki-atlas__factRow{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wiki-atlas__factPill{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(204,175,138,.10);
+  background: linear-gradient(180deg, rgba(20,16,14,.96), rgba(10,10,10,.98));
+}
+
+.wiki-atlas__factPill span{
+  color: rgba(207,184,151,.64);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wiki-atlas__factPill strong{
+  color: rgba(245,236,222,.94);
+}
+
+.wiki-atlas__chapterBar{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wiki-atlas__chapterBtn{
+  display: inline-grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(204,175,138,.10);
+  background: linear-gradient(180deg, rgba(20,16,14,.96), rgba(10,10,10,.98));
+  color: rgba(238,227,211,.86);
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease;
+}
+
+.wiki-atlas__chapterBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(214,186,148,.20);
+}
+
+.wiki-atlas__chapterBtnIndex{
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  border-radius: 12px;
+  background: rgba(234,221,202,.10);
+  color: rgba(245,237,225,.90);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.wiki-atlas__chapterBtnLabel{
+  line-height: 1.35;
+}
+
+.wiki-atlas__body{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-atlas__sheet{
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 30px;
+  border: 1px solid rgba(201,173,137,.10);
+  background:
+    linear-gradient(180deg, rgba(233,226,212,.98), rgba(214,205,191,.98));
+  box-shadow:
+    0 18px 46px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.34);
+}
+
+.wiki-atlas__sheetTop{
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-atlas__sheetNumber{
+  display: inline-grid;
+  place-items: center;
+  width: 84px;
+  min-height: 84px;
+  border-radius: 22px;
+  background: #15120f;
+  color: rgba(246,238,226,.94);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.wiki-atlas__sheetTitleWrap{
+  display: grid;
+  gap: 8px;
+}
+
+.wiki-atlas__sheetTitle{
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 34px;
+  line-height: 1.02;
+  letter-spacing: -.04em;
+  color: #17130f;
+}
+
+.wiki-atlas__sheetBody{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-atlas__sheetText{
+  margin: 0;
+  color: rgba(33,26,20,.82);
+  line-height: 1.8;
+}
+
+.wiki-atlas__sheetList{
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wiki-atlas__sheetList li{
+  position: relative;
+  padding-left: 20px;
+  color: rgba(33,26,20,.82);
+  line-height: 1.75;
+}
+
+.wiki-atlas__sheetList li::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .78em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #17120e;
+}
+
+.wiki-atlas__notes{
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid rgba(204,175,138,.10);
+  background: linear-gradient(180deg, rgba(18,14,12,.96), rgba(10,10,10,.98));
+}
+
+.wiki-atlas__notesHead{
+  display: grid;
+  gap: 6px;
+}
+
+.wiki-atlas__notesHead h3{
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  line-height: 1;
+  color: rgba(247,239,226,.96);
+}
+
+.wiki-atlas__notesList{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-atlas__noteItem{
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding-top: 12px;
+  border-top: 1px solid rgba(230,216,197,.08);
+  color: rgba(223,207,183,.78);
+  line-height: 1.65;
+}
+
+.wiki-atlas__noteItem:first-child{
+  border-top: 0;
+  padding-top: 0;
+}
+
+.wiki-atlas__noteIndex{
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  min-height: 42px;
+  border-radius: 13px;
+  background: rgba(235,224,208,.08);
+  color: rgba(247,239,226,.88);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.wiki-atlas__pager{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.wiki-atlas__pagerItem{
+  display: grid;
+  gap: 10px;
+  min-height: 124px;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(204,175,138,.10);
+  background: linear-gradient(180deg, rgba(20,16,14,.96), rgba(10,10,10,.98));
+  transition: transform .18s ease, border-color .18s ease;
+}
+
+.wiki-atlas__pagerItem:hover{
+  transform: translateY(-1px);
+  border-color: rgba(214,186,148,.20);
+}
+
+.wiki-atlas__pagerItem--ghost{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.wiki-atlas__pagerTitle{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  line-height: 1;
+  color: rgba(247,239,226,.96);
+}
+
+@media (max-width: 980px){
+  .wiki-atlas__masthead{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-atlas__edition{
+    padding-right: 0;
+    padding-bottom: 12px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(84,60,39,.14);
+  }
+}
+
+@media (max-width: 760px){
+  .wiki-atlas__sheetTop,
+  .wiki-atlas__pager{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-atlas__sheetNumber{
+    width: 70px;
+    min-height: 70px;
+  }
+
+  .wiki-atlas__headline h2,
+  .wiki-atlas__sheetTitle,
+  .wiki-atlas__pagerTitle{
+    max-width: none;
+  }
+}
+
 @media (max-width: 980px){
   .account-menu{
     top: 74px;
@@ -7713,5 +8206,470 @@ body.is-wiki .content{
 
   .admin-counts{
     grid-template-columns: 1fr;
+  }
+}
+
+/* 2026-04-13 wiki dossier rebuild */
+body.is-wiki{
+  background:
+    linear-gradient(180deg, #0b0f14 0%, #121821 46%, #0b1015 100%) !important;
+}
+
+body.is-wiki::before,
+body.is-wiki::after{
+  content: none !important;
+  display: none !important;
+}
+
+body.is-wiki .content{
+  width: min(1460px, calc(100% - 32px)) !important;
+  padding: 18px 0 132px !important;
+  background: transparent !important;
+}
+
+.wiki-dossier{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-dossier__masthead{
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(180deg, rgba(17,23,31,.98), rgba(10,14,19,.99));
+  box-shadow: 0 24px 46px rgba(0,0,0,.22);
+}
+
+.wiki-dossier__stamp,
+.wiki-dossier__summaryItem{
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+}
+
+.wiki-dossier__stampLabel,
+.wiki-dossier__eyebrow,
+.wiki-dossier__summaryItem span,
+.wiki-dossier__catalogTitle,
+.wiki-dossier__navigatorIndex,
+.wiki-dossier__folioNumber,
+.wiki-dossier__pagerLabel,
+.wiki-dossier__noteIndex{
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.wiki-dossier__stampLabel,
+.wiki-dossier__eyebrow,
+.wiki-dossier__summaryItem span{
+  color: rgba(196,207,220,.58);
+}
+
+.wiki-dossier__stampValue{
+  font-size: 28px;
+  line-height: 1;
+  color: rgba(243,246,250,.96);
+}
+
+.wiki-dossier__stampMeta{
+  color: rgba(205,214,223,.70);
+}
+
+.wiki-dossier__headline{
+  display: grid;
+  gap: 14px;
+  align-content: center;
+}
+
+.wiki-dossier__headline h2{
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos", "Segoe UI", sans-serif;
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 700;
+  line-height: .96;
+  letter-spacing: -.05em;
+  color: rgba(245,248,252,.98);
+}
+
+.wiki-dossier__headline p{
+  max-width: 64ch;
+  margin: 0;
+  color: rgba(205,214,223,.74);
+  line-height: 1.75;
+}
+
+.wiki-dossier__summaryGrid{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-dossier__summaryItem strong{
+  color: rgba(244,247,250,.96);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.wiki-dossier__catalog{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.wiki-dossier__catalogGroup{
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(17,23,31,.96), rgba(10,14,19,.98));
+}
+
+.wiki-dossier__catalogTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wiki-dossier__catalogTitle{
+  color: rgba(225,233,242,.74);
+}
+
+.wiki-dossier__catalogCount{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: rgba(241,245,249,.86);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wiki-dossier__catalogLinks{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wiki-dossier__catalogLink{
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  color: rgba(220,229,238,.82);
+  font-size: 13px;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.wiki-dossier__catalogLink:hover{
+  transform: translateY(-1px);
+  border-color: rgba(182,197,214,.20);
+  background: rgba(255,255,255,.05);
+}
+
+.wiki-dossier__catalogLink.is-active{
+  border-color: rgba(202,214,227,.28);
+  background: rgba(233,240,248,.10);
+  color: rgba(248,251,255,.96);
+}
+
+.wiki-dossier__workspace{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-dossier__main,
+.wiki-dossier__side{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-dossier__side{
+  position: sticky;
+  top: 96px;
+}
+
+.wiki-dossier__navigator{
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(17,23,31,.96), rgba(10,14,19,.98));
+}
+
+.wiki-dossier__navigatorTop{
+  display: grid;
+  gap: 6px;
+}
+
+.wiki-dossier__navigatorTop h3{
+  margin: 0;
+  color: rgba(244,248,252,.96);
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.wiki-dossier__navigatorList{
+  display: grid;
+  gap: 10px;
+}
+
+.wiki-dossier__navigatorBtn{
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  color: rgba(224,232,240,.84);
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.wiki-dossier__navigatorBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(186,198,212,.20);
+  background: rgba(255,255,255,.05);
+}
+
+.wiki-dossier__navigatorIndex{
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: rgba(243,248,253,.92);
+}
+
+.wiki-dossier__navigatorLabel{
+  line-height: 1.45;
+}
+
+.wiki-dossier__folio{
+  display: grid;
+  gap: 18px;
+  padding: 24px 26px;
+  border-radius: 26px;
+  border: 1px solid rgba(28,39,49,.16);
+  background:
+    linear-gradient(180deg, rgba(246,248,251,.98), rgba(232,237,243,.98));
+  box-shadow:
+    0 20px 42px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.wiki-dossier__folioTop{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.wiki-dossier__folioNumber{
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #121821;
+  color: rgba(244,248,252,.94);
+}
+
+.wiki-dossier__folioRule{
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(18,24,33,.30), rgba(18,24,33,.02));
+}
+
+.wiki-dossier__folioTitle{
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos", "Segoe UI", sans-serif;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -.04em;
+  color: #10161d;
+}
+
+.wiki-dossier__folioBody{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-dossier__folioText{
+  margin: 0;
+  color: rgba(26,33,41,.84);
+  line-height: 1.85;
+}
+
+.wiki-dossier__folioList{
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wiki-dossier__folioList li{
+  position: relative;
+  padding-left: 22px;
+  color: rgba(26,33,41,.84);
+  line-height: 1.78;
+}
+
+.wiki-dossier__folioList li::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .8em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #10161d;
+}
+
+.wiki-dossier__notes{
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(17,23,31,.96), rgba(10,14,19,.98));
+}
+
+.wiki-dossier__notesTop{
+  display: grid;
+  gap: 6px;
+}
+
+.wiki-dossier__notesTop h3{
+  margin: 0;
+  color: rgba(244,248,252,.96);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.wiki-dossier__notesList{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-dossier__note{
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  color: rgba(214,223,231,.76);
+  line-height: 1.7;
+}
+
+.wiki-dossier__noteIndex{
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.05);
+  color: rgba(247,251,255,.88);
+}
+
+.wiki-dossier__pager{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.wiki-dossier__pagerItem{
+  display: grid;
+  gap: 10px;
+  min-height: 120px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(17,23,31,.96), rgba(10,14,19,.98));
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.wiki-dossier__pagerItem:hover{
+  transform: translateY(-1px);
+  border-color: rgba(182,197,214,.18);
+  background: linear-gradient(180deg, rgba(20,27,36,.98), rgba(10,14,19,.99));
+}
+
+.wiki-dossier__pagerItem--ghost{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.wiki-dossier__pagerTitle{
+  color: rgba(244,248,252,.96);
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+@media (max-width: 1120px){
+  .wiki-dossier__masthead,
+  .wiki-dossier__workspace{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-dossier__side{
+    position: static;
+  }
+}
+
+@media (max-width: 760px){
+  body.is-wiki .content{
+    width: min(100%, calc(100% - 18px)) !important;
+    padding: 14px 0 124px !important;
+  }
+
+  .wiki-dossier__masthead,
+  .wiki-dossier__folio,
+  .wiki-dossier__catalogGroup,
+  .wiki-dossier__navigator,
+  .wiki-dossier__notes,
+  .wiki-dossier__pagerItem{
+    padding: 18px;
+  }
+
+  .wiki-dossier__catalog,
+  .wiki-dossier__pager{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-dossier__folioTop,
+  .wiki-dossier__note{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-dossier__folioRule{
+    display: none;
   }
 }

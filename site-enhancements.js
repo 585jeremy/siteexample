@@ -412,6 +412,470 @@
     return APPLICATION_OPEN_STATUSES.includes(String(status || "").trim());
   }
 
+  function getWikiAtlasAnchor(index) {
+    return `wiki-atlas-chapter-${index + 1}`;
+  }
+
+  function renderWikiAtlasShelf(categories, pages, currentSlug) {
+    return `
+      <section class="wiki-atlas__shelf" aria-label="Wiki library">
+        ${categories.map((category) => {
+          const links = (category.pages || []).map((slug) => {
+            const page = pages[slug];
+            if (!page) return "";
+            const active = slug === currentSlug ? " is-active" : "";
+            return `
+              <a class="wiki-atlas__link${active}" href="#/wiki/${escapeHtml(slug)}">
+                <span class="wiki-atlas__linkLabel">${escapeHtml(page.navLabel || page.title)}</span>
+              </a>
+            `;
+          }).join("");
+
+          return `
+            <article class="wiki-atlas__group">
+              <div class="wiki-atlas__groupTop">
+                <span class="wiki-atlas__groupTitle">${escapeHtml(category.title)}</span>
+                <span class="wiki-atlas__groupCount">${escapeHtml(String((category.pages || []).length))}</span>
+              </div>
+              <div class="wiki-atlas__groupLinks">${links}</div>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }
+
+  function renderWikiAtlasMasthead(page, category, updatedAt, currentIndex, totalPages) {
+    const notes = Array.isArray(page?.overviewCards) && page.overviewCards.length
+      ? page.overviewCards.slice(0, 3)
+      : [
+          { title: "Read order", text: "Start with the summary, then move through each chapter in order." },
+          { title: "Fast lookup", text: "Use the chapter strip below to jump straight into the exact section you need." },
+          { title: "Current page", text: "This page stays focused on one subject instead of mixing multiple systems together." }
+        ];
+
+    return `
+      <section class="wiki-atlas__masthead">
+        <div class="wiki-atlas__edition">
+          <div class="wiki-atlas__editionLabel">SGCNR knowledgebase</div>
+          <div class="wiki-atlas__editionValue">${escapeHtml(category?.title || "Wiki")}</div>
+          <div class="wiki-atlas__editionMeta">Page ${escapeHtml(String(currentIndex + 1))} / ${escapeHtml(String(totalPages))}</div>
+          <div class="wiki-atlas__editionMeta">Updated ${escapeHtml(updatedAt || "2026-04-01")}</div>
+        </div>
+        <div class="wiki-atlas__headline">
+          <div class="wiki-atlas__eyebrow">${escapeHtml(page.eyebrow || "Knowledgebase entry")}</div>
+          <h2>${escapeHtml(page.title)}</h2>
+          <p>${escapeHtml(page.summary || "")}</p>
+        </div>
+        <div class="wiki-atlas__briefing">
+          ${notes.map((card, index) => `
+            <article class="wiki-atlas__briefCard">
+              <div class="wiki-atlas__briefIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</div>
+              <div class="wiki-atlas__briefBody">
+                <strong>${escapeHtml(card.title || "Guide note")}</strong>
+                <span>${escapeHtml(card.text || "")}</span>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiAtlasFactRow(page) {
+    const facts = Array.isArray(page?.facts) ? page.facts : [];
+    if (!facts.length) return "";
+
+    return `
+      <section class="wiki-atlas__factRow">
+        ${facts.map(([label, value]) => `
+          <article class="wiki-atlas__factPill">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </article>
+        `).join("")}
+      </section>
+    `;
+  }
+
+  function renderWikiAtlasChapters(sections) {
+    const entries = Array.isArray(sections) ? sections : [];
+    if (!entries.length) return "";
+
+    return `
+      <section class="wiki-atlas__chapterBar">
+        ${entries.map((section, index) => `
+          <button class="wiki-atlas__chapterBtn" type="button" data-wiki-atlas-jump="${escapeHtml(getWikiAtlasAnchor(index))}">
+            <span class="wiki-atlas__chapterBtnIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+            <span class="wiki-atlas__chapterBtnLabel">${escapeHtml(section.title || `Section ${index + 1}`)}</span>
+          </button>
+        `).join("")}
+      </section>
+    `;
+  }
+
+  function renderWikiAtlasSheets(sections) {
+    const entries = Array.isArray(sections) ? sections : [];
+    return entries.map((section, index) => {
+      const paragraphs = (section.paragraphs || []).map((paragraph) => `<p class="wiki-atlas__sheetText">${escapeHtml(paragraph)}</p>`).join("");
+      const bullets = Array.isArray(section.bullets) && section.bullets.length
+        ? `
+          <ul class="wiki-atlas__sheetList">
+            ${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        `
+        : "";
+
+      return `
+        <article class="wiki-atlas__sheet" id="${escapeHtml(getWikiAtlasAnchor(index))}">
+          <div class="wiki-atlas__sheetTop">
+            <div class="wiki-atlas__sheetNumber">${escapeHtml(String(index + 1).padStart(2, "0"))}</div>
+            <div class="wiki-atlas__sheetTitleWrap">
+              <div class="wiki-atlas__sheetLabel">Chapter</div>
+              <h3 class="wiki-atlas__sheetTitle">${escapeHtml(section.title || `Section ${index + 1}`)}</h3>
+            </div>
+          </div>
+          <div class="wiki-atlas__sheetBody">
+            ${paragraphs}
+            ${bullets}
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function renderWikiAtlasNotes(items) {
+    const entries = Array.isArray(items) ? items : [];
+    if (!entries.length) return "";
+
+    return `
+      <section class="wiki-atlas__notes">
+        <div class="wiki-atlas__notesHead">
+          <div class="wiki-atlas__eyebrow">Important notes</div>
+          <h3>Current direction</h3>
+        </div>
+        <div class="wiki-atlas__notesList">
+          ${entries.map((item, index) => `
+            <article class="wiki-atlas__noteItem">
+              <span class="wiki-atlas__noteIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+              <span>${escapeHtml(item)}</span>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiAtlasPager(categories, pages, currentSlug) {
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = order.indexOf(currentSlug);
+    if (currentIndex === -1) return "";
+
+    const previousSlug = order[currentIndex - 1] || null;
+    const nextSlug = order[currentIndex + 1] || null;
+    const renderLink = (slug, label) => {
+      if (!slug || !pages[slug]) {
+        return `<div class="wiki-atlas__pagerItem wiki-atlas__pagerItem--ghost"></div>`;
+      }
+
+      const page = pages[slug];
+      return `
+        <a class="wiki-atlas__pagerItem" href="#/wiki/${escapeHtml(slug)}">
+          <span class="wiki-atlas__pagerLabel">${escapeHtml(label)}</span>
+          <strong class="wiki-atlas__pagerTitle">${escapeHtml(page.navLabel || page.title)}</strong>
+        </a>
+      `;
+    };
+
+    return `
+      <section class="wiki-atlas__pager">
+        ${renderLink(previousSlug, "Previous")}
+        ${renderLink(nextSlug, "Next")}
+      </section>
+    `;
+  }
+
+  function bindWikiAtlasControls() {
+    document.querySelectorAll("[data-wiki-atlas-jump]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-wiki-atlas-jump");
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  }
+
+  renderWiki = function renderWikiAtlas(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="wiki-atlas">
+          ${renderHeader("Wiki", [{ label: "Wiki" }])}
+          <div class="section">
+            <div class="empty">Wiki data is missing right now.</div>
+          </div>
+        </div>
+      `);
+      return;
+    }
+
+    const category = findWikiCategoryForPage(categories, currentSlug);
+    const heading = page.navLabel || page.title;
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = Math.max(0, order.indexOf(currentSlug));
+
+    setView(`
+      <div class="wiki-atlas">
+        ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+        ${renderWikiAtlasMasthead(page, category, wiki.updatedAt, currentIndex, order.length || 1)}
+        ${renderWikiAtlasShelf(categories, pages, currentSlug)}
+        ${renderWikiAtlasFactRow(page)}
+        ${renderWikiAtlasChapters(page.sections)}
+        <section class="wiki-atlas__body">
+          ${renderWikiAtlasSheets(page.sections)}
+          ${renderWikiAtlasNotes(page.updates)}
+          ${renderWikiAtlasPager(categories, pages, currentSlug)}
+        </section>
+      </div>
+    `);
+
+    bindWikiAtlasControls();
+  };
+
+  function getWikiDossierAnchor(index) {
+    return `wiki-dossier-part-${index + 1}`;
+  }
+
+  function renderWikiDossierCatalog(categories, pages, currentSlug) {
+    return `
+      <section class="wiki-dossier__catalog" aria-label="Wiki catalog">
+        ${categories.map((category) => {
+          const items = (category.pages || []).map((slug) => {
+            const page = pages[slug];
+            if (!page) return "";
+            const active = slug === currentSlug ? " is-active" : "";
+            return `
+              <a class="wiki-dossier__catalogLink${active}" href="#/wiki/${escapeHtml(slug)}">
+                ${escapeHtml(page.navLabel || page.title)}
+              </a>
+            `;
+          }).join("");
+
+          return `
+            <article class="wiki-dossier__catalogGroup">
+              <div class="wiki-dossier__catalogTop">
+                <span class="wiki-dossier__catalogTitle">${escapeHtml(category.title)}</span>
+                <span class="wiki-dossier__catalogCount">${escapeHtml(String((category.pages || []).length))}</span>
+              </div>
+              <div class="wiki-dossier__catalogLinks">${items}</div>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }
+
+  function renderWikiDossierMasthead(page, category, updatedAt, currentIndex, totalPages) {
+    const facts = Array.isArray(page?.facts) ? page.facts.slice(0, 3) : [];
+    const summaryFacts = facts.length
+      ? facts
+      : [
+          ["Category", category?.title || "Wiki"],
+          ["Sections", String((page?.sections || []).length || 0)],
+          ["Updated", updatedAt || "2026-04-01"]
+        ];
+
+    return `
+      <section class="wiki-dossier__masthead">
+        <div class="wiki-dossier__stamp">
+          <span class="wiki-dossier__stampLabel">SGCNR dossier</span>
+          <strong class="wiki-dossier__stampValue">${escapeHtml(category?.title || "Wiki")}</strong>
+          <span class="wiki-dossier__stampMeta">File ${escapeHtml(String(currentIndex + 1).padStart(2, "0"))} / ${escapeHtml(String(totalPages))}</span>
+        </div>
+        <div class="wiki-dossier__headline">
+          <div class="wiki-dossier__eyebrow">${escapeHtml(page.eyebrow || "Operational guide")}</div>
+          <h2>${escapeHtml(page.title)}</h2>
+          <p>${escapeHtml(page.summary || "")}</p>
+        </div>
+        <div class="wiki-dossier__summaryGrid">
+          ${summaryFacts.map(([label, value]) => `
+            <article class="wiki-dossier__summaryItem">
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiDossierNavigator(sections) {
+    const entries = Array.isArray(sections) ? sections : [];
+    if (!entries.length) return "";
+
+    return `
+      <aside class="wiki-dossier__navigator">
+        <div class="wiki-dossier__navigatorTop">
+          <div class="wiki-dossier__eyebrow">Page structure</div>
+          <h3>Jump to section</h3>
+        </div>
+        <div class="wiki-dossier__navigatorList">
+          ${entries.map((section, index) => `
+            <button class="wiki-dossier__navigatorBtn" type="button" data-wiki-dossier-jump="${escapeHtml(getWikiDossierAnchor(index))}">
+              <span class="wiki-dossier__navigatorIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+              <span class="wiki-dossier__navigatorLabel">${escapeHtml(section.title || `Section ${index + 1}`)}</span>
+            </button>
+          `).join("")}
+        </div>
+      </aside>
+    `;
+  }
+
+  function renderWikiDossierFolios(sections) {
+    const entries = Array.isArray(sections) ? sections : [];
+    return entries.map((section, index) => {
+      const paragraphs = (section.paragraphs || []).map((paragraph) => `
+        <p class="wiki-dossier__folioText">${escapeHtml(paragraph)}</p>
+      `).join("");
+      const bullets = Array.isArray(section.bullets) && section.bullets.length
+        ? `
+          <ul class="wiki-dossier__folioList">
+            ${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        `
+        : "";
+
+      return `
+        <article class="wiki-dossier__folio" id="${escapeHtml(getWikiDossierAnchor(index))}">
+          <div class="wiki-dossier__folioTop">
+            <span class="wiki-dossier__folioNumber">Part ${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+            <span class="wiki-dossier__folioRule" aria-hidden="true"></span>
+          </div>
+          <h3 class="wiki-dossier__folioTitle">${escapeHtml(section.title || `Section ${index + 1}`)}</h3>
+          <div class="wiki-dossier__folioBody">
+            ${paragraphs}
+            ${bullets}
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function renderWikiDossierNotes(items) {
+    const entries = Array.isArray(items) ? items : [];
+    if (!entries.length) return "";
+
+    return `
+      <section class="wiki-dossier__notes">
+        <div class="wiki-dossier__notesTop">
+          <div class="wiki-dossier__eyebrow">Revision notes</div>
+          <h3>Keep in mind</h3>
+        </div>
+        <div class="wiki-dossier__notesList">
+          ${entries.map((item, index) => `
+            <article class="wiki-dossier__note">
+              <span class="wiki-dossier__noteIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+              <span>${escapeHtml(item)}</span>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderWikiDossierPager(categories, pages, currentSlug) {
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = order.indexOf(currentSlug);
+    if (currentIndex === -1) return "";
+
+    const renderLink = (slug, label) => {
+      if (!slug || !pages[slug]) {
+        return `<div class="wiki-dossier__pagerItem wiki-dossier__pagerItem--ghost"></div>`;
+      }
+
+      const page = pages[slug];
+      return `
+        <a class="wiki-dossier__pagerItem" href="#/wiki/${escapeHtml(slug)}">
+          <span class="wiki-dossier__pagerLabel">${escapeHtml(label)}</span>
+          <strong class="wiki-dossier__pagerTitle">${escapeHtml(page.navLabel || page.title)}</strong>
+        </a>
+      `;
+    };
+
+    return `
+      <section class="wiki-dossier__pager">
+        ${renderLink(order[currentIndex - 1] || null, "Previous file")}
+        ${renderLink(order[currentIndex + 1] || null, "Next file")}
+      </section>
+    `;
+  }
+
+  function bindWikiDossierControls() {
+    document.querySelectorAll("[data-wiki-dossier-jump]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-wiki-dossier-jump");
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  }
+
+  renderWiki = function renderWikiDossier(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="wiki-dossier">
+          ${renderHeader("Wiki", [{ label: "Wiki" }])}
+          <section class="section">
+            <div class="empty">Wiki data is missing right now.</div>
+          </section>
+        </div>
+      `);
+      return;
+    }
+
+    const category = findWikiCategoryForPage(categories, currentSlug);
+    const heading = page.navLabel || page.title;
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = Math.max(0, order.indexOf(currentSlug));
+
+    setView(`
+      <div class="wiki-dossier">
+        ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+        ${renderWikiDossierMasthead(page, category, wiki.updatedAt, currentIndex, order.length || 1)}
+        ${renderWikiDossierCatalog(categories, pages, currentSlug)}
+        <section class="wiki-dossier__workspace">
+          <div class="wiki-dossier__main">
+            ${renderWikiDossierFolios(page.sections)}
+            ${renderWikiDossierNotes(page.updates)}
+            ${renderWikiDossierPager(categories, pages, currentSlug)}
+          </div>
+          <div class="wiki-dossier__side">
+            ${renderWikiDossierNavigator(page.sections)}
+          </div>
+        </section>
+      </div>
+    `);
+
+    bindWikiDossierControls();
+  };
+
   function clearApplicationCenterPoll() {
     if (applicationCenterState.pollTimer) {
       window.clearTimeout(applicationCenterState.pollTimer);
