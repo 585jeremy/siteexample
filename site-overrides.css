@@ -8940,3 +8940,292 @@ body.is-wiki .content{
     grid-template-columns: 1fr;
   }
 }
+
+/* 2026-04-13 wiki journal redesign */
+body.is-wiki{
+  background:
+    radial-gradient(circle at 14% 10%, rgba(184,132,78,.08), transparent 22%),
+    radial-gradient(circle at 86% 18%, rgba(120,75,43,.10), transparent 24%),
+    linear-gradient(180deg, #080808 0%, #110e0c 48%, #070707 100%) !important;
+}
+
+body.is-wiki::before,
+body.is-wiki::after{
+  content: none !important;
+  display: none !important;
+}
+
+body.is-wiki .content{
+  width: min(1400px, calc(100% - 28px)) !important;
+  padding: 16px 0 132px !important;
+  background: transparent !important;
+}
+
+.wiki-journal{
+  display: grid;
+  gap: 18px;
+}
+
+.wiki-journal__hero{
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(122,80,44,.16), transparent 24%),
+    radial-gradient(circle at 16% 16%, rgba(198,146,87,.11), transparent 18%),
+    linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-journal__heroGrid{
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-journal__heroCopy{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-journal__heroCopy h2{
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos", "Segoe UI", sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: -.05em;
+  color: rgba(248,241,230,.98);
+}
+
+.wiki-journal__heroCopy .doc-p{
+  max-width: 66ch;
+  margin: 0;
+  color: rgba(221,203,176,.74);
+}
+
+.wiki-journal__heroMeta{
+  display: grid;
+  gap: 12px;
+}
+
+.wiki-journal__metaCard{
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(183,137,85,.12);
+  background: linear-gradient(180deg, rgba(27,21,18,.90), rgba(10,10,11,.98));
+}
+
+.wiki-journal__metaCard span,
+.wiki-journal__railGroupTop{
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(205,179,142,.56);
+}
+
+.wiki-journal__metaCard strong{
+  font-size: 16px;
+  line-height: 1.35;
+  color: rgba(247,239,226,.95);
+}
+
+.wiki-journal__layout{
+  display: grid;
+  grid-template-columns: minmax(260px, 308px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.wiki-journal__rail{
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  border-radius: 24px !important;
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-journal__railTop{
+  display: grid;
+  gap: 10px;
+}
+
+.wiki-journal__railTop .doc-p{
+  margin: 0;
+  color: rgba(216,198,172,.72);
+}
+
+.wiki-journal__railGroups{
+  display: grid;
+  gap: 14px;
+}
+
+.wiki-journal__railGroup{
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(183,137,85,.10);
+  background: linear-gradient(180deg, rgba(22,17,14,.96), rgba(10,10,11,.98));
+}
+
+.wiki-journal__railGroupTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wiki-journal__railCount{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(183,137,85,.16);
+  background: rgba(201,149,87,.08);
+  color: rgba(244,235,220,.84);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wiki-journal__railList{
+  display: grid;
+  gap: 8px;
+}
+
+.wiki-journal__railLink{
+  display: block;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(183,137,85,.08);
+  background: linear-gradient(180deg, rgba(28,22,18,.94), rgba(11,11,12,.98));
+  color: rgba(228,216,199,.80);
+  font-size: 13px;
+  line-height: 1.4;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.wiki-journal__railLink:hover{
+  transform: translateY(-1px);
+  border-color: rgba(200,150,92,.18);
+  background: linear-gradient(180deg, rgba(38,29,23,.98), rgba(12,12,14,.98));
+}
+
+.wiki-journal__railLink.is-active{
+  border-color: rgba(208,156,95,.30);
+  background: linear-gradient(180deg, rgba(80,56,29,.36), rgba(21,15,12,.98));
+  color: rgba(248,240,228,.95);
+}
+
+.wiki-journal__article{
+  display: grid;
+  gap: 16px;
+  border-radius: 24px !important;
+  border-color: rgba(183,137,85,.12) !important;
+  background:
+    linear-gradient(180deg, rgba(16,13,11,.98), rgba(8,8,10,.99)) !important;
+}
+
+.wiki-journal__articleLead{
+  display: grid;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(183,137,85,.08);
+}
+
+.wiki-journal__articleLead .doc-p{
+  margin: 0;
+  color: rgba(216,198,172,.72);
+}
+
+.wiki-journal .wiki-facts{
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.wiki-journal .wiki-fact,
+.wiki-journal .wiki-card,
+.wiki-journal .wiki-sectionBlock,
+.wiki-journal .wiki-pager__card{
+  border-color: rgba(183,137,85,.10) !important;
+  background: linear-gradient(180deg, rgba(22,17,14,.96), rgba(10,10,11,.98)) !important;
+}
+
+.wiki-journal .wiki-fact__label,
+.wiki-journal .wiki-pager__eyebrow{
+  color: rgba(205,179,142,.56);
+}
+
+.wiki-journal .wiki-fact__value,
+.wiki-journal .wiki-card__title,
+.wiki-journal .wiki-sectionBlock__title,
+.wiki-journal .wiki-pager__title{
+  color: rgba(247,239,226,.95);
+}
+
+.wiki-journal .wiki-card__text,
+.wiki-journal .wiki-pager__text,
+.wiki-journal .doc-p,
+.wiki-journal .doc-list li{
+  color: rgba(219,210,194,.74);
+}
+
+.wiki-journal .wiki-grid{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wiki-journal .wiki-card{
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.wiki-journal .wiki-sectionBlock{
+  gap: 12px;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow:
+    inset 4px 0 0 rgba(201,149,87,.14),
+    inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.wiki-journal .wiki-pager{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wiki-journal .wiki-pager__card:hover{
+  border-color: rgba(206,150,92,.18) !important;
+  background: linear-gradient(180deg, rgba(36,28,23,.96), rgba(12,12,14,.98)) !important;
+}
+
+@media (max-width: 1040px){
+  .wiki-journal__heroGrid,
+  .wiki-journal__layout{
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-journal__rail{
+    position: static;
+  }
+}
+
+@media (max-width: 760px){
+  body.is-wiki .content{
+    width: min(100%, calc(100% - 18px)) !important;
+    padding: 14px 0 124px !important;
+  }
+
+  .wiki-journal .wiki-grid,
+  .wiki-journal .wiki-pager{
+    grid-template-columns: 1fr;
+  }
+}

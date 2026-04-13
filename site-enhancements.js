@@ -1673,6 +1673,127 @@
     `;
   };
 
+  function renderWikiJournalRail(categories, pages, currentSlug, updatedAt) {
+    return `
+      <aside class="section section--stack wiki-journal__rail">
+        <div class="wiki-journal__railTop">
+          <div class="section__eyebrow">Handbook</div>
+          <h2>Wiki directory</h2>
+          <p class="doc-p">Same handbook content, cleaner reading layout. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+        </div>
+        <div class="wiki-journal__railGroups">
+          ${categories.map((category) => {
+            const links = (category.pages || []).map((slug) => {
+              const page = pages[slug];
+              if (!page) return "";
+              const isActive = slug === currentSlug ? " is-active" : "";
+              return `
+                <a class="wiki-journal__railLink${isActive}" href="#/wiki/${escapeHtml(slug)}">
+                  ${escapeHtml(page.navLabel || page.title)}
+                </a>
+              `;
+            }).join("");
+
+            return `
+              <section class="wiki-journal__railGroup">
+                <div class="wiki-journal__railGroupTop">
+                  <span>${escapeHtml(category.title)}</span>
+                  <span class="wiki-journal__railCount">${escapeHtml(String((category.pages || []).length))}</span>
+                </div>
+                <div class="wiki-journal__railList">${links}</div>
+              </section>
+            `;
+          }).join("")}
+        </div>
+      </aside>
+    `;
+  }
+
+  function renderWikiJournalHero(page, category, updatedAt, currentIndex, totalPages) {
+    return `
+      <section class="section section--hero wiki-journal__hero">
+        <div class="wiki-journal__heroGrid">
+          <div class="wiki-journal__heroCopy">
+            <div class="section__eyebrow">${escapeHtml(page.eyebrow || "Wiki page")}</div>
+            <h2>${escapeHtml(page.title)}</h2>
+            <p class="doc-p">${escapeHtml(page.summary || "")}</p>
+          </div>
+          <div class="wiki-journal__heroMeta">
+            <article class="wiki-journal__metaCard">
+              <span>Category</span>
+              <strong>${escapeHtml(category?.title || "Wiki")}</strong>
+            </article>
+            <article class="wiki-journal__metaCard">
+              <span>Page</span>
+              <strong>${escapeHtml(String(currentIndex + 1))} / ${escapeHtml(String(totalPages))}</strong>
+            </article>
+            <article class="wiki-journal__metaCard">
+              <span>Updated</span>
+              <strong>${escapeHtml(updatedAt || "2026-04-01")}</strong>
+            </article>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  renderWikiSidebar = function renderWikiSidebarJournal(categories, pages, currentSlug, updatedAt) {
+    return renderWikiJournalRail(categories, pages, currentSlug, updatedAt);
+  };
+
+  renderWiki = function renderWikiJournal(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="wiki-journal">
+          ${renderHeader("Wiki", [{ label: "Wiki" }])}
+          <section class="section">
+            <div class="empty">Wiki data is missing right now.</div>
+          </section>
+        </div>
+      `);
+      return;
+    }
+
+    const category = findWikiCategoryForPage(categories, currentSlug);
+    const heading = page.navLabel || page.title;
+    const order = getWikiPageOrder(categories).filter((slug) => pages[slug]);
+    const currentIndex = Math.max(0, order.indexOf(currentSlug));
+    const sidebar = renderWikiJournalRail(categories, pages, currentSlug, wiki.updatedAt);
+    const facts = renderWikiFacts(page);
+    const overview = renderWikiOverviewCards(page.overviewCards);
+    const updates = renderWikiUpdates(page.updates);
+    const content = renderWikiSections(page.sections);
+    const pager = renderWikiPager(categories, pages, currentSlug);
+
+    setView(`
+      <div class="wiki-journal">
+        ${renderHeader("Wiki", [{ label: "Wiki" }, { label: heading }])}
+        ${renderWikiJournalHero(page, category, wiki.updatedAt, currentIndex, order.length || 1)}
+        <div class="wiki-journal__layout">
+          ${sidebar}
+          <section class="section wiki-journal__article">
+            <div class="wiki-journal__articleLead">
+              <div class="section__eyebrow">Guide content</div>
+              <p class="doc-p">Everything below stays in the original order. Only the presentation has been rebuilt.</p>
+            </div>
+            ${facts}
+            ${overview}
+            ${content}
+            ${updates}
+            ${pager}
+          </section>
+        </div>
+      </div>
+    `);
+  };
+
   function getApplicationLoadErrorMessage(error, fallbackMessage) {
     const reason = error?.payload?.error || error?.message || "application_load_failed";
     if (reason === "applications_not_configured") return "Applications are not connected yet.";
