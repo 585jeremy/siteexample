@@ -5939,6 +5939,19 @@ function renderContentBlocks(section) {
 
 function renderRulesHub(sections) {
   const title = renderHeader("Rules", [{ label: "Rules" }]);
+  if (!sections.length) {
+    setView(`
+      <div>
+        ${title}
+        <section class="section">
+          <div class="empty">The rules are currently being rewritten.</div>
+        </section>
+        ${renderRulesDisclaimer()}
+      </div>
+    `);
+    return;
+  }
+
   const cards = sections
     .map(s => {
       return `
@@ -6129,6 +6142,7 @@ function updateDockActive(routeName) {
 function route() {
   const data = getData();
   const sections = Array.isArray(data?.sections) ? data.sections : [];
+  const ruleSections = sections.filter(s => Array.isArray(s?.rules) && s.rules.length);
 
   const r = parseRoute();
   if (r.name !== "live") {
@@ -6146,7 +6160,7 @@ function route() {
   document.body.classList.toggle("is-standard", isStandardPage);
   document.body.classList.toggle("is-apply", r.name === "apply");
 
-  const inRulesFlow = r.name === "rules" || r.name === "section" || r.name === "rule";
+  const inRulesFlow = (r.name === "rules" && ruleSections.length > 0) || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);
 
   if (inRulesFlow && normalize(currentQuery)) {
@@ -6211,12 +6225,14 @@ function route() {
   }
 
   if (r.name === "rules") {
-    renderRulesHub(sections.filter(s => Array.isArray(s?.rules) && s.rules.length));
+    renderRulesHub(ruleSections);
     const totalRules = sections.reduce(
       (acc, s) => acc + (Array.isArray(s?.rules) ? s.rules.length : 0),
       0
     );
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${totalRules}</kbd> rules`;
+    meta.innerHTML = totalRules
+      ? `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${totalRules}</kbd> rules`
+      : `Updated: <kbd>${data.updatedAt}</kbd> &middot; Rewrite in progress`;
     return;
   }
   if (r.name === "section") {
