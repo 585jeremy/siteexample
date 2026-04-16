@@ -37,8 +37,25 @@ try {
         'messages' => array_map('auth_applications_message_payload', $stmt->fetchAll()),
     ]);
 } catch (Throwable $e) {
-    auth_send_json([
-        'ok' => false,
-        'error' => 'applications_query_failed',
-    ], 500);
+    try {
+        $store = auth_applications_store_load();
+        $application = auth_applications_find_owned_application_in_store($store, $publicId, $user['discordId']);
+        if (!$application) {
+            auth_send_json([
+                'ok' => false,
+                'error' => 'application_not_found',
+            ], 404);
+        }
+
+        auth_send_json([
+            'ok' => true,
+            'application' => auth_applications_application_payload($application),
+            'messages' => auth_applications_messages_from_store_record($application),
+        ]);
+    } catch (Throwable $fallbackError) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'applications_query_failed',
+        ], 500);
+    }
 }

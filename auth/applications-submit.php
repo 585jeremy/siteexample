@@ -126,9 +126,29 @@ try {
     if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    try {
+        $store = auth_applications_store_load();
+        $existing = auth_applications_find_active_application_for_user_in_store($store, $user['discordId']);
 
-    auth_send_json([
-        'ok' => false,
-        'error' => 'application_submit_failed',
-    ], 500);
+        if ($existing) {
+            auth_send_json([
+                'ok' => false,
+                'error' => 'active_application_exists',
+                'application' => auth_applications_application_payload($existing),
+            ], 409);
+        }
+
+        $record = auth_applications_create_file_record($user, $application);
+        auth_applications_send_webhook('application_submitted', $record);
+
+        auth_send_json([
+            'ok' => true,
+            'application' => auth_applications_application_payload($record),
+        ]);
+    } catch (Throwable $fallbackError) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'application_submit_failed',
+        ], 500);
+    }
 }

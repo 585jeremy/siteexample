@@ -119,6 +119,14 @@ try {
     // Non-fatal: login should still succeed even if DB persistence fails.
 }
 
+auth_record_web_session_fallback([
+    'discord_id' => (string) $user['id'],
+    'username' => (string) $user['username'],
+    'avatar' => (string) $avatarUrl,
+    'roles' => is_array($roles) ? $roles : [],
+    'last_seen' => gmdate('Y-m-d H:i:s'),
+]);
+
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Location: ' . ($returnTo && auth_is_allowed_redirect($returnTo) ? $returnTo : $siteHomeUrl));

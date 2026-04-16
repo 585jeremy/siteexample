@@ -21,8 +21,17 @@ try {
         'items' => $items,
     ]);
 } catch (Throwable $e) {
-    auth_send_json([
-        'ok' => false,
-        'error' => 'applications_query_failed',
-    ], 500);
+    try {
+        $store = auth_applications_store_load();
+        $items = array_map('auth_applications_application_payload', auth_applications_list_owned_applications_in_store($store, $user['discordId']));
+        auth_send_json([
+            'ok' => true,
+            'items' => $items,
+        ]);
+    } catch (Throwable $fallbackError) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'applications_query_failed',
+        ], 500);
+    }
 }

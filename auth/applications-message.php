@@ -76,9 +76,28 @@ try {
     if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    try {
+        $senderName = $user['guildNickname'] !== '' ? $user['guildNickname'] : $user['discordDisplayName'];
+        $application = auth_applications_append_file_message($publicId, $user['discordId'], $senderName, $messageText);
 
-    auth_send_json([
-        'ok' => false,
-        'error' => 'application_message_failed',
-    ], 500);
+        if (!$application) {
+            auth_send_json([
+                'ok' => false,
+                'error' => 'application_not_found',
+            ], 404);
+        }
+
+        auth_applications_send_webhook('applicant_message', $application, [
+            'message' => $messageText,
+        ]);
+
+        auth_send_json([
+            'ok' => true,
+        ]);
+    } catch (Throwable $fallbackError) {
+        auth_send_json([
+            'ok' => false,
+            'error' => 'application_message_failed',
+        ], 500);
+    }
 }

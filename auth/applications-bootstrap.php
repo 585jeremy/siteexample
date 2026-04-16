@@ -149,10 +149,7 @@ function auth_applications_pdo(): PDO
     $password = (string) auth_config('applications_mysql_password', auth_config('mysql_password', ''));
 
     if ($dsn === '' || $user === '') {
-        auth_send_json([
-            'ok' => false,
-            'error' => 'applications_not_configured',
-        ], 500);
+        throw new RuntimeException('applications_not_configured');
     }
 
     $pdo = new PDO($dsn, $user, $password, [
@@ -301,6 +298,236 @@ function auth_applications_generate_public_id(PDO $pdo): string
     }
 
     throw new RuntimeException('public_id_generation_failed');
+}
+
+function auth_applications_active_statuses(): array
+{
+    return ['submitted', 'in_review', 'needs_info', 'interview'];
+}
+
+function auth_applications_store_load(): array
+{
+    return auth_storage_read_json('staff_applications.json', [
+        'next_id' => 1,
+        'applications' => [],
+    ]);
+}
+
+function auth_applications_store_save(array $store): bool
+{
+    return auth_storage_write_json('staff_applications.json', $store);
+}
+
+function auth_applications_store_items(array $store): array
+{
+    return is_array($store['applications'] ?? null) ? array_values($store['applications']) : [];
+}
+
+function auth_applications_generate_public_id_from_store(array $store): string
+{
+    $applications = auth_applications_store_items($store);
+
+    for ($attempt = 0; $attempt < 6; $attempt++) {
+        $publicId = 'APP-' . strtoupper(bin2hex(random_bytes(5)));
+        $exists = false;
+        foreach ($applications as $application) {
+            if ((string) ($application['public_id'] ?? '') === $publicId) {
+                $exists = true;
+                break;
+            }
+        }
+
+        if (!$exists) {
+            return $publicId;
+        }
+    }
+
+    throw new RuntimeException('public_id_generation_failed');
+}
+
+function auth_applications_find_owned_application_in_store(array $store, string $publicId, string $discordId): ?array
+{
+    foreach (auth_applications_store_items($store) as $application) {
+        if ((string) ($application['public_id'] ?? '') === $publicId && (string) ($application['discord_id'] ?? '') === $discordId) {
+            return $application;
+        }
+    }
+
+    return null;
+}
+
+function auth_applications_find_active_application_for_user_in_store(array $store, string $discordId): ?array
+{
+    foreach (auth_applications_store_items($store) as $application) {
+        if ((string) ($application['discord_id'] ?? '') !== $discordId) {
+            continue;
+        }
+
+        if (in_array((string) ($application['status'] ?? 'submitted'), auth_applications_active_statuses(), true)) {
+            return $application;
+        }
+    }
+
+    return null;
+}
+
+function auth_applications_list_owned_applications_in_store(array $store, string $discordId): array
+{
+    $items = array_values(array_filter(auth_applications_store_items($store), static function (array $application) use ($discordId): bool {
+        return (string) ($application['discord_id'] ?? '') === $discordId;
+    }));
+
+    usort($items, static function (array $left, array $right): int {
+        return strcmp((string) ($right['created_at'] ?? ''), (string) ($left['created_at'] ?? ''));
+    });
+
+    return $items;
+}
+
+function auth_applications_create_file_record(array $user, array $application): array
+{
+    $store = auth_applications_store_load();
+    $applications = auth_applications_store_items($store);
+    $nextId = max(1, (int) ($store['next_id'] ?? 1));
+    $publicId = auth_applications_generate_public_id_from_store($store);
+    $now = gmdate('Y-m-d H:i:s');
+
+    $record = [
+        'id' => $nextId,
+        'public_id' => $publicId,
+        'discord_id' => (string) ($user['discordId'] ?? ''),
+        'discord_username' => (string) ($user['discordUsername'] ?? ''),
+        'discord_display_name' => (string) ($user['discordDisplayName'] ?? ''),
+        'guild_nickname' => (string) ($user['guildNickname'] ?? ''),
+        'applicant_name' => (string) ($application['applicant_name'] ?? ''),
+        'applicant_level' => $application['applicant_level'],
+        'playtime_hours' => $application['playtime_hours'],
+        'timezone_label' => (string) ($application['timezone_label'] ?? ''),
+        'role_requested' => (string) ($application['role_requested'] ?? ''),
+        'availability' => (string) ($application['availability'] ?? ''),
+        'ban_history' => (string) ($application['ban_history'] ?? ''),
+        'moderation_experience' => (string) ($application['moderation_experience'] ?? ''),
+        'testing_experience' => (string) ($application['testing_experience'] ?? ''),
+        'fit_reason' => (string) ($application['fit_reason'] ?? ''),
+        'status' => 'submitted',
+        'assigned_staff_id' => null,
+        'assigned_staff_name' => null,
+        'last_message_at' => $now,
+        'last_staff_reply_at' => null,
+        'created_at' => $now,
+        'updated_at' => $now,
+        'messages' => [[
+            'sender_type' => 'system',
+            'sender_name' => 'System',
+            'message' => 'Application submitted. Staff will review it here and reply in this chat.',
+            'created_at' => $now,
+        ]],
+    ];
+
+    $applications[] = $record;
+    $store['next_id'] = $nextId + 1;
+    $store['applications'] = $applications;
+    if (!auth_applications_store_save($store)) {
+        throw new RuntimeException('applications_storage_write_failed');
+    }
+
+    return $record;
+}
+
+function auth_applications_append_file_message(string $publicId, string $discordId, string $senderName, string $messageText): ?array
+{
+    $store = auth_applications_store_load();
+    $applications = auth_applications_store_items($store);
+    $now = gmdate('Y-m-d H:i:s');
+
+    foreach ($applications as $index => $application) {
+        if ((string) ($application['public_id'] ?? '') !== $publicId || (string) ($application['discord_id'] ?? '') !== $discordId) {
+            continue;
+        }
+
+        if ((string) ($application['status'] ?? '') === 'closed') {
+            return null;
+        }
+
+        $messages = is_array($application['messages'] ?? null) ? $application['messages'] : [];
+        $messages[] = [
+            'sender_type' => 'applicant',
+            'sender_name' => $senderName,
+            'message' => $messageText,
+            'created_at' => $now,
+        ];
+
+        $application['messages'] = $messages;
+        $application['status'] = (string) ($application['status'] ?? '') === 'needs_info' ? 'in_review' : (string) ($application['status'] ?? 'submitted');
+        $application['last_message_at'] = $now;
+        $application['updated_at'] = $now;
+        $applications[$index] = $application;
+        $store['applications'] = $applications;
+        if (!auth_applications_store_save($store)) {
+            throw new RuntimeException('applications_storage_write_failed');
+        }
+
+        return $application;
+    }
+
+    return null;
+}
+
+function auth_applications_messages_from_store_record(array $application): array
+{
+    return array_map('auth_applications_message_payload', is_array($application['messages'] ?? null) ? $application['messages'] : []);
+}
+
+function auth_applications_counts_from_store(array $store): array
+{
+    $counts = [
+        'submitted' => 0,
+        'in_review' => 0,
+        'needs_info' => 0,
+        'interview' => 0,
+        'accepted' => 0,
+        'denied' => 0,
+        'closed' => 0,
+        'open' => 0,
+        'total' => 0,
+    ];
+
+    foreach (auth_applications_store_items($store) as $application) {
+        $status = strtolower(trim((string) ($application['status'] ?? 'submitted')));
+        if (array_key_exists($status, $counts)) {
+            $counts[$status]++;
+        }
+        $counts['total']++;
+    }
+
+    $counts['open'] =
+        $counts['submitted'] +
+        $counts['in_review'] +
+        $counts['needs_info'] +
+        $counts['interview'];
+
+    return $counts;
+}
+
+function auth_applications_recent_from_store(array $store, int $limit = 8): array
+{
+    $items = auth_applications_store_items($store);
+    usort($items, static function (array $left, array $right): int {
+        return strcmp((string) ($right['updated_at'] ?? ''), (string) ($left['updated_at'] ?? ''));
+    });
+
+    $recent = array_slice($items, 0, max(1, $limit));
+
+    return array_map(static function (array $row): array {
+        return [
+            'publicId' => (string) ($row['public_id'] ?? ''),
+            'applicantName' => (string) ($row['applicant_name'] ?? ''),
+            'roleRequested' => (string) ($row['role_requested'] ?? ''),
+            'status' => (string) ($row['status'] ?? ''),
+            'assignedStaffName' => (string) ($row['assigned_staff_name'] ?? ''),
+            'updatedAt' => (string) ($row['updated_at'] ?? ''),
+        ];
+    }, $recent);
 }
 
 function auth_applications_send_webhook(string $event, array $application, array $context = []): void

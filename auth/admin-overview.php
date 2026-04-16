@@ -1,6 +1,7 @@
 <?php
 
 require __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/applications-bootstrap.php';
 
 auth_require_admin_panel_access();
 
@@ -86,6 +87,25 @@ try {
         $payload['recentLogins']['available'] = false;
     }
 
+    if (!$payload['recentLogins']['available']) {
+        $fallbackItems = auth_read_web_sessions_fallback(10);
+        if ($fallbackItems) {
+            $payload['recentLogins']['available'] = true;
+            $payload['recentLogins']['items'] = array_map(static function (array $row): array {
+                $roles = $row['roles'] ?? [];
+                $roleCount = is_array($roles) ? count($roles) : 0;
+
+                return [
+                    'discordId' => (string) ($row['discord_id'] ?? ''),
+                    'username' => (string) ($row['username'] ?? ''),
+                    'avatar' => (string) ($row['avatar'] ?? ''),
+                    'lastSeen' => (string) ($row['last_seen'] ?? ''),
+                    'roleCount' => $roleCount,
+                ];
+            }, $fallbackItems);
+        }
+    }
+
     $applicationsPdo = auth_admin_connect_applications_pdo();
     if ($applicationsPdo instanceof PDO && auth_table_exists($applicationsPdo, 'staff_applications')) {
         $payload['applications']['available'] = true;
@@ -128,6 +148,16 @@ try {
                 'updatedAt' => (string) ($row['updated_at'] ?? ''),
             ];
         }, $recentStmt->fetchAll() ?: []);
+    }
+
+    if (!$payload['applications']['available']) {
+        $store = auth_applications_store_load();
+        $counts = auth_applications_counts_from_store($store);
+        if ($counts['total'] > 0) {
+            $payload['applications']['available'] = true;
+            $payload['applications']['counts'] = $counts;
+            $payload['applications']['recent'] = auth_applications_recent_from_store($store, 8);
+        }
     }
 
     auth_send_json($payload);

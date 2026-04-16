@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Force known SPA routes to index.html even if stale route folders still exist on the server.
+RewriteRule ^(start|rules|wiki|map|live|apply|applications|help|faq|account|admin|definitions|info|section|rule|leaderboard|commands)(/.*)?$ index.html [L]
+
 # Serve existing files and directories normally.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

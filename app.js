@@ -9,6 +9,7 @@ const registerBtn = document.getElementById("registerBtn");
 const accountBtn = document.getElementById("accountBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authModalRoot = document.getElementById("authModalRoot");
+const brandHomeBtn = document.getElementById("brandHomeBtn");
 
 const AUTH_ACCOUNTS_KEY = "sgcnr_demo_accounts_v1";
 const AUTH_SESSION_KEY = "sgcnr_demo_session_v1";
@@ -64,7 +65,7 @@ const SERVER_JOIN_URL = SERVER_CONFIG.joinUrl || (SERVER_JOIN_CODE ? `https://cf
 const SERVER_SINGLE_API_URL = SERVER_JOIN_CODE
   ? `https://servers-frontend.fivem.net/api/servers/single/${SERVER_JOIN_CODE}`
   : "";
-const SITE_ASSET_VERSION = "20260403q";
+const SITE_ASSET_VERSION = "20260416a";
 const APP_ASSET_BASE_URL = document.currentScript?.src
   ? new URL(".", document.currentScript.src).href
   : `${window.location.origin}/`;
@@ -678,6 +679,12 @@ function setSearchVisible(visible) {
   if (!visible) {
     currentQuery = "";
     if (searchInput) searchInput.value = "";
+  }
+}
+
+function clearTopMeta() {
+  if (meta) {
+    meta.innerHTML = "";
   }
 }
 
@@ -1550,6 +1557,19 @@ function updateAuthUi() {
 
 function initAuth() {
   updateAuthUi();
+
+  if (brandHomeBtn) {
+    brandHomeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeAccountUi();
+      const currentPath = window.location.pathname || "/";
+      if (currentPath === "/" || currentPath === "/index.html") {
+        window.location.reload();
+      } else {
+        window.location.href = "/";
+      }
+    });
+  }
 
   if (loginBtn) {
     loginBtn.addEventListener("click", () => openAuthModal("login"));
@@ -5974,7 +5994,7 @@ function renderRulesHub(sections) {
 function renderDefinitions() {
   const sections = getSections().filter(s => Array.isArray(s?.rules) && s.rules.length);
   renderRulesHub(sections);
-  meta.innerHTML = `Updated: <kbd>${getData().updatedAt}</kbd> &middot; Categories <kbd>${sections.length}</kbd>`;
+  clearTopMeta();
 }
 
 function renderSection(sectionId) {
@@ -6097,7 +6117,7 @@ function renderSearch(sections) {
     </div>
   `);
 
-  meta.innerHTML = `Updated: <kbd>${getData().updatedAt}</kbd> &middot; Matches <kbd>${results.length}</kbd> / <kbd>${totalRules}</kbd> rules`;
+  clearTopMeta();
 }
 
 function parseRoute() {
@@ -6159,6 +6179,7 @@ function route() {
   document.body.classList.toggle("is-wiki", r.name === "wiki");
   document.body.classList.toggle("is-standard", isStandardPage);
   document.body.classList.toggle("is-apply", r.name === "apply");
+  clearTopMeta();
 
   const inRulesFlow = (r.name === "rules" && ruleSections.length > 0) || r.name === "section" || r.name === "rule";
   setSearchVisible(inRulesFlow);
@@ -6170,86 +6191,63 @@ function route() {
 
   if (r.name === "start") {
     renderStart();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
   if (r.name === "apply") {
     renderApply();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Apply`;
     return;
   }
   if (r.name === "help") {
     renderHelp();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
   if (r.name === "account") {
     renderAccount();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Account`;
     return;
   }
   if (r.name === "admin") {
     if (hasAdminAccess()) {
       renderAdminDashboard(getCurrentAccount());
-      meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; ${escapeHtml(SERVER_CONFIG.adminPanelLabel || "Manager")} mode`;
     } else {
       setView(renderAdminLockedPage());
-      meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Restricted`;
     }
     return;
   }
   if (r.name === "wiki") {
     renderWiki(r.wikiPage);
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
   if (r.name === "map") {
     renderMap();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
   if (r.name === "live") {
     renderStatus();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Live`;
     return;
   }
   if (r.name === "definitions") {
     renderDefinitions();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; Reference`;
     return;
   }
   if (r.name === "info") {
     renderInfo();
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
 
   if (r.name === "rules") {
     renderRulesHub(ruleSections);
-    const totalRules = sections.reduce(
-      (acc, s) => acc + (Array.isArray(s?.rules) ? s.rules.length : 0),
-      0
-    );
-    meta.innerHTML = totalRules
-      ? `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${totalRules}</kbd> rules`
-      : `Updated: <kbd>${data.updatedAt}</kbd> &middot; Rewrite in progress`;
     return;
   }
   if (r.name === "section") {
     renderSection(r.sectionId);
-    const section = findSectionById(r.sectionId);
-    const total = Array.isArray(section?.rules) ? section.rules.length : 0;
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd> &middot; <kbd>${total}</kbd> rules`;
     return;
   }
   if (r.name === "rule") {
     renderRule(r.sectionId, r.ruleId);
-    meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
     return;
   }
 
   renderLandingHome();
-  meta.innerHTML = `Updated: <kbd>${data.updatedAt}</kbd>`;
 }
 
 function resizePointerFxCanvas() {

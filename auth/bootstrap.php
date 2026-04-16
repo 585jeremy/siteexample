@@ -305,6 +305,90 @@ function auth_ensure_web_sessions_schema(PDO $pdo): void
     $schemaReady = true;
 }
 
+function auth_storage_dir(): string
+{
+    $configured = trim((string) auth_config('auth_storage_dir', ''));
+    $dir = $configured !== '' ? $configured : (__DIR__ . '/data');
+
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+
+    return $dir;
+}
+
+function auth_storage_path(string $filename): string
+{
+    return rtrim(auth_storage_dir(), '/\\') . DIRECTORY_SEPARATOR . ltrim($filename, '/\\');
+}
+
+function auth_storage_read_json(string $filename, array $default = []): array
+{
+    $path = auth_storage_path($filename);
+    if (!is_file($path)) {
+        return $default;
+    }
+
+    $raw = @file_get_contents($path);
+    if ($raw === false || $raw === '') {
+        return $default;
+    }
+
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : $default;
+}
+
+function auth_storage_write_json(string $filename, array $payload): bool
+{
+    $path = auth_storage_path($filename);
+    $encoded = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if (!is_string($encoded)) {
+        return false;
+    }
+
+    return @file_put_contents($path, $encoded, LOCK_EX) !== false;
+}
+
+function auth_record_web_session_fallback(array $record): void
+{
+    $discordId = trim((string) ($record['discord_id'] ?? ''));
+    if ($discordId === '') {
+        return;
+    }
+
+    $store = auth_storage_read_json('web_sessions.json', ['items' => []]);
+    $items = $store['items'] ?? [];
+    if (!is_array($items)) {
+        $items = [];
+    }
+
+    $items[$discordId] = [
+        'discord_id' => $discordId,
+        'username' => (string) ($record['username'] ?? ''),
+        'avatar' => (string) ($record['avatar'] ?? ''),
+        'roles' => array_values(array_filter(array_map(
+            static fn ($role) => trim((string) $role),
+            is_array($record['roles'] ?? null) ? $record['roles'] : []
+        ))),
+        'last_seen' => (string) ($record['last_seen'] ?? gmdate('Y-m-d H:i:s')),
+    ];
+
+    $store['items'] = $items;
+    auth_storage_write_json('web_sessions.json', $store);
+}
+
+function auth_read_web_sessions_fallback(int $limit = 10): array
+{
+    $store = auth_storage_read_json('web_sessions.json', ['items' => []]);
+    $items = array_values(is_array($store['items'] ?? null) ? $store['items'] : []);
+
+    usort($items, static function (array $left, array $right): int {
+        return strcmp((string) ($right['last_seen'] ?? ''), (string) ($left['last_seen'] ?? ''));
+    });
+
+    return array_slice($items, 0, max(1, $limit));
+}
+
 function auth_send_json(array $payload, int $statusCode = 200): void
 {
     http_response_code($statusCode);
