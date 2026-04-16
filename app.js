@@ -5941,12 +5941,9 @@ function renderRulesHub(sections) {
   const title = renderHeader("Rules", [{ label: "Rules" }]);
   const cards = sections
     .map(s => {
-      const ruleCount = Array.isArray(s?.rules) ? s.rules.length : 0;
-      const hint = ruleCount ? `${ruleCount} rules` : "Reference";
       return `
         <a class="card" href="#/section/${escapeHtml(s.id)}">
           <div class="card__title">${escapeHtml(s.title)}</div>
-          <div class="card__meta">${escapeHtml(hint)}</div>
         </a>
       `;
     })
@@ -5962,15 +5959,9 @@ function renderRulesHub(sections) {
 }
 
 function renderDefinitions() {
-  const section = findSectionById("definitions");
-  const title = renderHeader("Definitions", [{ label: "Definitions" }]);
-  const body = section ? renderContentBlocks(section) : "";
-  setView(`
-    <div>
-      ${title}
-      <section class="section">${body}</section>
-    </div>
-  `);
+  const sections = getSections().filter(s => Array.isArray(s?.rules) && s.rules.length);
+  renderRulesHub(sections);
+  meta.innerHTML = `Updated: <kbd>${getData().updatedAt}</kbd> &middot; Categories <kbd>${sections.length}</kbd>`;
 }
 
 function renderSection(sectionId) {
@@ -5984,7 +5975,7 @@ function renderSection(sectionId) {
   const rules = Array.isArray(section.rules) ? section.rules : [];
   const filtered = rules.filter(r => {
     if (!q) return true;
-    const hay = normalize(`${r.id} ${r.title} ${r.body} ${r.explanation || ""} ${(r.tags || []).join(" ")} ${section.title}`);
+    const hay = normalize(`${r.id} ${r.title} ${r.body} ${(r.tags || []).join(" ")} ${section.title}`);
     return hay.includes(q);
   });
 
@@ -5993,7 +5984,6 @@ function renderSection(sectionId) {
     { label: section.title }
   ]);
 
-  const content = renderContentBlocks(section);
   const list = filtered
     .map(r => {
       return `
@@ -6012,7 +6002,6 @@ function renderSection(sectionId) {
     <div>
       ${title}
       <section class="section">
-        ${content}
         <div class="rule-list">${list}</div>
       </section>
       ${renderRulesDisclaimer()}
@@ -6033,9 +6022,6 @@ function renderRule(sectionId, ruleId) {
     { label: `${rule.id}` }
   ]);
 
-  const exp = rule.explanation ? `<div class="rule__explanation">${escapeHtml(rule.explanation)}</div>` : "";
-  const tags = renderTags(rule.tags || []);
-
   setView(`
     <div>
       ${title}
@@ -6043,8 +6029,6 @@ function renderRule(sectionId, ruleId) {
         <div class="rule-detail">
           <div class="rule-detail__pill"><span class="rule__id">${escapeHtml(rule.id)}</span></div>
           <div class="rule__body">${escapeHtml(rule.body)}</div>
-          ${exp}
-          ${tags}
         </div>
       </section>
       ${renderRulesDisclaimer()}
@@ -6065,7 +6049,7 @@ function renderSearch(sections) {
     const rules = Array.isArray(section?.rules) ? section.rules : [];
     totalRules += rules.length;
     for (const r of rules) {
-      const hay = normalize(`${r.id} ${r.title} ${r.body} ${r.explanation || ""} ${(r.tags || []).join(" ")} ${section.title}`);
+      const hay = normalize(`${r.id} ${r.title} ${r.body} ${(r.tags || []).join(" ")} ${section.title}`);
       if (hay.includes(q)) results.push({ section, rule: r });
     }
   }
@@ -6227,7 +6211,7 @@ function route() {
   }
 
   if (r.name === "rules") {
-    renderRulesHub(sections.filter(s => s.id !== "definitions"));
+    renderRulesHub(sections.filter(s => Array.isArray(s?.rules) && s.rules.length));
     const totalRules = sections.reduce(
       (acc, s) => acc + (Array.isArray(s?.rules) ? s.rules.length : 0),
       0
