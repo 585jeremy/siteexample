@@ -1549,6 +1549,38 @@ body::before{
   z-index: 1;
 }
 
+.footer__inner{
+  gap: 10px;
+}
+
+.footer__brand{
+  font-weight: 700;
+  color: rgba(244,232,214,.94);
+}
+
+.footer__legal{
+  color: rgba(218,201,177,.76);
+}
+
+.footer__links{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  padding-top: 4px;
+}
+
+.footer__link{
+  color: rgba(223,184,129,.92);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(223,184,129,.28);
+  padding-bottom: 2px;
+}
+
+.footer__link:hover{
+  color: rgba(244,211,165,.98);
+  border-bottom-color: rgba(244,211,165,.54);
+}
+
 .topbar{
   align-items: center;
   gap: 12px;
@@ -9011,6 +9043,14 @@ body.is-wiki .content{
 .wiki-journal__heroMeta{
   display: grid;
   gap: 12px;
+}
+
+body.is-landing .footer,
+body.is-standard .footer,
+body.is-wiki .footer,
+body.is-apply .footer,
+body.is-map .footer{
+  display: block !important;
 }
 
 .wiki-journal__metaCard{
