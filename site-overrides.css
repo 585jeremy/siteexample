@@ -11484,3 +11484,735 @@ body.is-map .footer{
     transition-delay: 0ms !important;
   }
 }
+
+/* 2026-04-20 final public theme cleanup */
+.meta,
+.legal-rail,
+.page-hero__badge,
+.rules-legal{
+  display: none !important;
+}
+
+html,
+body{
+  background: #050a07 !important;
+}
+
+body{
+  color: #eff8f2 !important;
+}
+
+body.is-landing,
+body.is-standard,
+body.is-wiki,
+body.is-apply,
+body.is-map{
+  overflow-y: auto !important;
+}
+
+body.is-landing .content,
+body.is-standard .content,
+body.is-wiki .content,
+body.is-apply .content,
+body.is-map .content{
+  width: min(1380px, calc(100% - 24px)) !important;
+  max-width: none !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  padding: 24px 0 calc(248px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.is-map .content{
+  width: min(1480px, calc(100% - 24px)) !important;
+}
+
+body.is-landing #rules,
+.landing-hub,
+.portal-home,
+.portal-home--minimal{
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.topbar,
+body.is-landing .topbar,
+body.is-standard .topbar,
+body.is-wiki .topbar,
+body.is-apply .topbar,
+body.is-map .topbar{
+  background: linear-gradient(180deg, rgba(7, 14, 10, .96), rgba(5, 10, 7, .90)) !important;
+  border-bottom: 1px solid rgba(104, 242, 155, .16) !important;
+}
+
+.brandmark__badge{
+  border-color: rgba(104, 242, 155, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(12, 22, 16, .98), rgba(7, 12, 10, .98)) !important;
+}
+
+.brandmark__title{
+  color: #f2fff5 !important;
+}
+
+.auth__btn,
+.auth__btn--primary,
+body.is-landing .auth__btn--primary,
+body.is-standard .auth__btn--primary,
+body.is-wiki .auth__btn--primary,
+body.is-map .auth__btn--primary,
+body.is-apply .auth__btn--primary{
+  border-radius: 16px !important;
+  min-height: 46px !important;
+  padding: 0 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.auth__btn{
+  border: 1px solid rgba(104, 242, 155, .16) !important;
+  background: linear-gradient(180deg, rgba(12, 20, 16, .92), rgba(8, 13, 11, .98)) !important;
+  color: rgba(233, 245, 236, .92) !important;
+}
+
+.auth__btn:hover{
+  border-color: rgba(104, 242, 155, .28) !important;
+  background: linear-gradient(180deg, rgba(15, 28, 20, .96), rgba(8, 14, 11, .98)) !important;
+}
+
+.auth__btn--primary,
+body.is-landing .auth__btn--primary,
+body.is-standard .auth__btn--primary,
+body.is-wiki .auth__btn--primary,
+body.is-map .auth__btn--primary,
+body.is-apply .auth__btn--primary{
+  border: 1px solid rgba(104, 242, 155, .32) !important;
+  background: linear-gradient(180deg, rgba(18, 58, 34, .98), rgba(9, 31, 19, .98)) !important;
+  color: #ecfff3 !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(217, 255, 235, .10) !important;
+}
+
+.auth__btn--primary:hover,
+body.is-landing .auth__btn--primary:hover,
+body.is-standard .auth__btn--primary:hover,
+body.is-wiki .auth__btn--primary:hover,
+body.is-map .auth__btn--primary:hover,
+body.is-apply .auth__btn--primary:hover{
+  border-color: rgba(104, 242, 155, .46) !important;
+  background: linear-gradient(180deg, rgba(22, 72, 41, .98), rgba(11, 38, 23, .98)) !important;
+}
+
+.section__eyebrow{
+  border-color: rgba(104, 242, 155, .14) !important;
+  background: rgba(104, 242, 155, .06) !important;
+  color: rgba(212, 246, 225, .74) !important;
+}
+
+.page-title,
+.section h2,
+.section h3{
+  color: #f3fff7 !important;
+}
+
+.neo-hero{
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 24px 28px;
+  border-radius: 30px;
+  border: 1px solid rgba(104, 242, 155, .14);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(104, 242, 155, .10), transparent 20%),
+    linear-gradient(180deg, rgba(10, 18, 13, .96), rgba(6, 10, 8, .98));
+  box-shadow: 0 28px 58px rgba(0, 0, 0, .34);
+}
+
+.neo-hero__top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.neo-hero__eyebrow,
+.neo-kicker{
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(104, 242, 155, .16);
+  background: rgba(104, 242, 155, .08);
+  color: rgba(214, 255, 228, .82);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.neo-hero__title{
+  margin: 0;
+  font-size: clamp(2.4rem, 4.2vw, 4.4rem);
+  line-height: .95;
+  letter-spacing: -.06em;
+  color: #f5fff8;
+}
+
+.neo-home,
+.neo-start,
+.neo-help,
+.neo-wiki{
+  display: grid;
+  gap: 20px;
+}
+
+.neo-home__hero{
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+  gap: 20px;
+  min-height: 0 !important;
+  padding: 28px !important;
+}
+
+.neo-home__copy,
+.neo-home__signals{
+  display: grid;
+  gap: 14px;
+}
+
+.neo-home__eyebrow{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(200, 230, 210, .68);
+}
+
+.neo-home__title{
+  margin: 0;
+  font-size: clamp(2.8rem, 5vw, 4.8rem);
+  line-height: .94;
+  letter-spacing: -.07em;
+  color: #f4fff7;
+  max-width: 9ch;
+}
+
+.neo-home__text{
+  max-width: 60ch;
+  margin: 0;
+  color: rgba(222, 236, 228, .76);
+  line-height: 1.7;
+}
+
+.neo-home__actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.neo-home__grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.neo-card,
+.neo-signal,
+.neo-start__panel,
+.neo-help__panel,
+.neo-wiki__rail,
+.neo-wiki__article{
+  border-radius: 26px;
+  border: 1px solid rgba(104, 242, 155, .12);
+  background:
+    linear-gradient(180deg, rgba(11, 19, 14, .96), rgba(6, 10, 8, .98));
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .28);
+}
+
+.neo-card{
+  display: grid;
+  gap: 10px;
+  min-height: 190px;
+  padding: 22px;
+  color: inherit;
+}
+
+.neo-card__label,
+.neo-signal__label{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(174, 209, 187, .66);
+}
+
+.neo-card__title,
+.neo-signal__title{
+  font-size: 1.4rem;
+  line-height: 1.08;
+  letter-spacing: -.04em;
+  color: #f1fff5;
+}
+
+.neo-card__text,
+.neo-signal__text{
+  color: rgba(214, 226, 219, .72);
+  line-height: 1.65;
+}
+
+.neo-stepGrid,
+.neo-stepStack{
+  display: grid;
+  gap: 14px;
+}
+
+.neo-step{
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(104, 242, 155, .10);
+  background: rgba(104, 242, 155, .05);
+}
+
+.neo-step--compact{
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+
+.neo-step__index{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(104, 242, 155, .18);
+  background: rgba(104, 242, 155, .10);
+  color: #e7fff0;
+  font-weight: 900;
+}
+
+.neo-step strong{
+  display: block;
+  margin-bottom: 4px;
+  color: #effff5;
+}
+
+.neo-step p{
+  margin: 0;
+  color: rgba(212, 226, 218, .74);
+  line-height: 1.6;
+}
+
+.neo-help__grid{
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+  gap: 18px;
+}
+
+.breadcrumb{
+  color: rgba(183, 210, 193, .58) !important;
+}
+
+.breadcrumb__link{
+  color: rgba(211, 238, 220, .78) !important;
+}
+
+.breadcrumb__current{
+  color: rgba(239, 255, 245, .92) !important;
+}
+
+.info-faq{
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.info-faq__item{
+  border: 1px solid rgba(104, 242, 155, .10) !important;
+  background: rgba(255, 255, 255, .02) !important;
+  border-radius: 20px !important;
+}
+
+.info-faq__q{
+  color: #f1fff5 !important;
+}
+
+.info-faq__a{
+  color: rgba(216, 228, 221, .76) !important;
+}
+
+.neo-wiki__hero{
+  padding: 28px !important;
+}
+
+.neo-wiki__controls{
+  display: grid;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.neo-wiki__search{
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(104, 242, 155, .14);
+  background: rgba(255, 255, 255, .03);
+  color: #f1fff5;
+}
+
+.neo-wiki__filters{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.neo-wiki__filter{
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(104, 242, 155, .14);
+  background: rgba(255, 255, 255, .03);
+  color: rgba(226, 239, 231, .78);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.neo-wiki__filter.is-active{
+  border-color: rgba(104, 242, 155, .32);
+  background: rgba(104, 242, 155, .14);
+  color: #edfff4;
+}
+
+.neo-wiki__layout{
+  display: grid;
+  grid-template-columns: minmax(320px, .72fr) minmax(0, 1.28fr);
+  gap: 18px;
+}
+
+.neo-wiki__rail,
+.neo-wiki__article{
+  padding: 22px;
+}
+
+.neo-wiki__cards{
+  display: grid;
+  gap: 12px;
+}
+
+.neo-wiki__card{
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(104, 242, 155, .10);
+  background: rgba(255, 255, 255, .02);
+  color: inherit;
+}
+
+.neo-wiki__card.is-current{
+  border-color: rgba(104, 242, 155, .28);
+  background: rgba(104, 242, 155, .09);
+}
+
+.neo-wiki__cardMeta{
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(177, 209, 189, .62);
+}
+
+.neo-wiki__cardTitle{
+  color: #effff5;
+  font-size: 1.05rem;
+}
+
+.neo-wiki__cardText{
+  color: rgba(211, 223, 217, .72);
+  line-height: 1.55;
+}
+
+.neo-wiki__facts{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.neo-wiki__fact{
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(104, 242, 155, .10);
+  background: rgba(255, 255, 255, .02);
+}
+
+.neo-wiki__fact span{
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(179, 209, 190, .60);
+}
+
+.neo-wiki__fact strong{
+  color: #eefff4;
+}
+
+.neo-wiki__sections{
+  display: grid;
+  gap: 14px;
+}
+
+.neo-wiki__section{
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(104, 242, 155, .10);
+  background: rgba(255, 255, 255, .02);
+}
+
+.neo-wiki__sectionTop{
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.neo-wiki__sectionIndex,
+.neo-wiki__updateIndex{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(104, 242, 155, .10);
+  border: 1px solid rgba(104, 242, 155, .16);
+  color: #e9fff1;
+  font-weight: 900;
+}
+
+.neo-wiki__section h3{
+  margin: 0;
+  color: #f1fff5;
+  font-size: 1.2rem;
+}
+
+.neo-wiki__updates{
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.apply-stage,
+.apply-layout,
+.apply-panel,
+.apply-sidecard,
+.apply-stage__hero,
+.apply-app,
+.apply-chat,
+.apply-queue__item{
+  border-color: rgba(104, 242, 155, .12) !important;
+}
+
+.apply-stage__hero,
+.apply-sidecard,
+.apply-panel,
+.apply-app,
+.apply-chat,
+.apply-queue__item{
+  background: linear-gradient(180deg, rgba(11, 18, 14, .96), rgba(6, 10, 8, .98)) !important;
+}
+
+.apply-sidecard__pill,
+.apply-app__status,
+.apply-queue__status{
+  border-color: rgba(104, 242, 155, .18) !important;
+  background: rgba(104, 242, 155, .10) !important;
+  color: #ebfff2 !important;
+}
+
+.apply-stage__step{
+  background: rgba(104, 242, 155, .05) !important;
+  border-color: rgba(104, 242, 155, .10) !important;
+}
+
+.apply-stage__stepIndex{
+  border-color: rgba(104, 242, 155, .18) !important;
+  background: rgba(104, 242, 155, .10) !important;
+  color: #eafff2 !important;
+}
+
+.info-link{
+  color: #d6ffe6 !important;
+}
+
+.info-link:hover{
+  color: #f3fff8 !important;
+}
+
+.neo-wiki__updateList{
+  display: grid;
+  gap: 10px;
+}
+
+.neo-wiki__update{
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(104, 242, 155, .10);
+  background: rgba(255, 255, 255, .02);
+  color: rgba(214, 226, 220, .76);
+}
+
+.map-panel,
+.service-map-shell,
+.map-stage-card,
+.map-toolbar--overlay,
+.map-tool,
+.map-toolbar__badge,
+.map-detail,
+.map-stat,
+.map-filter,
+.map-legend__item{
+  border-color: rgba(104, 242, 155, .14) !important;
+}
+
+.map-panel,
+.service-map-shell,
+.map-stage-card,
+.map-detail{
+  background: linear-gradient(180deg, rgba(11, 18, 14, .96), rgba(6, 10, 8, .98)) !important;
+}
+
+.map-toolbar--overlay{
+  background: rgba(9, 15, 12, .92) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.map-tool,
+.map-toolbar__badge,
+.map-filter,
+.map-legend__item,
+.map-stat{
+  background: rgba(255, 255, 255, .03) !important;
+  color: #ecfff3 !important;
+}
+
+.map-panel__headline,
+.map-detail__title,
+.map-stage-card__title{
+  color: #f1fff5 !important;
+}
+
+.map-panel__intro,
+.map-stage-card__body,
+.map-detail__body,
+.map-toolbar__hint{
+  color: rgba(210, 223, 216, .72) !important;
+}
+
+.map-panel .section__eyebrow,
+.map-stage-card__eyebrow,
+.map-detail__eyebrow,
+.map-panel__title,
+.map-panel__sourceLabel{
+  color: rgba(178, 210, 190, .66) !important;
+}
+
+.footer,
+body.is-landing .footer,
+body.is-standard .footer,
+body.is-wiki .footer,
+body.is-apply .footer,
+body.is-map .footer{
+  display: block !important;
+  width: min(1380px, calc(100% - 24px)) !important;
+  margin: 0 auto !important;
+  padding: 0 0 calc(256px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.footer__inner{
+  display: grid !important;
+  gap: 10px !important;
+  padding: 20px 22px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(104, 242, 155, .12) !important;
+  background: linear-gradient(180deg, rgba(10, 18, 13, .92), rgba(6, 10, 8, .98)) !important;
+}
+
+.footer__brand{
+  color: #f0fff5 !important;
+  font-weight: 800 !important;
+}
+
+.footer__legal{
+  color: rgba(202, 218, 209, .72) !important;
+  line-height: 1.6 !important;
+}
+
+.footer__links{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer__link,
+.footer__mail{
+  color: #ccffde !important;
+  font-weight: 700;
+}
+
+.footer__link:hover,
+.footer__mail:hover{
+  color: #f0fff5 !important;
+}
+
+@media (max-width: 1080px){
+  .neo-home__hero,
+  .neo-help__grid,
+  .neo-wiki__layout,
+  .neo-home__grid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 780px){
+  .topbar{
+    padding: 12px !important;
+  }
+
+  .content,
+  body.is-landing .content,
+  body.is-standard .content,
+  body.is-wiki .content,
+  body.is-apply .content,
+  body.is-map .content{
+    width: calc(100% - 16px) !important;
+    padding-bottom: calc(280px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .neo-home__hero,
+  .neo-hero,
+  .neo-start__panel,
+  .neo-help__panel,
+  .neo-wiki__hero,
+  .neo-wiki__rail,
+  .neo-wiki__article{
+    padding: 20px !important;
+  }
+
+  .dock__item{
+    min-width: 78px !important;
+  }
+}

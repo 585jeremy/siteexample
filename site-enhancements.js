@@ -1814,5 +1814,435 @@
     }
   });
 
+  const originalUpdateAuthUi = updateAuthUi;
+  updateAuthUi = function updateAuthUiFinal() {
+    originalUpdateAuthUi();
+    if (loginBtn) {
+      loginBtn.textContent = "Login";
+    }
+  };
+
+  renderRulesDisclaimer = function renderRulesDisclaimerFinal() {
+    return "";
+  };
+
+  renderHeader = function renderHeaderFinal(title, breadcrumbItems, options = {}) {
+    const bc = breadcrumbItems?.length ? buildBreadcrumb(breadcrumbItems) : "";
+    const eyebrow = options.eyebrow || breadcrumbItems?.[0]?.label || "";
+    const badge = options.showBadge && options.badgeLabel ? `<div class="neo-hero__badge">${escapeHtml(options.badgeLabel)}</div>` : "";
+    return `
+      <div class="neo-hero">
+        ${bc}
+        <div class="neo-hero__top">
+          ${eyebrow ? `<span class="neo-hero__eyebrow">${escapeHtml(eyebrow)}</span>` : ""}
+          ${badge}
+        </div>
+        <h1 class="neo-hero__title">${escapeHtml(title)}</h1>
+      </div>
+    `;
+  };
+
+  renderLandingHome = function renderLandingHomeFinal() {
+    setView(`
+      <div class="neo-home">
+        <section class="neo-home__hero section section--hero" data-reveal>
+          <div class="neo-home__copy">
+            <span class="neo-home__eyebrow">Los Santos network</span>
+            <h2 class="neo-home__title">One clean front door for SGCNR.</h2>
+            <p class="neo-home__text">Jump into the pages players actually use: getting started, the map, live status, applications, and support. No filler, no duplicate routes, just the essentials in one place.</p>
+            <div class="neo-home__actions">
+              <a class="auth__btn auth__btn--primary" href="/start">Start here</a>
+              <a class="auth__btn" href="/map">Open map</a>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
+            </div>
+          </div>
+          <div class="neo-home__signals">
+            <article class="neo-signal">
+              <span class="neo-signal__label">Start</span>
+              <strong class="neo-signal__title">Join the city the right way</strong>
+              <span class="neo-signal__text">Use Start for first steps, Rules for standards, and Map for locations.</span>
+            </article>
+            <article class="neo-signal">
+              <span class="neo-signal__label">Live</span>
+              <strong class="neo-signal__title">Check the two signals that matter</strong>
+              <span class="neo-signal__text">See server status and Discord bot status before you move.</span>
+            </article>
+            <article class="neo-signal">
+              <span class="neo-signal__label">Support</span>
+              <strong class="neo-signal__title">Tickets stay in Discord</strong>
+              <span class="neo-signal__text">Support, ban history, and staff contact stay tracked in the Discord ticket channel.</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="neo-home__grid" aria-label="Homepage shortcuts">
+          <a class="neo-card" href="/start" data-reveal>
+            <span class="neo-card__label">Start</span>
+            <strong class="neo-card__title">First steps</strong>
+            <span class="neo-card__text">Find the server, check the basics, and keep the useful pages close.</span>
+          </a>
+          <a class="neo-card" href="/wiki" data-reveal>
+            <span class="neo-card__label">Wiki</span>
+            <strong class="neo-card__title">Jobs and systems</strong>
+            <span class="neo-card__text">Browse roles, city jobs, systems, and activity pages through one filtered library.</span>
+          </a>
+          <a class="neo-card" href="/map" data-reveal>
+            <span class="neo-card__label">Map</span>
+            <strong class="neo-card__title">City layout</strong>
+            <span class="neo-card__text">Keep service locations and route context visible while you play.</span>
+          </a>
+          <a class="neo-card" href="/apply" data-reveal>
+            <span class="neo-card__label">Apply</span>
+            <strong class="neo-card__title">Staff applications</strong>
+            <span class="neo-card__text">Send one application, track one private case, and keep follow-up in one thread.</span>
+          </a>
+        </section>
+      </div>
+    `);
+  };
+
+  renderStart = function renderStartFinal() {
+    setView(`
+      <div class="neo-start">
+        ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
+        <section class="section neo-start__panel" data-reveal>
+          <span class="neo-kicker">First steps</span>
+          <h2>Get in, get set, and keep moving.</h2>
+          <p class="doc-p">Use this page as the short setup path before you jump into the city.</p>
+          <div class="neo-stepGrid">
+            <article class="neo-step">
+              <span class="neo-step__index">01</span>
+              <div>
+                <strong>Find SGCNR in FiveM</strong>
+                <p>Search for the server in FiveM and join from there.</p>
+              </div>
+            </article>
+            <article class="neo-step">
+              <span class="neo-step__index">02</span>
+              <div>
+                <strong>Read the rules</strong>
+                <p>Check the rules page before you enter active situations in the city.</p>
+              </div>
+            </article>
+            <article class="neo-step">
+              <span class="neo-step__index">03</span>
+              <div>
+                <strong>Use Discord for support</strong>
+                <p>Support, ban history, and staff contact all stay tracked in Discord tickets.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    `);
+  };
+
+  renderHelp = function renderHelpFinal() {
+    const ticketLink = `<a class="info-link" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">open the ticket channel</a>`;
+    setView(`
+      <div class="neo-help">
+        ${renderHeader("Help", [{ label: "Help" }], { showBadge: false })}
+        <div class="neo-help__grid">
+          <section class="section neo-help__panel">
+            <span class="neo-kicker">Quick answers</span>
+            <h2>Use the fast route.</h2>
+            <div class="info-faq">
+              <div class="info-faq__item">
+                <div class="info-faq__q">Need support or want to report a player?</div>
+                <div class="info-faq__a">Join Discord and ${ticketLink} so staff can track the case properly.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">Need your ban history?</div>
+                <div class="info-faq__a">Open a Discord ticket and choose <strong>Ban history</strong>.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">Appealing something?</div>
+                <div class="info-faq__a">Use the ticket channel and include your ID, the context, and any evidence you have.</div>
+              </div>
+              <div class="info-faq__item">
+                <div class="info-faq__q">Not sure about a rule?</div>
+                <div class="info-faq__a">Ask staff before you act. It is better than fixing the damage later.</div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="section neo-help__panel neo-help__panel--side">
+            <span class="neo-kicker">Best practice</span>
+            <h2>Before you send a ticket</h2>
+            <div class="neo-stepStack">
+              <div class="neo-step neo-step--compact"><span class="neo-step__index">01</span><div><strong>Be direct</strong><p>Write the issue clearly and keep it short.</p></div></div>
+              <div class="neo-step neo-step--compact"><span class="neo-step__index">02</span><div><strong>Bring proof</strong><p>Add screenshots, IDs, clips, or anything else staff needs.</p></div></div>
+              <div class="neo-step neo-step--compact"><span class="neo-step__index">03</span><div><strong>Stay in one thread</strong><p>Keep the whole case in the same Discord ticket.</p></div></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    `);
+  };
+
+  renderServerStatusShell = function renderServerStatusShellFinal() {
+    return `
+      <div class="status-page status-page--minimal">
+        ${renderHeader("Live", [{ label: "Live" }], { showBadge: false })}
+        <section class="section section--hero live-minimal__hero" data-reveal>
+          <span class="neo-kicker">Live checks</span>
+          <h2>Server and Discord bot status.</h2>
+          <p class="doc-p">Two checks, one page: the game server and the Discord bot bridge.</p>
+          <div class="status-live__actions">
+            <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
+          </div>
+        </section>
+        <div id="serverStatusMount">${renderServerStatusLoading()}</div>
+      </div>
+    `;
+  };
+
+  const originalRenderApplyFinalBase = renderApply;
+  renderApply = function renderApplyFinal() {
+    originalRenderApplyFinalBase();
+
+    const hero = document.querySelector(".apply-stage__hero");
+    if (hero) {
+      const heading = hero.querySelector("h2");
+      const copy = hero.querySelector(".doc-p");
+      if (heading) heading.textContent = "Staff applications";
+      if (copy) copy.textContent = "Use the website form once your ban history is ready. Staff replies and status updates stay inside your private case thread here.";
+    }
+
+    document.querySelectorAll(".apply-stage__hero .auth__btn--primary").forEach((button) => {
+      if (/discord/i.test(button.textContent || "")) {
+        button.textContent = "Sign in";
+      }
+    });
+  };
+
+  renderMapStageAside = function renderMapStageAsideFinal(location) {
+    const legend = renderMapLegend();
+    if (!location) {
+      return `
+        <div class="map-stage-card map-stage-card--focus">
+          <div class="map-stage-card__eyebrow">Map focus</div>
+          <div class="map-stage-card__title">Los Santos services</div>
+          <div class="map-stage-card__body">Use the filters and location list to move through service points faster.</div>
+        </div>
+        <div class="map-stage-card">
+          <div class="map-stage-card__eyebrow">Legend</div>
+          <div class="map-stage-card__legend">${legend}</div>
+        </div>
+      `;
+    }
+
+    const meta = getMapTypeMeta(location.type);
+    return `
+      <div class="map-stage-card map-stage-card--focus">
+        <div class="map-stage-card__eyebrow">${escapeHtml(meta.label)}</div>
+        <div class="map-stage-card__title">${escapeHtml(location.name)}</div>
+        <div class="map-stage-card__body">${escapeHtml(getMapLocationDescription(location))}</div>
+      </div>
+      <div class="map-stage-card">
+        <div class="map-stage-card__eyebrow">Region</div>
+        <div class="map-stage-card__title">${escapeHtml(location.region || "Los Santos")}</div>
+        <div class="map-stage-card__body">${escapeHtml(getMapLocationMeta(location))}</div>
+      </div>
+    `;
+  };
+
+  if (MAP_TYPE_META?.police) MAP_TYPE_META.police = { ...MAP_TYPE_META.police, color: "#79ffb4", glow: "rgba(121, 255, 180, .24)" };
+  if (MAP_TYPE_META?.hospital) MAP_TYPE_META.hospital = { ...MAP_TYPE_META.hospital, color: "#d9ffeb", glow: "rgba(217, 255, 235, .22)" };
+  if (MAP_TYPE_META?.fire) MAP_TYPE_META.fire = { ...MAP_TYPE_META.fire, color: "#56d88a", glow: "rgba(86, 216, 138, .24)" };
+  if (MAP_TYPE_META?.carwash) MAP_TYPE_META.carwash = { ...MAP_TYPE_META.carwash, color: "#9cf6c2", glow: "rgba(156, 246, 194, .22)" };
+  if (MAP_TYPE_META?.underground) MAP_TYPE_META.underground = { ...MAP_TYPE_META.underground, color: "#48b76e", glow: "rgba(72, 183, 110, .24)" };
+
+  const WIKI_FILTERS = [
+    { id: "all", label: "All" },
+    { id: "response", label: "Response" },
+    { id: "jobs", label: "Jobs" },
+    { id: "systems", label: "Systems" },
+    { id: "illegal", label: "Illegal" },
+    { id: "property", label: "Property" },
+    { id: "support", label: "Support" }
+  ];
+
+  const wikiUiState = {
+    filter: "all",
+    query: ""
+  };
+
+  function getWikiPageEntries(categories, pages) {
+    return categories.flatMap((category) =>
+      (category.pages || []).map((slug) => {
+        const page = pages[slug];
+        if (!page) return null;
+        let bucket = "systems";
+        if (category.id === "basics") bucket = "all";
+        if (category.id === "emergency") bucket = "response";
+        if (category.id === "civilian") bucket = "jobs";
+        if (category.id === "gameplay") bucket = "systems";
+        if (category.id === "criminal") bucket = "illegal";
+        if (category.id === "properties") bucket = "property";
+        if (category.id === "misc") bucket = "support";
+
+        return {
+          slug,
+          title: page.navLabel || page.title,
+          summary: page.summary || "",
+          bucket,
+          categoryTitle: category.title,
+          searchIndex: normalize(`${page.navLabel || page.title} ${page.summary || ""} ${category.title}`)
+        };
+      }).filter(Boolean)
+    );
+  }
+
+  function wikiEntryMatches(entry) {
+    const filterMatch = wikiUiState.filter === "all" || entry.bucket === wikiUiState.filter;
+    const queryMatch = !wikiUiState.query || entry.searchIndex.includes(normalize(wikiUiState.query));
+    return filterMatch && queryMatch;
+  }
+
+  function bindWikiShowcase() {
+    const search = document.querySelector("[data-wiki-search]");
+    const cards = Array.from(document.querySelectorAll("[data-wiki-card]"));
+    const empty = document.querySelector("[data-wiki-empty]");
+
+    const sync = () => {
+      let visible = 0;
+      cards.forEach((card) => {
+        const matchesFilter = wikiUiState.filter === "all" || card.dataset.bucket === wikiUiState.filter;
+        const matchesQuery = !wikiUiState.query || (card.dataset.search || "").includes(normalize(wikiUiState.query));
+        const show = matchesFilter && matchesQuery;
+        card.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (empty) {
+        empty.hidden = visible > 0;
+      }
+      document.querySelectorAll("[data-wiki-filter]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.wikiFilter === wikiUiState.filter);
+      });
+    };
+
+    if (search) {
+      search.value = wikiUiState.query;
+      search.addEventListener("input", () => {
+        wikiUiState.query = search.value || "";
+        sync();
+      });
+    }
+
+    document.querySelectorAll("[data-wiki-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        wikiUiState.filter = button.dataset.wikiFilter || "all";
+        sync();
+      });
+    });
+
+    sync();
+  }
+
+  renderWiki = function renderWikiShowcase(pageSlug) {
+    const wiki = getWikiDataset();
+    const categories = Array.isArray(wiki.categories) ? wiki.categories : [];
+    const pages = wiki.pages && typeof wiki.pages === "object" ? wiki.pages : {};
+    const entries = getWikiPageEntries(categories, pages);
+    const requestedSlug = (pageSlug || "introduction").toString().toLowerCase();
+    const currentSlug = pages[requestedSlug] ? requestedSlug : "introduction";
+    const page = pages[currentSlug];
+
+    if (!page) {
+      setView(`
+        <div class="neo-wiki">
+          ${renderHeader("Wiki", [{ label: "Wiki" }], { showBadge: false })}
+          <section class="section"><div class="empty">Wiki data is missing right now.</div></section>
+        </div>
+      `);
+      return;
+    }
+
+    const pageFacts = Array.isArray(page.facts) ? page.facts : [];
+    const pageSections = Array.isArray(page.sections) ? page.sections : [];
+    const pageUpdates = Array.isArray(page.updates) ? page.updates : [];
+
+    setView(`
+      <div class="neo-wiki">
+        ${renderHeader("Wiki", [{ label: "Wiki" }], { showBadge: false })}
+        <section class="section section--hero neo-wiki__hero" data-reveal>
+          <span class="neo-kicker">Knowledgebase</span>
+          <h2>${escapeHtml(page.title)}</h2>
+          <p class="doc-p">${escapeHtml(page.summary || "Browse jobs, systems, support pages, and city mechanics from one cleaner library.")}</p>
+          <div class="neo-wiki__controls">
+            <input class="neo-wiki__search" data-wiki-search type="search" placeholder="Filter wiki pages..." />
+            <div class="neo-wiki__filters">
+              ${WIKI_FILTERS.map((filter) => `<button class="neo-wiki__filter${filter.id === wikiUiState.filter ? " is-active" : ""}" type="button" data-wiki-filter="${escapeHtml(filter.id)}">${escapeHtml(filter.label)}</button>`).join("")}
+            </div>
+          </div>
+        </section>
+
+        <div class="neo-wiki__layout">
+          <aside class="neo-wiki__rail section" data-reveal>
+            <div class="neo-wiki__railTop">
+              <span class="neo-kicker">Pages</span>
+              <h3>Filtered library</h3>
+            </div>
+            <div class="neo-wiki__cards">
+              ${entries.map((entry) => `
+                <a class="neo-wiki__card${entry.slug === currentSlug ? " is-current" : ""}" href="/wiki/${escapeHtml(entry.slug)}" data-wiki-card data-bucket="${escapeHtml(entry.bucket)}" data-search="${escapeHtml(entry.searchIndex)}">
+                  <span class="neo-wiki__cardMeta">${escapeHtml(entry.categoryTitle)}</span>
+                  <strong class="neo-wiki__cardTitle">${escapeHtml(entry.title)}</strong>
+                  <span class="neo-wiki__cardText">${escapeHtml(entry.summary)}</span>
+                </a>
+              `).join("")}
+              <div class="empty" data-wiki-empty hidden>No wiki pages match this filter yet.</div>
+            </div>
+          </aside>
+
+          <section class="neo-wiki__article section" data-reveal>
+            <div class="neo-wiki__facts">
+              ${pageFacts.map(([label, value]) => `
+                <article class="neo-wiki__fact">
+                  <span>${escapeHtml(label)}</span>
+                  <strong>${escapeHtml(value)}</strong>
+                </article>
+              `).join("")}
+            </div>
+
+            <div class="neo-wiki__sections">
+              ${pageSections.map((section, index) => `
+                <article class="neo-wiki__section">
+                  <div class="neo-wiki__sectionTop">
+                    <span class="neo-wiki__sectionIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+                    <h3>${escapeHtml(section.title || `Section ${index + 1}`)}</h3>
+                  </div>
+                  ${(section.paragraphs || []).map((paragraph) => `<p class="doc-p">${escapeHtml(paragraph)}</p>`).join("")}
+                  ${Array.isArray(section.bullets) && section.bullets.length ? `
+                    <ul class="doc-list neo-wiki__list">
+                      ${section.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join("")}
+                    </ul>
+                  ` : ""}
+                </article>
+              `).join("")}
+            </div>
+
+            ${pageUpdates.length ? `
+              <section class="neo-wiki__updates">
+                <span class="neo-kicker">Current notes</span>
+                <div class="neo-wiki__updateList">
+                  ${pageUpdates.map((note, index) => `
+                    <div class="neo-wiki__update">
+                      <span class="neo-wiki__updateIndex">${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+                      <span>${escapeHtml(note)}</span>
+                    </div>
+                  `).join("")}
+                </div>
+              </section>
+            ` : ""}
+          </section>
+        </div>
+      </div>
+    `);
+
+    bindWikiShowcase();
+  };
+
   route();
 })();
