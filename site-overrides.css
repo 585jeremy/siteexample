@@ -2640,7 +2640,7 @@ body.is-landing .auth{
 }
 
 .dock__item.is-active .dock__label{
-  color: rgba(230,190,129,.95);
+  color: rgba(234,255,242,.95);
 }
 
 @media (max-width: 1080px){
@@ -10642,8 +10642,8 @@ body.is-map .content{
 .landing-hub__hero{
   position: relative !important;
   overflow: hidden !important;
-  min-height: 340px !important;
-  padding: 34px !important;
+  min-height: 280px !important;
+  padding: 24px !important;
   border-radius: 30px !important;
   border: 1px solid rgba(104, 242, 155, .15) !important;
   background:
@@ -10673,14 +10673,14 @@ body.is-map .content{
 
 .landing-hub__title{
   max-width: 10ch !important;
-  font-size: clamp(3.1rem, 6vw, 5.4rem) !important;
+  font-size: clamp(2.3rem, 4.8vw, 4rem) !important;
   line-height: .9 !important;
   letter-spacing: -.07em !important;
 }
 
 .landing-hub__text{
   max-width: 62ch !important;
-  font-size: 1.03rem !important;
+  font-size: .98rem !important;
 }
 
 .landing-hub__actions{
@@ -10699,8 +10699,8 @@ body.is-map .content{
   position: relative !important;
   display: grid !important;
   gap: 12px !important;
-  min-height: 232px !important;
-  padding: 26px !important;
+  min-height: 176px !important;
+  padding: 20px !important;
   border-radius: 24px !important;
   border: 1px solid var(--site-border-soft) !important;
   background: var(--site-surface-soft) !important;
@@ -10742,8 +10742,8 @@ body.is-map .content{
   grid-template-columns: 68px minmax(0, 1fr) !important;
   gap: 16px !important;
   align-items: start !important;
-  min-height: 148px !important;
-  padding: 22px !important;
+  min-height: 124px !important;
+  padding: 18px !important;
   border-radius: 22px !important;
   border: 1px solid var(--site-border-soft) !important;
   background: var(--site-surface-soft) !important;
@@ -10776,8 +10776,8 @@ body.is-map .content{
 .start-clean__linkCard{
   display: grid !important;
   gap: 10px !important;
-  min-height: 172px !important;
-  padding: 22px !important;
+  min-height: 136px !important;
+  padding: 18px !important;
   border-radius: 22px !important;
   border: 1px solid var(--site-border-soft) !important;
   background: linear-gradient(180deg, rgba(14, 24, 18, .88), rgba(8, 14, 10, .96)) !important;
@@ -10880,8 +10880,8 @@ textarea{
 .live-minimal__card{
   display: grid !important;
   gap: 12px !important;
-  min-height: 196px !important;
-  padding: 24px !important;
+  min-height: 164px !important;
+  padding: 18px !important;
   border-radius: 24px !important;
 }
 
@@ -10898,7 +10898,7 @@ textarea{
 }
 
 .live-minimal__value{
-  font-size: clamp(2.8rem, 4.2vw, 4.5rem) !important;
+  font-size: clamp(1.95rem, 3vw, 3rem) !important;
   line-height: .92 !important;
   letter-spacing: -.06em !important;
 }
@@ -10909,7 +10909,7 @@ textarea{
 }
 
 .wiki-ledger__masthead{
-  padding: 30px !important;
+  padding: 22px !important;
   border-radius: 30px !important;
   background:
     radial-gradient(circle at 14% 8%, rgba(104, 242, 155, .12), transparent 26%),
@@ -10931,7 +10931,7 @@ textarea{
 
 .wiki-ledger__mastheadCopy h2{
   font-family: "Segoe UI", "Bahnschrift", system-ui, sans-serif !important;
-  font-size: clamp(2.8rem, 5vw, 4.6rem) !important;
+  font-size: clamp(2rem, 3.8vw, 3.2rem) !important;
   line-height: .94 !important;
   letter-spacing: -.07em !important;
 }
@@ -11293,7 +11293,7 @@ body.is-map .footer{
 }
 
 .landing-hub__hero{
-  min-height: min(74svh, 760px) !important;
+  min-height: min(58svh, 620px) !important;
   align-content: end !important;
 }
 
@@ -11318,7 +11318,7 @@ body.is-map .footer{
 }
 
 .landing-hub__actions .auth__btn{
-  min-width: 148px !important;
+  min-width: 132px !important;
   justify-content: center !important;
 }
 
@@ -11361,7 +11361,7 @@ body.is-map .footer{
 }
 
 .landing-hub__cardTitle{
-  font-size: clamp(1.38rem, 2.2vw, 1.9rem) !important;
+  font-size: clamp(1.2rem, 1.9vw, 1.6rem) !important;
   line-height: 1.02 !important;
   letter-spacing: -.04em !important;
 }
@@ -11376,7 +11376,7 @@ body.is-map .footer{
 }
 
 .start-clean__step strong{
-  font-size: 1.08rem !important;
+  font-size: 1rem !important;
   letter-spacing: -.02em !important;
 }
 
@@ -11405,7 +11405,7 @@ body.is-map .footer{
 }
 
 .wiki-ledger__masthead{
-  min-height: 320px !important;
+  min-height: 240px !important;
   align-content: end !important;
 }
 
@@ -11466,7 +11466,7 @@ body.is-map .footer{
 
 @media (max-width: 1080px){
   .landing-hub__hero{
-    min-height: 520px !important;
+    min-height: 420px !important;
   }
 }
 
