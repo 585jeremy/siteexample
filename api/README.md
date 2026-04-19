@@ -8,6 +8,14 @@ This folder is the website-side ingest bridge for the Discord bot / FiveM bridge
   - trusted ingest endpoint for the bot
 - `live-ops.php`
   - public read endpoint the website uses
+- `player-profile.php`
+  - public profile read endpoint for future game profiles
+- `leaderboard.php`
+  - public leaderboard read endpoint for future stat boards
+- `game-sync-schema.sql`
+  - recommended database schema for game profiles, stats, live status, and events
+- `game-sync-contract.md`
+  - exact payload contract for `ExtraM_BotIntegr`
 - `config.example.php`
   - example config for the shared secret and defaults
 
@@ -18,6 +26,22 @@ This folder is the website-side ingest bridge for the Discord bot / FiveM bridge
 3. Point the bot `.env` to:
    - `WEB_API_URL=https://sgcnr.net/api/update.php`
    - `WEB_API_SECRET=your-secret`
+
+## Optional game/profile database
+
+If you want player profiles and leaderboards on the website, set these in `api/config.php`:
+
+- `game_mysql_dsn`
+- `game_mysql_user`
+- `game_mysql_password`
+
+Then run:
+
+- `api/game-sync-schema.sql`
+
+The recommended payload contract for the FiveM bridge is documented in:
+
+- `api/game-sync-contract.md`
 
 ## Optional bot DB fallback
 
@@ -94,6 +118,12 @@ Fallback values currently supported:
 }
 ```
 
+### Full FiveM / website payload
+
+See:
+
+- `api/game-sync-contract.md`
+
 ## Built-in simple keys
 
 These map straight into the website live dashboard:
@@ -124,6 +154,16 @@ These map straight into the website live dashboard:
 - `leaderboard`
 - `announcements`
 - `live_map`
+- `game_status`
+- `online_players`
+- `max_players`
+- `active_missions`
+- `active_robberies`
+- `active_heists`
+- `server_uptime_seconds`
+- `game_profiles`
+- `game_leaderboards`
+- `game_events`
 
 ## Storage
 

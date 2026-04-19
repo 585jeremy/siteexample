@@ -9781,3 +9781,80 @@ body.is-landing .footer__inner{
   background: linear-gradient(180deg, rgba(15,12,10,.96), rgba(8,8,9,.98));
   box-shadow: 0 18px 42px rgba(0,0,0,.28);
 }
+
+/* 2026-04-19 public theme refresh and dock clearance */
+:root{
+  --accent: #cfa36a;
+  --accent2: #7aa6d8;
+  --border: rgba(136,157,184,.18);
+}
+
+body,
+body.is-landing,
+body.is-standard,
+body.is-wiki,
+body.is-apply{
+  background-color: #0c1016 !important;
+}
+
+body.is-landing{
+  background:
+    radial-gradient(circle at 14% 12%, rgba(207,163,106,.12), transparent 24%),
+    radial-gradient(circle at 86% 16%, rgba(122,166,216,.12), transparent 26%),
+    linear-gradient(180deg, #0b1016 0%, #121926 100%) !important;
+}
+
+.topbar{
+  background: linear-gradient(180deg, rgba(13,18,25,.94), rgba(10,14,20,.88)) !important;
+  border-bottom-color: rgba(207,163,106,.14) !important;
+}
+
+.section,
+.card,
+.home-main,
+.home-side,
+.landing-hub__card,
+.start-clean__step,
+.start-clean__linkCard,
+.live-minimal__card,
+.wiki-ledger__masthead,
+.wiki-ledger__directory,
+.wiki-ledger__summary,
+.wiki-ledger__document,
+.wiki-ledger__updates,
+.wiki-ledger__navigator{
+  box-shadow: 0 18px 38px rgba(0,0,0,.28) !important;
+}
+
+.content,
+body.is-landing .content,
+body.is-standard .content,
+body.is-wiki .content,
+body.is-apply .content{
+  padding-bottom: calc(188px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.footer,
+body.is-landing .footer,
+body.is-standard .footer,
+body.is-wiki .footer,
+body.is-apply .footer{
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.dock,
+body.is-landing .dock,
+body.is-standard .dock,
+body.is-wiki .dock,
+body.is-apply .dock,
+body.is-map .dock{
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  background: linear-gradient(180deg, rgba(17,24,34,.9), rgba(11,16,24,.92)) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.34) !important;
+}
+
+.dock__item.is-active{
+  background: rgba(207,163,106,.14) !important;
+  border-color: rgba(207,163,106,.34) !important;
+}

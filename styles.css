@@ -1,13 +1,13 @@
 :root{
-  --bg: #070b10;
-  --panel: rgba(11,17,25,.94);
-  --panel2: rgba(13,20,30,.88);
-  --text: #edf4fb;
-  --muted: rgba(237,244,251,.68);
-  --border: rgba(120,147,182,.18);
-  --accent: #d7a161;
-  --accent2: #cf5a5a;
-  --shadow: 0 16px 34px rgba(0,0,0,.42);
+  --bg: #0c1016;
+  --panel: rgba(17,24,34,.94);
+  --panel2: rgba(21,30,42,.88);
+  --text: #eef3f8;
+  --muted: rgba(222,230,239,.72);
+  --border: rgba(136,157,184,.18);
+  --accent: #cfa36a;
+  --accent2: #7aa6d8;
+  --shadow: 0 18px 38px rgba(0,0,0,.34);
   --ease: cubic-bezier(.2,.8,.2,1);
 }
 
@@ -21,9 +21,9 @@ body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
   background-color: var(--bg);
   background-image:
-    radial-gradient(1100px 640px at 18% -8%, rgba(171,127,74,.12), transparent 55%),
-    radial-gradient(920px 540px at 84% -6%, rgba(198,77,77,.10), transparent 54%),
-    linear-gradient(180deg, rgba(255,255,255,.02), transparent 22%);
+    radial-gradient(980px 580px at 14% -6%, rgba(207,163,106,.12), transparent 56%),
+    radial-gradient(920px 520px at 88% -4%, rgba(77,118,168,.11), transparent 54%),
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 24%);
   background-attachment: fixed;
   color: var(--text);
   overflow-x: hidden;
@@ -97,8 +97,8 @@ a:hover{ color: var(--accent); }
   align-items: flex-start;
   gap: 14px;
   padding: 16px 18px 12px 18px;
-  background: linear-gradient(180deg, rgba(8,10,13,.95), rgba(5,6,8,.92));
-  border-bottom: 1px solid rgba(179,134,77,.14);
+  background: linear-gradient(180deg, rgba(12,16,22,.94), rgba(9,12,18,.88));
+  border-bottom: 1px solid rgba(207,163,106,.14);
   backdrop-filter: blur(10px);
 }
 
@@ -245,8 +245,8 @@ a:hover{ color: var(--accent); }
   letter-spacing: .08em;
   text-transform: uppercase;
   color: rgba(237,244,251,.84);
-  border: 1px solid rgba(167,128,82,.14);
-  background: rgba(12,18,26,.82);
+  border: 1px solid rgba(207,163,106,.14);
+  background: rgba(16,22,31,.82);
   padding: 10px 14px;
   border-radius: 999px;
   backdrop-filter: blur(10px);
@@ -255,7 +255,7 @@ a:hover{ color: var(--accent); }
 .content{
   max-width: 980px;
   margin: 0 auto;
-  padding: 14px 16px 120px 16px;
+  padding: 14px 16px 170px 16px;
   min-height: calc(100vh - 80px);
 }
 
@@ -1319,7 +1319,7 @@ body.is-landing .landing{
 .footer{
   margin: 0 auto;
   max-width: 980px;
-  padding: 0 16px 18px 16px;
+  padding: 0 16px calc(140px + env(safe-area-inset-bottom, 0px)) 16px;
 }
 
 .footer__inner{
@@ -2366,16 +2366,16 @@ body.is-landing .landing{
 .dock{
   position: fixed;
   left: 50%;
-  bottom: 26px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   display:flex;
   gap: 12px;
   padding: 10px;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(17,24,34,.88), rgba(10,15,23,.9));
   backdrop-filter: blur(18px);
-  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+  box-shadow: 0 20px 50px rgba(0,0,0,.38);
   z-index: 20;
 }
 
@@ -2415,11 +2415,11 @@ body.is-landing .landing{
 .dock__item.is-active{
   transform: translateY(-1px);
   border-color: rgba(215,161,97,.5);
-  background: rgba(215,161,97,.10);
+  background: rgba(207,163,106,.14);
   box-shadow:
-    0 10px 26px rgba(0,0,0,.55),
-    0 0 0 1px rgba(215,161,97,.10) inset,
-    0 0 22px rgba(215,161,97,.16);
+    0 10px 26px rgba(0,0,0,.34),
+    0 0 0 1px rgba(207,163,106,.10) inset,
+    0 0 18px rgba(207,163,106,.12);
 }
 
 .dock__icon{

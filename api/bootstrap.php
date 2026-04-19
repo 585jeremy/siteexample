@@ -91,6 +91,31 @@ function api_default_snapshot(): array
             'updatedAt' => null,
             'rows' => [],
         ],
+        'game' => [
+            'server' => [
+                'status' => 'pending',
+                'serverName' => api_config('default_server_name', 'SGCNR'),
+                'onlinePlayers' => null,
+                'maxPlayers' => null,
+                'activeMissions' => null,
+                'activeRobberies' => null,
+                'activeHeists' => null,
+                'uptimeSeconds' => null,
+                'updatedAt' => null,
+            ],
+            'profiles' => [
+                'updatedAt' => null,
+                'rows' => [],
+            ],
+            'leaderboards' => [
+                'updatedAt' => null,
+                'boards' => [],
+            ],
+            'events' => [
+                'updatedAt' => null,
+                'rows' => [],
+            ],
+        ],
         'liveMap' => [
             'updatedAt' => null,
             'requiresOptIn' => (bool) api_config('live_tracking_requires_opt_in', true),
@@ -466,6 +491,72 @@ function api_apply_named_update(array &$snapshot, string $key, $value, array &$a
             }
             return;
 
+        case 'game_status':
+            $snapshot['game']['server']['status'] = (string) $value;
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'game_status';
+            return;
+
+        case 'online_players':
+            $snapshot['game']['server']['onlinePlayers'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'online_players';
+            return;
+
+        case 'max_players':
+            $snapshot['game']['server']['maxPlayers'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'max_players';
+            return;
+
+        case 'active_missions':
+            $snapshot['game']['server']['activeMissions'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'active_missions';
+            return;
+
+        case 'active_robberies':
+            $snapshot['game']['server']['activeRobberies'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'active_robberies';
+            return;
+
+        case 'active_heists':
+            $snapshot['game']['server']['activeHeists'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'active_heists';
+            return;
+
+        case 'server_uptime_seconds':
+            $snapshot['game']['server']['uptimeSeconds'] = api_to_number($value);
+            $snapshot['game']['server']['updatedAt'] = api_now_iso();
+            $applied[] = 'server_uptime_seconds';
+            return;
+
+        case 'game_profiles':
+            if (is_array($value)) {
+                $snapshot['game']['profiles']['rows'] = $value;
+                $snapshot['game']['profiles']['updatedAt'] = api_now_iso();
+                $applied[] = 'game_profiles';
+            }
+            return;
+
+        case 'game_leaderboards':
+            if (is_array($value)) {
+                $snapshot['game']['leaderboards']['boards'] = $value;
+                $snapshot['game']['leaderboards']['updatedAt'] = api_now_iso();
+                $applied[] = 'game_leaderboards';
+            }
+            return;
+
+        case 'game_events':
+            if (is_array($value)) {
+                $snapshot['game']['events']['rows'] = $value;
+                $snapshot['game']['events']['updatedAt'] = api_now_iso();
+                $applied[] = 'game_events';
+            }
+            return;
+
         case 'announcements':
             if (is_array($value)) {
                 $snapshot['discord']['announcements'] = $value;
@@ -522,6 +613,7 @@ function api_apply_updates(array &$snapshot, array $payload, array &$applied): v
     $sectionMap = [
         'discord',
         'leaderboard',
+        'game',
         'liveMap',
         'uptime',
         'restart',
@@ -560,3 +652,23 @@ function api_apply_updates(array &$snapshot, array $payload, array &$applied): v
     }
 }
 
+function api_db_connect(string $dsnKey, string $userKey, string $passwordKey): ?PDO
+{
+    $dsn = trim((string) api_config($dsnKey, ''));
+    $user = (string) api_config($userKey, '');
+    $password = (string) api_config($passwordKey, '');
+
+    if ($dsn === '') {
+        return null;
+    }
+
+    try {
+        return new PDO($dsn, $user, $password, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
+    } catch (Throwable $error) {
+        return null;
+    }
+}

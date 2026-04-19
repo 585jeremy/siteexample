@@ -1726,8 +1726,8 @@ function renderLandingHome() {
     <div class="landing-hub">
       <section class="section section--hero landing-hub__hero" aria-label="Welcome">
         <div class="landing-hub__eyebrow">Official SGCNR</div>
-        <h1 class="landing-hub__title">Everything important, one clean stop.</h1>
-        <p class="landing-hub__text">Use the public site to get started, read the rules, check the map, track live status, and apply without having to dig through filler pages.</p>
+        <h1 class="landing-hub__title">Everything you need, in one place.</h1>
+        <p class="landing-hub__text">Start here for the essentials: rules, map, live status, and applications without having to dig through extra pages.</p>
         <div class="landing-hub__actions">
           <a class="auth__btn auth__btn--primary" href="/start">Open Start</a>
           <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
@@ -1747,8 +1747,8 @@ function renderLandingHome() {
         </a>
         <a class="landing-hub__card" href="/live">
           <span class="landing-hub__cardLabel">Live</span>
-          <strong class="landing-hub__cardTitle">Check server and bot state fast</strong>
-          <span class="landing-hub__cardText">The live page now stays focused on the two status checks that actually matter.</span>
+            <strong class="landing-hub__cardTitle">See live server status at a glance</strong>
+            <span class="landing-hub__cardText">Quickly check whether the server and Discord bot are online.</span>
         </a>
       </section>
     </div>
@@ -1770,7 +1770,7 @@ function renderStart() {
       <section class="section section--hero start-clean">
         <div class="section__eyebrow">New player entry</div>
         <h2>Get into the city without missing the basics.</h2>
-        <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+        <p class="doc-p">If you're new here, use this page to get settled fast: join the server, read the rules, and keep Discord nearby for support.</p>
         <div class="start-clean__flow">
           <article class="start-clean__step">
             <span class="start-clean__stepIndex">01</span>
@@ -5299,7 +5299,7 @@ function renderServerStatusShell() {
       <section class="section section--hero live-minimal__hero">
         <div class="section__eyebrow">Live checks</div>
         <h2>${escapeHtml(SERVER_CONFIG.name)} status</h2>
-        <p class="doc-p">This page stays intentionally small: one check for the game server, one check for the Discord bot, and nothing else fighting for attention.</p>
+        <p class="doc-p">A quick status check for the game server and the Discord bot.</p>
         <div class="status-live__actions">
           <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
         </div>
