@@ -9858,3 +9858,1418 @@ body.is-map .dock{
   background: rgba(207,163,106,.14) !important;
   border-color: rgba(207,163,106,.34) !important;
 }
+
+/* 2026-04-20 public site redesign */
+:root{
+  --site-ink: #eef4fb;
+  --site-copy: rgba(223,231,242,.76);
+  --site-faint: rgba(201,210,223,.54);
+  --site-accent: #d4a464;
+  --site-accent-soft: rgba(212,164,100,.18);
+  --site-cold: #74a4da;
+  --site-edge: rgba(140,157,183,.16);
+  --site-panel-strong: linear-gradient(180deg, rgba(17,24,35,.96), rgba(10,15,23,.98));
+  --site-panel-soft: linear-gradient(180deg, rgba(20,28,40,.9), rgba(11,16,24,.94));
+  --site-glow: 0 22px 50px rgba(0,0,0,.34);
+}
+
+body,
+body.is-landing,
+body.is-standard,
+body.is-wiki,
+body.is-apply,
+body.is-map{
+  background:
+    radial-gradient(circle at 14% 10%, rgba(212,164,100,.14), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(116,164,218,.12), transparent 26%),
+    linear-gradient(180deg, #09101a 0%, #101827 44%, #0b111c 100%) !important;
+  color: var(--site-ink) !important;
+}
+
+body::before{
+  background:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) !important;
+  background-size: 220px 220px !important;
+  opacity: .025 !important;
+}
+
+body::after{
+  opacity: .012 !important;
+}
+
+.topbar{
+  align-items: center !important;
+  gap: 18px !important;
+  min-height: 78px;
+  padding: 16px 22px 14px !important;
+  background: linear-gradient(180deg, rgba(11,16,24,.9), rgba(11,16,24,.72)) !important;
+  border-bottom: 1px solid rgba(212,164,100,.12) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.16);
+}
+
+.topbar__status{
+  position: absolute;
+  left: 22px;
+  top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clock{
+  min-height: 38px;
+  padding: 0 14px !important;
+  display: inline-flex;
+  align-items: center;
+  border-color: rgba(212,164,100,.14) !important;
+  background: rgba(16,22,32,.74) !important;
+  color: rgba(238,244,251,.82) !important;
+}
+
+.brandmark{
+  min-width: 0 !important;
+}
+
+.brandmark__badge{
+  min-width: 236px !important;
+  min-height: 58px !important;
+  border-radius: 18px !important;
+  border-color: rgba(212,164,100,.14) !important;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(212,164,100,.16), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgba(116,164,218,.12), transparent 26%),
+    var(--site-panel-soft) !important;
+  box-shadow: 0 18px 38px rgba(0,0,0,.28) !important;
+}
+
+.brandmark__light--blue{
+  background: radial-gradient(circle, rgba(116,164,218,.88), rgba(116,164,218,0) 68%) !important;
+}
+
+.brandmark__light--red{
+  background: radial-gradient(circle, rgba(212,164,100,.94), rgba(212,164,100,0) 68%) !important;
+}
+
+.auth{
+  top: 16px !important;
+  right: 22px !important;
+  gap: 10px !important;
+}
+
+.auth__btn{
+  min-height: 38px;
+  padding: 0 14px !important;
+  border-radius: 12px !important;
+  border-color: rgba(212,164,100,.12) !important;
+  background: rgba(17,24,35,.72) !important;
+  color: rgba(238,244,251,.86) !important;
+  letter-spacing: .1em !important;
+}
+
+.auth__btn--primary{
+  background: linear-gradient(180deg, rgba(212,164,100,.22), rgba(212,164,100,.1)) !important;
+  color: #fbe9cf !important;
+}
+
+.legal-rail{
+  width: min(1240px, calc(100% - 28px));
+  margin: 14px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(212,164,100,.12);
+  background:
+    radial-gradient(circle at 14% 16%, rgba(212,164,100,.12), transparent 24%),
+    var(--site-panel-soft);
+  box-shadow: var(--site-glow);
+}
+
+.legal-rail__label{
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--site-faint);
+}
+
+.legal-rail__links{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.legal-rail__link{
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  color: var(--site-copy);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.legal-rail__link:hover{
+  color: #f9e5c9;
+  border-color: rgba(212,164,100,.24);
+  background: rgba(212,164,100,.08);
+}
+
+.content,
+body.is-landing .content,
+body.is-standard .content,
+body.is-wiki .content,
+body.is-apply .content,
+body.is-map .content{
+  width: min(1240px, calc(100% - 28px)) !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 18px 0 calc(210px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.section,
+.page-hero,
+.home-main,
+.home-side,
+.landing-hub__hero,
+.landing-hub__card,
+.start-clean__step,
+.start-clean__linkCard,
+.live-minimal__hero,
+.live-minimal__card,
+.wiki-ledger__masthead,
+.wiki-ledger__directory,
+.wiki-ledger__summary,
+.wiki-ledger__document,
+.wiki-ledger__updates,
+.wiki-ledger__navigator{
+  border-color: var(--site-edge) !important;
+  background: var(--site-panel-strong) !important;
+  box-shadow: var(--site-glow) !important;
+}
+
+.section__eyebrow,
+.landing-hub__cardLabel,
+.start-clean__linkLabel,
+.live-minimal__label,
+.wiki-ledger__directoryGroupTop,
+.wiki-ledger__metaCard span{
+  color: var(--site-faint) !important;
+}
+
+.section h2,
+.landing-hub__title,
+.landing-hub__cardTitle,
+.start-clean__linkTitle,
+.home-title,
+.page-title,
+.wiki-ledger__mastheadCopy h2,
+.wiki-ledger__body h3{
+  color: var(--site-ink) !important;
+}
+
+.doc-p,
+.landing-hub__text,
+.landing-hub__cardText,
+.start-clean__stepCopy span,
+.wiki-ledger .doc-p,
+.wiki-ledger .doc-list li,
+.live-minimal__text,
+.home-text{
+  color: var(--site-copy) !important;
+}
+
+.landing-hub{
+  gap: 20px !important;
+}
+
+.landing-hub__hero{
+  padding: 28px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(116,164,218,.12), transparent 26%),
+    radial-gradient(circle at 18% 16%, rgba(212,164,100,.14), transparent 22%),
+    linear-gradient(180deg, rgba(18,26,38,.98), rgba(10,15,24,.99)) !important;
+}
+
+.landing-hub__grid{
+  gap: 16px !important;
+}
+
+.landing-hub__card{
+  min-height: 210px;
+  padding: 22px !important;
+  border-radius: 24px !important;
+}
+
+.start-clean{
+  gap: 20px !important;
+}
+
+.start-clean__step{
+  grid-template-columns: 72px minmax(0,1fr) !important;
+  min-height: 132px;
+  align-items: center !important;
+  border-radius: 22px !important;
+}
+
+.start-clean__stepIndex{
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 18px !important;
+  background: rgba(212,164,100,.12) !important;
+  border-color: rgba(212,164,100,.24) !important;
+}
+
+.start-clean__linkCard{
+  min-height: 128px;
+  justify-content: end;
+}
+
+.live-minimal__hero{
+  padding: 22px !important;
+}
+
+.live-minimal__grid{
+  gap: 16px !important;
+}
+
+.live-minimal__card{
+  min-height: 184px !important;
+  padding: 22px !important;
+}
+
+.live-minimal__value{
+  font-size: clamp(40px, 4.2vw, 58px) !important;
+}
+
+.wiki-ledger{
+  gap: 20px !important;
+}
+
+.wiki-ledger__layout{
+  gap: 20px !important;
+}
+
+.wiki-ledger__directory,
+.wiki-ledger__summary,
+.wiki-ledger__document,
+.wiki-ledger__updates,
+.wiki-ledger__navigator{
+  border-radius: 26px !important;
+}
+
+.wiki-ledger__directoryLink,
+.wiki-ledger__directoryLink.is-active{
+  border-left-width: 3px !important;
+}
+
+.wiki-ledger .wiki-card,
+.wiki-ledger .wiki-sectionBlock,
+.wiki-ledger .wiki-fact,
+.wiki-ledger .wiki-pager__card{
+  background: linear-gradient(180deg, rgba(22,30,42,.96), rgba(11,16,24,.98)) !important;
+}
+
+.account-form__grid,
+.content-grid{
+  gap: 18px !important;
+}
+
+.account-field__input,
+.account-field__textarea,
+.account-field__select,
+input[type="text"],
+input[type="search"],
+input[type="number"],
+textarea,
+select{
+  border-radius: 14px !important;
+  border-color: rgba(255,255,255,.08) !important;
+  background: rgba(255,255,255,.035) !important;
+  color: var(--site-ink) !important;
+}
+
+.dock,
+body.is-landing .dock,
+body.is-standard .dock,
+body.is-wiki .dock,
+body.is-apply .dock,
+body.is-map .dock{
+  left: 50% !important;
+  width: auto !important;
+  max-width: calc(100% - 28px) !important;
+  padding: 12px !important;
+  gap: 10px !important;
+  border-radius: 22px !important;
+  border-color: rgba(255,255,255,.08) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212,164,100,.1), transparent 42%),
+    linear-gradient(180deg, rgba(18,26,38,.92), rgba(11,16,24,.96)) !important;
+  box-shadow: 0 22px 52px rgba(0,0,0,.38) !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.dock::-webkit-scrollbar{
+  display: none;
+}
+
+.dock__item{
+  width: auto !important;
+  min-width: 88px;
+  height: 50px !important;
+  gap: 8px;
+  padding: 0 14px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.03) !important;
+}
+
+.dock__label{
+  display: inline-block !important;
+  color: var(--site-copy) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.dock__icon{
+  color: rgba(238,244,251,.76) !important;
+}
+
+.dock__item.is-active{
+  background: rgba(212,164,100,.14) !important;
+  border-color: rgba(212,164,100,.28) !important;
+}
+
+.dock__item.is-active .dock__label,
+.dock__item.is-active .dock__icon{
+  color: #f8e2c2 !important;
+}
+
+.footer{
+  width: min(1240px, calc(100% - 28px)) !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 0 0 calc(114px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.footer__inner{
+  border-top: none !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(212,164,100,.1);
+  background: linear-gradient(180deg, rgba(16,22,32,.86), rgba(11,16,24,.94)) !important;
+  box-shadow: 0 18px 36px rgba(0,0,0,.24);
+  padding: 18px 20px !important;
+  gap: 8px !important;
+}
+
+.footer__brand{
+  color: rgba(248,241,230,.9) !important;
+}
+
+.footer__legal{
+  color: var(--site-faint) !important;
+}
+
+@media (max-width: 920px){
+  .topbar{
+    padding: 14px 12px 12px !important;
+  }
+
+  .topbar__status{
+    position: static;
+  }
+
+  .auth{
+    position: static !important;
+    margin-left: auto;
+  }
+
+  .legal-rail{
+    width: min(100%, calc(100% - 16px));
+    margin-top: 10px;
+    padding: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .legal-rail__links{
+    justify-content: flex-start;
+  }
+
+  .content,
+  body.is-landing .content,
+  body.is-standard .content,
+  body.is-wiki .content,
+  body.is-apply .content,
+  body.is-map .content{
+    width: min(100%, calc(100% - 16px)) !important;
+    padding-bottom: calc(226px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .footer{
+    width: min(100%, calc(100% - 16px)) !important;
+  }
+}
+
+@media (max-width: 640px){
+  .dock{
+    justify-content: flex-start !important;
+  }
+
+  .dock__item{
+    min-width: 72px;
+    padding: 0 12px !important;
+  }
+
+  .dock__label{
+    font-size: 10px !important;
+  }
+}
+
+/* 2026-04-20 full public redesign */
+:root{
+  --site-bg: #09111a;
+  --site-bg-deep: #050b12;
+  --site-surface: linear-gradient(180deg, rgba(16, 24, 36, .96), rgba(10, 16, 24, .98));
+  --site-surface-soft: linear-gradient(180deg, rgba(20, 30, 44, .88), rgba(12, 18, 28, .94));
+  --site-border-strong: rgba(200, 163, 104, .16);
+  --site-border-soft: rgba(129, 151, 180, .13);
+  --site-ink-strong: #f1f6fb;
+  --site-copy-strong: rgba(218, 227, 237, .78);
+  --site-muted-strong: rgba(173, 187, 205, .56);
+  --site-gold: #d2a56a;
+  --site-blue: #78a6dc;
+  --site-green: #7bb497;
+  --site-shadow-strong: 0 28px 80px rgba(0, 0, 0, .38);
+}
+
+html{
+  background: var(--site-bg) !important;
+}
+
+body,
+body.is-landing,
+body.is-standard,
+body.is-wiki,
+body.is-apply,
+body.is-map{
+  background:
+    radial-gradient(circle at 14% 10%, rgba(210, 165, 106, .14), transparent 24%),
+    radial-gradient(circle at 82% 10%, rgba(90, 130, 182, .12), transparent 26%),
+    linear-gradient(180deg, #0b131d 0%, #09111a 34%, #070d14 100%) !important;
+  background-color: var(--site-bg) !important;
+  color: var(--site-ink-strong) !important;
+}
+
+body::before{
+  opacity: .028 !important;
+}
+
+body::after{
+  opacity: .018 !important;
+}
+
+.topbar,
+body.is-landing .topbar,
+body.is-standard .topbar,
+body.is-wiki .topbar,
+body.is-apply .topbar,
+body.is-map .topbar{
+  position: sticky !important;
+  top: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: min(1380px, calc(100% - 28px)) !important;
+  margin: 14px auto 0 !important;
+  padding: 14px 18px !important;
+  border: 1px solid rgba(210, 165, 106, .12) !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(210, 165, 106, .12), transparent 32%),
+    radial-gradient(circle at 84% 0%, rgba(120, 166, 220, .10), transparent 30%),
+    linear-gradient(180deg, rgba(10, 16, 24, .88), rgba(9, 14, 22, .94)) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .26) !important;
+  backdrop-filter: blur(20px) saturate(125%) !important;
+  z-index: 30 !important;
+}
+
+.topbar__status{
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  justify-self: start !important;
+}
+
+.meta{
+  display: none !important;
+}
+
+.clock{
+  border-radius: 999px !important;
+  border: 1px solid rgba(210, 165, 106, .16) !important;
+  background: rgba(255, 255, 255, .03) !important;
+  color: rgba(238, 244, 250, .86) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+.brandmark,
+body.is-landing .brandmark,
+body.is-standard .brandmark,
+body.is-wiki .brandmark,
+body.is-apply .brandmark,
+body.is-map .brandmark{
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  margin: 0 auto !important;
+  justify-self: center !important;
+}
+
+.brandmark--link{
+  transition: transform .24s ease, filter .24s ease !important;
+}
+
+.brandmark--link:hover{
+  transform: translateY(-1px) scale(1.01) !important;
+  filter: brightness(1.04) !important;
+}
+
+.brandmark__badge{
+  min-width: 264px !important;
+  min-height: 62px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(210, 165, 106, .18) !important;
+  background:
+    radial-gradient(circle at 14% -10%, rgba(210, 165, 106, .22), transparent 36%),
+    radial-gradient(circle at 86% -8%, rgba(120, 166, 220, .16), transparent 34%),
+    linear-gradient(180deg, rgba(13, 20, 31, .98), rgba(8, 12, 18, .99)) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, .36),
+    inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+.brandmark__badge::before{
+  inset: 5px !important;
+  border-color: rgba(255, 255, 255, .045) !important;
+}
+
+.brandmark__title{
+  color: #f7fbff !important;
+  font-size: 30px !important;
+  letter-spacing: -.06em !important;
+}
+
+.auth{
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  justify-self: end !important;
+  margin-left: auto !important;
+}
+
+.auth__btn{
+  min-height: 42px !important;
+  border-radius: 14px !important;
+  border-color: rgba(210, 165, 106, .14) !important;
+  background: rgba(255, 255, 255, .03) !important;
+  color: rgba(236, 242, 248, .88) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03) !important;
+}
+
+.auth__btn:hover{
+  border-color: rgba(210, 165, 106, .26) !important;
+  background: rgba(255, 255, 255, .05) !important;
+}
+
+.auth__btn--primary{
+  background: linear-gradient(180deg, rgba(210, 165, 106, .18), rgba(210, 165, 106, .10)) !important;
+  border-color: rgba(210, 165, 106, .28) !important;
+  color: #f5dfc0 !important;
+}
+
+.legal-rail{
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: min(1380px, calc(100% - 28px)) !important;
+  margin: 14px auto 4px !important;
+  padding: 16px 18px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(120, 166, 220, .14) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(120, 166, 220, .08), transparent 30%),
+    linear-gradient(180deg, rgba(13, 19, 29, .84), rgba(9, 14, 22, .90)) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .22) !important;
+}
+
+.legal-rail__label{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(210, 165, 106, .18) !important;
+  background: rgba(210, 165, 106, .08) !important;
+  color: #ebd2b0 !important;
+  letter-spacing: .14em !important;
+}
+
+.legal-rail__links{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+}
+
+.legal-rail__link{
+  min-height: 38px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: rgba(255, 255, 255, .03) !important;
+  color: rgba(233, 240, 247, .82) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease !important;
+}
+
+.legal-rail__link:hover{
+  transform: translateY(-1px) !important;
+  border-color: rgba(210, 165, 106, .26) !important;
+  background: rgba(210, 165, 106, .08) !important;
+}
+
+.content,
+body.is-landing .content,
+body.is-standard .content,
+body.is-wiki .content,
+body.is-apply .content,
+body.is-map .content{
+  width: min(1380px, calc(100% - 28px)) !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 18px 0 calc(248px + env(safe-area-inset-bottom, 0px)) !important;
+  min-height: auto !important;
+}
+
+.section,
+.page-hero,
+.rules-legal,
+.status-note,
+.status-card,
+.stack-list__item,
+.info-faq__item,
+.account-sheet__panel,
+.auth-modal__panel,
+.leaderboard-stat,
+.leaderboard-highlight,
+.leaderboard-roster__item,
+.admin-list__item{
+  border-radius: 24px !important;
+  border: 1px solid var(--site-border-strong) !important;
+  background: var(--site-surface) !important;
+  box-shadow: var(--site-shadow-strong) !important;
+}
+
+.section{
+  padding: 28px !important;
+}
+
+.section__eyebrow,
+.page-hero__badge,
+.doc-table th,
+.status-card__label,
+.status-note strong,
+.stack-list__index,
+.info-link__label{
+  color: var(--site-muted-strong) !important;
+}
+
+.page-title,
+.section h2,
+.section h3,
+.landing-hub__title,
+.landing-hub__cardTitle,
+.start-clean__linkTitle,
+.live-minimal__value,
+.wiki-ledger__mastheadCopy h2,
+.wiki-ledger__body h3{
+  color: var(--site-ink-strong) !important;
+}
+
+.doc-p,
+.section p,
+.landing-hub__text,
+.landing-hub__cardText,
+.start-clean__stepCopy span,
+.live-minimal__text,
+.live-minimal__meta,
+.status-card__meta,
+.status-note,
+.info-faq__a,
+.wiki-ledger .doc-p,
+.wiki-ledger .doc-list li,
+.wiki-ledger .wiki-card__text,
+.wiki-ledger .wiki-pager__text{
+  color: var(--site-copy-strong) !important;
+}
+
+.landing-hub{
+  display: grid !important;
+  gap: 22px !important;
+}
+
+.landing-hub__hero{
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 340px !important;
+  padding: 34px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(210, 165, 106, .15) !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(210, 165, 106, .16), transparent 28%),
+    radial-gradient(circle at 82% 16%, rgba(120, 166, 220, .14), transparent 26%),
+    linear-gradient(135deg, rgba(16, 24, 36, .96), rgba(8, 13, 20, .98)) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .38) !important;
+}
+
+.landing-hub__hero::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: auto -14% -40% auto !important;
+  width: 520px !important;
+  height: 520px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(210, 165, 106, .18), transparent 62%) !important;
+  pointer-events: none !important;
+}
+
+.landing-hub__eyebrow{
+  color: #f1c991 !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+}
+
+.landing-hub__title{
+  max-width: 10ch !important;
+  font-size: clamp(3.1rem, 6vw, 5.4rem) !important;
+  line-height: .9 !important;
+  letter-spacing: -.07em !important;
+}
+
+.landing-hub__text{
+  max-width: 62ch !important;
+  font-size: 1.03rem !important;
+}
+
+.landing-hub__actions{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+
+.landing-hub__grid{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.landing-hub__card{
+  position: relative !important;
+  display: grid !important;
+  gap: 12px !important;
+  min-height: 232px !important;
+  padding: 26px !important;
+  border-radius: 24px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: var(--site-surface-soft) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .24) !important;
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease !important;
+}
+
+.landing-hub__card:hover{
+  transform: translateY(-4px) !important;
+  border-color: rgba(210, 165, 106, .24) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .30) !important;
+}
+
+.landing-hub__cardLabel,
+.start-clean__linkLabel,
+.live-minimal__label,
+.wiki-ledger__directoryGroupTop,
+.wiki-ledger__metaCard span{
+  color: var(--site-muted-strong) !important;
+  text-transform: uppercase !important;
+  letter-spacing: .14em !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.start-clean{
+  display: grid !important;
+  gap: 22px !important;
+}
+
+.start-clean__flow{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.start-clean__step{
+  display: grid !important;
+  grid-template-columns: 68px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  min-height: 148px !important;
+  padding: 22px !important;
+  border-radius: 22px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: var(--site-surface-soft) !important;
+}
+
+.start-clean__stepIndex{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(210, 165, 106, .22) !important;
+  background: rgba(210, 165, 106, .10) !important;
+  color: #f2d6b3 !important;
+  font-weight: 800 !important;
+}
+
+.start-clean__stepCopy{
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.start-clean__links{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.start-clean__linkCard{
+  display: grid !important;
+  gap: 10px !important;
+  min-height: 172px !important;
+  padding: 22px !important;
+  border-radius: 22px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: linear-gradient(180deg, rgba(18, 28, 42, .88), rgba(10, 17, 26, .96)) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .24) !important;
+}
+
+.content-grid{
+  gap: 20px !important;
+}
+
+.content-grid--sidebar{
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .8fr) !important;
+  align-items: start !important;
+}
+
+.info-faq,
+.stack-list{
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.info-faq__item,
+.stack-list__item{
+  padding: 18px 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: none !important;
+}
+
+.info-faq__q{
+  color: var(--site-ink-strong) !important;
+  font-weight: 700 !important;
+}
+
+.stack-list__item{
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  align-items: center !important;
+}
+
+.stack-list__index{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(210, 165, 106, .20) !important;
+  background: rgba(210, 165, 106, .08) !important;
+  color: #efcf9f !important;
+}
+
+.account-form{
+  display: grid !important;
+  gap: 18px !important;
+}
+
+.account-form__grid{
+  gap: 18px !important;
+}
+
+.account-field__input,
+.account-field__textarea,
+.account-field__select,
+input[type="text"],
+input[type="search"],
+input[type="number"],
+textarea,
+select{
+  min-height: 52px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: rgba(255, 255, 255, .04) !important;
+  color: var(--site-ink-strong) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03) !important;
+}
+
+.account-field__textarea,
+textarea{
+  min-height: 152px !important;
+}
+
+.live-minimal{
+  display: grid !important;
+  gap: 18px !important;
+}
+
+.live-minimal__hero{
+  min-height: 0 !important;
+  padding: 26px !important;
+  border-radius: 28px !important;
+}
+
+.live-minimal__grid{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.live-minimal__card{
+  display: grid !important;
+  gap: 12px !important;
+  min-height: 196px !important;
+  padding: 24px !important;
+  border-radius: 24px !important;
+}
+
+.live-minimal__card--online{
+  border-color: rgba(123, 180, 151, .24) !important;
+}
+
+.live-minimal__card--offline{
+  border-color: rgba(190, 98, 98, .24) !important;
+}
+
+.live-minimal__card--pending{
+  border-color: rgba(210, 165, 106, .18) !important;
+}
+
+.live-minimal__value{
+  font-size: clamp(2.8rem, 4.2vw, 4.5rem) !important;
+  line-height: .92 !important;
+  letter-spacing: -.06em !important;
+}
+
+.wiki-ledger{
+  display: grid !important;
+  gap: 20px !important;
+}
+
+.wiki-ledger__masthead{
+  padding: 30px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(210, 165, 106, .12), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgba(120, 166, 220, .10), transparent 24%),
+    linear-gradient(135deg, rgba(15, 24, 36, .96), rgba(8, 13, 20, .98)) !important;
+}
+
+.wiki-ledger__mastheadGrid{
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.35fr) 320px !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+.wiki-ledger__mastheadCopy{
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.wiki-ledger__mastheadCopy h2{
+  font-family: "Segoe UI", "Bahnschrift", system-ui, sans-serif !important;
+  font-size: clamp(2.8rem, 5vw, 4.6rem) !important;
+  line-height: .94 !important;
+  letter-spacing: -.07em !important;
+}
+
+.wiki-ledger__mastheadMeta{
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.wiki-ledger__metaCard{
+  display: grid !important;
+  gap: 8px !important;
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: rgba(255, 255, 255, .03) !important;
+}
+
+.wiki-ledger__metaCard strong{
+  color: var(--site-ink-strong) !important;
+  font-size: 18px !important;
+}
+
+.wiki-ledger__layout{
+  display: grid !important;
+  grid-template-columns: 300px minmax(0, 1fr) !important;
+  gap: 18px !important;
+  align-items: start !important;
+}
+
+.wiki-ledger__directory{
+  position: sticky !important;
+  top: 112px !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+}
+
+.wiki-ledger__directoryGroups{
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.wiki-ledger__directoryGroup{
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.wiki-ledger__directoryList{
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.wiki-ledger__directoryLink{
+  display: block !important;
+  padding: 12px 14px !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, .02) !important;
+  color: rgba(228, 235, 243, .82) !important;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease !important;
+}
+
+.wiki-ledger__directoryLink:hover{
+  transform: translateX(2px) !important;
+  border-left-color: rgba(210, 165, 106, .34) !important;
+  background: rgba(210, 165, 106, .07) !important;
+}
+
+.wiki-ledger__directoryLink.is-active{
+  border-left-color: rgba(210, 165, 106, .72) !important;
+  background: rgba(210, 165, 106, .12) !important;
+  color: #f5dfc0 !important;
+}
+
+.wiki-ledger__body{
+  display: grid !important;
+  gap: 18px !important;
+}
+
+.wiki-ledger__summary,
+.wiki-ledger__document,
+.wiki-ledger__updates,
+.wiki-ledger__navigator{
+  padding: 28px !important;
+  border-radius: 26px !important;
+}
+
+.wiki-ledger .wiki-facts{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.wiki-ledger .wiki-fact,
+.wiki-ledger .wiki-card,
+.wiki-ledger .wiki-sectionBlock,
+.wiki-ledger .wiki-pager__card{
+  border-radius: 18px !important;
+  border: 1px solid var(--site-border-soft) !important;
+  background: rgba(255, 255, 255, .03) !important;
+  box-shadow: none !important;
+}
+
+.wiki-ledger .wiki-sectionBlock{
+  padding: 22px !important;
+  border-left: 3px solid rgba(210, 165, 106, .30) !important;
+}
+
+.wiki-ledger .wiki-grid,
+.wiki-ledger .wiki-pager{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.dock,
+body.is-landing .dock,
+body.is-standard .dock,
+body.is-wiki .dock,
+body.is-apply .dock,
+body.is-map .dock{
+  left: 50% !important;
+  width: auto !important;
+  max-width: calc(100% - 34px) !important;
+  padding: 12px !important;
+  gap: 8px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(210, 165, 106, .16) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(210, 165, 106, .10), transparent 40%),
+    linear-gradient(180deg, rgba(14, 21, 31, .94), rgba(9, 14, 22, .98)) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+  box-shadow: 0 24px 52px rgba(0, 0, 0, .36) !important;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.dock__item{
+  min-width: 90px !important;
+  height: 52px !important;
+  padding: 0 15px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, .05) !important;
+  background: rgba(255, 255, 255, .026) !important;
+}
+
+.dock__item:hover{
+  border-color: rgba(210, 165, 106, .18) !important;
+  background: rgba(255, 255, 255, .045) !important;
+}
+
+.dock__icon{
+  color: rgba(235, 241, 248, .78) !important;
+}
+
+.dock__label{
+  color: rgba(224, 232, 241, .70) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+}
+
+.dock__item.is-active{
+  border-color: rgba(210, 165, 106, .28) !important;
+  background: linear-gradient(180deg, rgba(210, 165, 106, .16), rgba(210, 165, 106, .10)) !important;
+}
+
+.dock__item.is-active .dock__label,
+.dock__item.is-active .dock__icon{
+  color: #f6dfbc !important;
+}
+
+.footer,
+body.is-landing .footer,
+body.is-standard .footer,
+body.is-wiki .footer,
+body.is-apply .footer,
+body.is-map .footer{
+  display: block !important;
+  width: min(1380px, calc(100% - 28px)) !important;
+  margin: 0 auto !important;
+  padding: 0 0 calc(188px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.footer__inner{
+  gap: 8px !important;
+  padding: 18px 20px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(210, 165, 106, .12) !important;
+  background: linear-gradient(180deg, rgba(13, 19, 29, .84), rgba(9, 14, 22, .92)) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .24) !important;
+}
+
+.footer__brand{
+  color: rgba(242, 247, 252, .92) !important;
+}
+
+.footer__legal{
+  color: var(--site-copy-strong) !important;
+}
+
+@media (max-width: 1080px){
+  .topbar,
+  body.is-landing .topbar,
+  body.is-standard .topbar,
+  body.is-wiki .topbar,
+  body.is-apply .topbar,
+  body.is-map .topbar{
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "brand auth"
+      "status status" !important;
+  }
+
+  .brandmark{
+    justify-self: start !important;
+  }
+
+  .topbar__status{
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+  }
+
+  .landing-hub__grid,
+  .start-clean__flow,
+  .start-clean__links,
+  .live-minimal__grid,
+  .wiki-ledger__mastheadGrid,
+  .wiki-ledger__layout,
+  .content-grid--sidebar{
+    grid-template-columns: 1fr !important;
+  }
+
+  .wiki-ledger__directory{
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+@media (max-width: 780px){
+  .topbar,
+  .legal-rail,
+  .content,
+  .footer,
+  body.is-landing .topbar,
+  body.is-standard .topbar,
+  body.is-wiki .topbar,
+  body.is-apply .topbar,
+  body.is-map .topbar,
+  body.is-landing .content,
+  body.is-standard .content,
+  body.is-wiki .content,
+  body.is-apply .content,
+  body.is-map .content{
+    width: min(100%, calc(100% - 16px)) !important;
+  }
+
+  .topbar{
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .brandmark__badge{
+    min-width: 196px !important;
+    min-height: 56px !important;
+  }
+
+  .brandmark__title{
+    font-size: 24px !important;
+  }
+
+  .legal-rail{
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+    padding: 14px !important;
+  }
+
+  .legal-rail__links{
+    justify-content: flex-start !important;
+  }
+
+  .content,
+  body.is-landing .content,
+  body.is-standard .content,
+  body.is-wiki .content,
+  body.is-apply .content,
+  body.is-map .content{
+    padding-bottom: calc(238px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .section,
+  .wiki-ledger__summary,
+  .wiki-ledger__document,
+  .wiki-ledger__updates,
+  .wiki-ledger__navigator,
+  .wiki-ledger__masthead{
+    padding: 22px !important;
+  }
+
+  .landing-hub__hero{
+    min-height: 0 !important;
+    padding: 26px !important;
+  }
+
+  .landing-hub__title{
+    font-size: clamp(2.4rem, 11vw, 3.8rem) !important;
+  }
+
+  .dock{
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 560px){
+  .clock{
+    display: none !important;
+  }
+
+  .auth{
+    width: 100% !important;
+    justify-content: flex-end !important;
+    flex-wrap: wrap !important;
+  }
+
+  .dock__item{
+    min-width: 72px !important;
+    padding: 0 12px !important;
+  }
+
+  .dock__label{
+    font-size: 10px !important;
+  }
+
+  .footer,
+  body.is-landing .footer,
+  body.is-standard .footer,
+  body.is-wiki .footer,
+  body.is-apply .footer,
+  body.is-map .footer{
+    padding-bottom: calc(210px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
