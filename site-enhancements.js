@@ -1,5 +1,30 @@
 (() => {
   const originalRoute = route;
+  let revealObserver = null;
+
+  function initEditorialMotion() {
+    if (!("IntersectionObserver" in window)) {
+      document.querySelectorAll("[data-reveal]").forEach((node) => node.classList.add("is-visible"));
+      return;
+    }
+
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.18, rootMargin: "0px 0px -6% 0px" });
+    }
+
+    document.querySelectorAll("[data-reveal]").forEach((node, index) => {
+      node.style.setProperty("--reveal-delay", `${Math.min(index, 8) * 70}ms`);
+      node.classList.remove("is-visible");
+      revealObserver.observe(node);
+    });
+  }
 
   route = function enhancedRoute() {
     const currentRoute = parseRoute().name;
@@ -10,6 +35,7 @@
     if (currentRoute === "apply" && getCurrentAccount()) {
       loadApplicationCenter({ showLoading: !applicationCenterState.items.length, keepSelection: true });
     }
+    window.requestAnimationFrame(initEditorialMotion);
     return output;
   };
 
@@ -23,26 +49,26 @@
     setView(`
       <div>
         ${renderHeader("Start Here", [{ label: "Start" }], { showBadge: false })}
-        <section class="section section--hero start-clean">
+        <section class="section section--hero start-clean" data-reveal>
           <div class="section__eyebrow">New player entry</div>
           <h2>Get into the city without missing the basics.</h2>
-          <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+          <p class="doc-p">This page is your fast lane: find the server, lock in the rules, and keep the right links ready before you start moving.</p>
           <div class="start-clean__flow">
-            <article class="start-clean__step">
+            <article class="start-clean__step" data-reveal>
               <span class="start-clean__stepIndex">01</span>
               <div class="start-clean__stepCopy">
                 <strong>Find SGCNR in FiveM</strong>
                 <span>Search for the server in FiveM and join from there.</span>
               </div>
             </article>
-            <article class="start-clean__step">
+            <article class="start-clean__step" data-reveal>
               <span class="start-clean__stepIndex">02</span>
               <div class="start-clean__stepCopy">
                 <strong>Read the rules first</strong>
                 <span>Use the Rules page before you jump into active situations in the city.</span>
               </div>
             </article>
-            <article class="start-clean__step">
+            <article class="start-clean__step" data-reveal>
               <span class="start-clean__stepIndex">03</span>
               <div class="start-clean__stepCopy">
                 <strong>Use Discord for support</strong>
@@ -54,7 +80,7 @@
 
         <section class="start-clean__links" aria-label="Start shortcuts">
           ${quickLinks.map((item) => `
-            <a class="start-clean__linkCard" href="${escapeHtml(item.href)}">
+            <a class="start-clean__linkCard" href="${escapeHtml(item.href)}" data-reveal>
               <span class="start-clean__linkLabel">${escapeHtml(item.label)}</span>
               <strong class="start-clean__linkTitle">${escapeHtml(item.detail)}</strong>
             </a>
@@ -1543,7 +1569,7 @@
         <section class="section section--hero start-clean">
           <div class="section__eyebrow">New player entry</div>
           <h2>Get into the city without missing the basics.</h2>
-          <p class="doc-p">The Start page should do one job well: show the first steps clearly, keep the core links nearby, and stay out of the way after that.</p>
+          <p class="doc-p">This page is your fast lane: find the server, lock in the rules, and keep the right links ready before you start moving.</p>
           <div class="start-clean__flow">
             <article class="start-clean__step">
               <span class="start-clean__stepIndex">01</span>
@@ -1623,7 +1649,7 @@
         <div class="wiki-ledger__directoryTop">
           <div class="section__eyebrow">Guide directory</div>
           <h2>Wiki pages</h2>
-          <p class="doc-p">Browse every guide page from one slim index. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+          <p class="doc-p">Move through systems, roles, and procedures from one cleaner library view.</p>
         </div>
         <div class="wiki-ledger__directoryGroups">
           ${categories.map((category) => {

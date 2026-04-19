@@ -1724,31 +1724,31 @@ function renderLanding() {
 function renderLandingHome() {
   setView(`
     <div class="landing-hub">
-      <section class="section section--hero landing-hub__hero" aria-label="Welcome">
-        <div class="landing-hub__eyebrow">Official SGCNR</div>
-        <h1 class="landing-hub__title">Everything you need, in one place.</h1>
-        <p class="landing-hub__text">Start here for the essentials: rules, map, live status, and applications without having to dig through extra pages.</p>
+      <section class="section section--hero landing-hub__hero" aria-label="Welcome" data-reveal>
+        <div class="landing-hub__eyebrow">SGCNR Network</div>
+        <h1 class="landing-hub__title">Built for the city. Ready for the grind.</h1>
+        <p class="landing-hub__text">Step into SGCNR with the core pages that matter most: entry, map, live status, and applications, all in one cleaner front door.</p>
         <div class="landing-hub__actions">
-          <a class="auth__btn auth__btn--primary" href="/start">Open Start</a>
-          <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          <a class="auth__btn auth__btn--primary" href="/start">Enter Start</a>
+          <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Join Discord</a>
         </div>
       </section>
 
       <section class="landing-hub__grid" aria-label="Portal shortcuts">
-        <a class="landing-hub__card" href="/rules">
+        <a class="landing-hub__card" href="/rules" data-reveal>
           <span class="landing-hub__cardLabel">Rules</span>
-          <strong class="landing-hub__cardTitle">Know the basics before you join</strong>
-          <span class="landing-hub__cardText">The rulebook, category flow, and direct search stay one click away.</span>
+          <strong class="landing-hub__cardTitle">Read the ground rules first</strong>
+          <span class="landing-hub__cardText">Keep the city standards, punishments, and expectations close before you move.</span>
         </a>
-        <a class="landing-hub__card" href="/map">
+        <a class="landing-hub__card" href="/map" data-reveal>
           <span class="landing-hub__cardLabel">Map</span>
-          <strong class="landing-hub__cardTitle">Keep the city layout nearby</strong>
-          <span class="landing-hub__cardText">Use the live city map as a quick reference instead of guessing locations.</span>
+          <strong class="landing-hub__cardTitle">Hold the city layout nearby</strong>
+          <span class="landing-hub__cardText">Use the map as your live reference for services, key points, and movement.</span>
         </a>
-        <a class="landing-hub__card" href="/live">
+        <a class="landing-hub__card" href="/live" data-reveal>
           <span class="landing-hub__cardLabel">Live</span>
-            <strong class="landing-hub__cardTitle">See live server status at a glance</strong>
-            <span class="landing-hub__cardText">Quickly check whether the server and Discord bot are online.</span>
+            <strong class="landing-hub__cardTitle">Check the network in seconds</strong>
+            <span class="landing-hub__cardText">See whether the game server and Discord operations are online before you jump in.</span>
         </a>
       </section>
     </div>
@@ -1770,7 +1770,7 @@ function renderStart() {
       <section class="section section--hero start-clean">
         <div class="section__eyebrow">New player entry</div>
         <h2>Get into the city without missing the basics.</h2>
-        <p class="doc-p">If you're new here, use this page to get settled fast: join the server, read the rules, and keep Discord nearby for support.</p>
+        <p class="doc-p">This page is your fast lane: find the server, lock in the rules, and keep the right links ready before you start moving.</p>
         <div class="start-clean__flow">
           <article class="start-clean__step">
             <span class="start-clean__stepIndex">01</span>
@@ -5296,10 +5296,10 @@ function renderServerStatusShell() {
   return `
     <div class="status-page status-page--minimal">
       ${renderHeader("Live", [{ label: "Live" }])}
-      <section class="section section--hero live-minimal__hero">
+      <section class="section section--hero live-minimal__hero" data-reveal>
         <div class="section__eyebrow">Live checks</div>
         <h2>${escapeHtml(SERVER_CONFIG.name)} status</h2>
-        <p class="doc-p">A quick status check for the game server and the Discord bot.</p>
+        <p class="doc-p">A compact live check for the two signals that matter most: the game server and the Discord bot bridge.</p>
         <div class="status-live__actions">
           <button class="auth__btn" id="statusRefreshBtn" type="button">Refresh</button>
         </div>
@@ -5590,14 +5590,14 @@ function renderServerStatusContent(snapshot) {
   return `
     <section class="live-minimal">
       <div class="live-minimal__grid">
-        <article class="section live-minimal__card live-minimal__card--${escapeHtml(serverStatus.status || "pending")}">
+        <article class="section live-minimal__card live-minimal__card--${escapeHtml(serverStatus.status || "pending")}" data-reveal>
           <div class="live-minimal__label">Server status</div>
           <div class="live-minimal__value">${escapeHtml(serverValue)}</div>
           <div class="live-minimal__text">${escapeHtml(serverStatus.message || "Waiting for the live server feed.")}</div>
           <div class="live-minimal__meta">${escapeHtml(snapshot.refreshedAt ? `Last refresh ${formatServerTimestamp(snapshot.refreshedAt)}` : "No refresh time recorded yet.")}</div>
         </article>
 
-        <article class="section live-minimal__card live-minimal__card--${escapeHtml(botStatus.status || "pending")}">
+        <article class="section live-minimal__card live-minimal__card--${escapeHtml(botStatus.status || "pending")}" data-reveal>
           <div class="live-minimal__label">Discord bot status</div>
           <div class="live-minimal__value">${escapeHtml(botValue)}</div>
           <div class="live-minimal__text">${escapeHtml(botStatus.message || "Waiting for the Discord bot live push.")}</div>
@@ -5703,7 +5703,7 @@ function renderWikiSidebar(categories, pages, currentSlug, updatedAt) {
       <div class="wiki-ledger__directoryTop">
         <div class="section__eyebrow">Guide directory</div>
         <h2>Wiki pages</h2>
-        <p class="doc-p">Browse every guide page from one slim index. Updated ${escapeHtml(updatedAt || "recently")}.</p>
+        <p class="doc-p">Move through systems, roles, and procedures from one cleaner library view.</p>
       </div>
       <div class="wiki-ledger__directoryGroups">
         ${categories.map((category) => {
