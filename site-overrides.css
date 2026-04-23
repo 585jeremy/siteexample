@@ -12216,3 +12216,143 @@ body.is-map .footer{
     min-width: 78px !important;
   }
 }
+
+/* 2026-04-23 final green theme lock */
+body.is-landing,
+body.is-standard,
+body.is-wiki,
+body.is-map,
+body.is-apply{
+  background:
+    radial-gradient(circle at 18% 8%, rgba(104, 242, 155, .09), transparent 26%) !important,
+    radial-gradient(circle at 84% 12%, rgba(104, 242, 155, .06), transparent 24%) !important,
+    linear-gradient(180deg, #050a07 0%, #07110c 52%, #040806 100%) !important;
+}
+
+.auth__btn,
+body.is-landing .auth__btn,
+body.is-standard .auth__btn,
+body.is-wiki .auth__btn,
+body.is-map .auth__btn,
+body.is-apply .auth__btn{
+  border-color: rgba(104, 242, 155, .16) !important;
+  background: linear-gradient(180deg, rgba(12, 20, 16, .94), rgba(7, 12, 10, .98)) !important;
+  color: rgba(233, 245, 236, .92) !important;
+}
+
+.auth__btn:hover,
+body.is-landing .auth__btn:hover,
+body.is-standard .auth__btn:hover,
+body.is-wiki .auth__btn:hover,
+body.is-map .auth__btn:hover,
+body.is-apply .auth__btn:hover{
+  border-color: rgba(104, 242, 155, .30) !important;
+  background: linear-gradient(180deg, rgba(16, 27, 21, .96), rgba(9, 15, 12, .98)) !important;
+}
+
+.auth__btn--primary,
+body.is-landing .auth__btn--primary,
+body.is-standard .auth__btn--primary,
+body.is-wiki .auth__btn--primary,
+body.is-map .auth__btn--primary,
+body.is-apply .auth__btn--primary{
+  border-color: rgba(104, 242, 155, .34) !important;
+  background: linear-gradient(180deg, rgba(18, 60, 35, .98), rgba(9, 33, 20, .98)) !important;
+  color: #ecfff3 !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(217, 255, 235, .10) !important;
+}
+
+.auth__btn--primary:hover,
+body.is-landing .auth__btn--primary:hover,
+body.is-standard .auth__btn--primary:hover,
+body.is-wiki .auth__btn--primary:hover,
+body.is-map .auth__btn--primary:hover,
+body.is-apply .auth__btn--primary:hover{
+  border-color: rgba(104, 242, 155, .48) !important;
+  background: linear-gradient(180deg, rgba(22, 76, 43, .98), rgba(11, 40, 24, .98)) !important;
+}
+
+.page-hero,
+body.is-standard .page-hero{
+  border-color: rgba(104, 242, 155, .14) !important;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(104, 242, 155, .10), transparent 24%) !important,
+    radial-gradient(circle at 86% 20%, rgba(104, 242, 155, .05), transparent 22%) !important,
+    linear-gradient(180deg, rgba(11, 18, 14, .95), rgba(7, 12, 10, .98)) !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, .34),
+    inset 0 1px 0 rgba(255, 255, 255, .03) !important;
+}
+
+.page-hero::before,
+body.is-standard .page-hero::before{
+  background: radial-gradient(circle, rgba(104, 242, 155, .14) 0%, rgba(104, 242, 155, 0) 72%) !important;
+}
+
+.section__eyebrow,
+body.is-standard .section__eyebrow,
+.feature-card__label,
+.status-card__label,
+.status-live__label,
+.wiki-sidebar__statLabel{
+  border-color: rgba(104, 242, 155, .14) !important;
+  background: rgba(104, 242, 155, .06) !important;
+  color: rgba(212, 246, 225, .74) !important;
+}
+
+.breadcrumb__sep{
+  color: rgba(104, 242, 155, .30) !important;
+}
+
+.breadcrumb__link,
+.breadcrumb__current{
+  border-color: rgba(104, 242, 155, .16) !important;
+  background: rgba(104, 242, 155, .06) !important;
+  color: rgba(230, 255, 239, .88) !important;
+}
+
+.breadcrumb__link:hover{
+  border-color: rgba(104, 242, 155, .28) !important;
+  background: rgba(104, 242, 155, .10) !important;
+}
+
+body.is-standard :is(.feature-card, .stack-list__item, .info-faq__item, .rule-card, .card, .rules-legal, .status-card, .status-note),
+body.is-wiki :is(.wiki-card, .wiki-sectionBlock, .wiki-pager__card, .wiki-fact),
+body.is-landing :is(.landing-hub__card, .neo-card, .neo-signal),
+body.is-map :is(.map-panel, .map-detail, .map-stage-card, .map-stat, .map-filter, .map-tool, .map-toolbar__badge, .map-legend__item, .service-map-shell){
+  border-color: rgba(104, 242, 155, .12) !important;
+  background: linear-gradient(180deg, rgba(11, 18, 14, .95), rgba(7, 12, 10, .98)) !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, .30),
+    inset 0 1px 0 rgba(255, 255, 255, .03) !important;
+}
+
+body.is-standard :is(.feature-card__value, .status-card__value, .status-live__value),
+body.is-standard :is(.page-title, .section h2, .section h3),
+body.is-wiki :is(.wiki-card__title, .wiki-sectionBlock h3, .wiki-pager__title),
+body.is-map :is(.map-panel__headline, .map-detail__title, .map-stage-card__title){
+  color: #f1fff5 !important;
+}
+
+body.is-map .map-toolbar--overlay{
+  border-color: rgba(104, 242, 155, .16) !important;
+  background: rgba(8, 14, 11, .92) !important;
+}
+
+body.is-map .map-filter.is-active,
+body.is-map .map-tool.is-active,
+body.is-map .map-toolbar__badge.is-active{
+  border-color: rgba(104, 242, 155, .32) !important;
+  background: linear-gradient(180deg, rgba(104, 242, 155, .14), rgba(104, 242, 155, .08)) !important;
+  color: #ecfff3 !important;
+}
+
+.dock__item.is-active{
+  border-color: rgba(104, 242, 155, .28) !important;
+  background: linear-gradient(180deg, rgba(104, 242, 155, .16), rgba(104, 242, 155, .10)) !important;
+}
+
+.dock__item.is-active .dock__label,
+.dock__item.is-active .dock__icon{
+  color: #eafff2 !important;
+}
