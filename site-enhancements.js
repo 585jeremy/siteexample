@@ -2225,5 +2225,297 @@
     bindWikiShowcase();
   };
 
+  function renderHomefrontStatusCards(snapshot = null) {
+    const liveOps = snapshot?.liveOps || {};
+    const discordOps = liveOps.discord || normaliseDiscordOpsPayload(null);
+    const serverHealth = normaliseHealthPayload(
+      liveOps.serverHealth || {
+        status: snapshot
+          ? (snapshot.online ? "online" : "offline")
+          : "pending",
+        message: snapshot?.apiError || "Checking the live server feed."
+      },
+      "Game Server"
+    );
+    const botHealth = {
+      ...(discordOps?.botStatus || normaliseHealthPayload(null, "Discord Bot")),
+      label: "Discord Bot"
+    };
+    const serverValue = serverHealth.status === "online"
+      ? "All systems operational"
+      : serverHealth.status === "offline"
+        ? "Server feed offline"
+        : "Checking live feed";
+    const playersValue = snapshot
+      ? `${snapshot.clients ?? 0}${snapshot.maxClients ? ` / ${snapshot.maxClients}` : ""}`
+      : "Pending";
+    const playersMeta = snapshot?.online
+      ? `${snapshot.mapName || "Los Santos"} live`
+      : "Waiting for server feed";
+    const discordValue = botHealth.status === "online"
+      ? "Connected"
+      : botHealth.status === "offline"
+        ? "Offline"
+        : "Pending";
+    const discordMeta = botHealth.latencyMs != null
+      ? `${botHealth.latencyMs} ms latency`
+      : "Support & updates";
+    const refreshMeta = snapshot?.refreshedAt
+      ? `Updated ${formatServerTimestamp(snapshot.refreshedAt)}`
+      : "Refreshing live data";
+
+    return `
+      <article class="homefront__statusCard homefront__statusCard--${escapeHtml(serverHealth.status || "pending")}">
+        <span class="homefront__statusLabel">Live status</span>
+        <strong class="homefront__statusValue">${escapeHtml(serverValue)}</strong>
+        <span class="homefront__statusMeta">${escapeHtml(refreshMeta)}</span>
+      </article>
+      <article class="homefront__statusCard">
+        <span class="homefront__statusLabel">Players online</span>
+        <strong class="homefront__statusValue">${escapeHtml(playersValue)}</strong>
+        <span class="homefront__statusMeta">${escapeHtml(playersMeta)}</span>
+      </article>
+      <article class="homefront__statusCard homefront__statusCard--discord">
+        <span class="homefront__statusLabel">Discord</span>
+        <strong class="homefront__statusValue">${escapeHtml(discordValue)}</strong>
+        <span class="homefront__statusMeta">${escapeHtml(discordMeta)}</span>
+      </article>
+    `;
+  }
+
+  async function hydrateHomefrontStatus() {
+    const mount = document.getElementById("homefrontStatusGrid");
+    if (!mount) return;
+
+    try {
+      const snapshot = await loadServerSnapshot();
+      if (!document.getElementById("homefrontStatusGrid")) return;
+      mount.innerHTML = renderHomefrontStatusCards(snapshot);
+    } catch {
+      if (!document.getElementById("homefrontStatusGrid")) return;
+      mount.innerHTML = renderHomefrontStatusCards(null);
+    }
+  }
+
+  renderLandingHome = function renderLandingHomeRebuilt() {
+    setView(`
+      <div class="homefront">
+        <section class="homefront__hero" data-reveal>
+          <div class="homefront__copy">
+            <span class="homefront__eyebrow">Los Santos network</span>
+            <h2 class="homefront__title">One clean front door for <span>SGCNR.</span></h2>
+            <p class="homefront__text">Jump straight into the pages players actually use: Start, the map, live status, and support. No duplicate routes, no filler, just the pages that matter.</p>
+            <div class="homefront__actions">
+              <a class="auth__btn auth__btn--primary" href="/start">Start here</a>
+              <a class="auth__btn" href="/map">Open map</a>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Join Discord</a>
+            </div>
+          </div>
+
+          <div class="homefront__media">
+            <div class="homefront__visual">
+              <div class="homefront__visualGlow" aria-hidden="true"></div>
+              <img class="homefront__visualImage" src="${escapeHtml(BRAND_LOGO_BANNER_URL)}" alt="SGCNR branding" loading="eager" />
+            </div>
+            <div class="homefront__statusGrid" id="homefrontStatusGrid">
+              ${renderHomefrontStatusCards()}
+            </div>
+          </div>
+        </section>
+
+        <section class="homefront__signalRow" data-reveal aria-label="Homepage routing">
+          <a class="homefront__signal" href="/start">
+            <span class="homefront__signalIcon" aria-hidden="true">◎</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Start here</span>
+              <strong class="homefront__signalTitle">Join the city the right way</strong>
+              <span class="homefront__signalText">Use Start for first steps, Rules for standards, and Map for locations.</span>
+            </div>
+          </a>
+          <a class="homefront__signal" href="/live">
+            <span class="homefront__signalIcon" aria-hidden="true">◎</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Live</span>
+              <strong class="homefront__signalTitle">Check the two signals that matter</strong>
+              <span class="homefront__signalText">See the server and Discord bot state before you move.</span>
+            </div>
+          </a>
+          <a class="homefront__signal" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">
+            <span class="homefront__signalIcon" aria-hidden="true">◎</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Support</span>
+              <strong class="homefront__signalTitle">Tickets stay in Discord</strong>
+              <span class="homefront__signalText">Support, ban history, and staff contact stay tracked in the ticket channel.</span>
+            </div>
+          </a>
+        </section>
+
+        <section class="homefront__grid" aria-label="Homepage shortcuts">
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">◉</span>
+            <span class="homefront__cardLabel">Start</span>
+            <strong class="homefront__cardTitle">First steps</strong>
+            <span class="homefront__cardText">Find the server, check the basics, and keep the useful pages close.</span>
+            <a class="homefront__cardButton" href="/start">View page</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">▣</span>
+            <span class="homefront__cardLabel">Wiki</span>
+            <strong class="homefront__cardTitle">Jobs and systems</strong>
+            <span class="homefront__cardText">Browse roles, city jobs, systems, and activity pages through one filtered library.</span>
+            <a class="homefront__cardButton" href="/wiki">View page</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">▤</span>
+            <span class="homefront__cardLabel">Map</span>
+            <strong class="homefront__cardTitle">City layout</strong>
+            <span class="homefront__cardText">Keep service locations and route context visible while you play.</span>
+            <a class="homefront__cardButton" href="/map">View map</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">◌</span>
+            <span class="homefront__cardLabel">Support</span>
+            <strong class="homefront__cardTitle">Discord tickets</strong>
+            <span class="homefront__cardText">Support, ban history, and staff contact now stay inside the Discord ticket channel.</span>
+            <a class="homefront__cardButton" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          </article>
+        </section>
+      </div>
+    `);
+
+    void hydrateHomefrontStatus();
+  };
+
+  renderStart = function renderStartRebuilt() {
+    setView(`
+      <div class="startfront">
+        <section class="startfront__hero" data-reveal>
+          <div class="startfront__head">
+            <span class="startfront__eyebrow">Start</span>
+            <h2 class="startfront__title">Get into SGCNR the right way.</h2>
+            <p class="startfront__text">This page is the clean setup lane: find the server, lock in the rules, and keep the right links nearby before you jump into the city.</p>
+          </div>
+          <div class="startfront__actions">
+            <a class="auth__btn auth__btn--primary" href="/rules">Read rules</a>
+            <a class="auth__btn" href="/map">Open map</a>
+            <a class="auth__btn" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Discord</a>
+          </div>
+          <div class="startfront__stepGrid">
+            <article class="startfront__step">
+              <span class="startfront__stepIndex">01</span>
+              <div class="startfront__stepCopy">
+                <strong>Find SGCNR in FiveM</strong>
+                <span>Search for the server in FiveM and join from there.</span>
+              </div>
+            </article>
+            <article class="startfront__step">
+              <span class="startfront__stepIndex">02</span>
+              <div class="startfront__stepCopy">
+                <strong>Read the rules first</strong>
+                <span>Check the rules before you enter active situations in the city.</span>
+              </div>
+            </article>
+            <article class="startfront__step">
+              <span class="startfront__stepIndex">03</span>
+              <div class="startfront__stepCopy">
+                <strong>Use Discord for support</strong>
+                <span>Support, ban history, and staff contact all stay tracked in Discord tickets.</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    `);
+  };
+
+  renderLandingHome = function renderLandingHomeFinalPass() {
+    setView(`
+      <div class="homefront">
+        <section class="homefront__hero" data-reveal>
+          <div class="homefront__copy">
+            <span class="homefront__eyebrow">Los Santos network</span>
+            <h2 class="homefront__title">One clean front door for <span>SGCNR.</span></h2>
+            <p class="homefront__text">Jump straight into the pages players actually use: Start, the map, live status, and support. No duplicate routes, no filler, just the pages that matter.</p>
+            <div class="homefront__actions">
+              <a class="auth__btn auth__btn--primary" href="/start">Start here</a>
+              <a class="auth__btn" href="/map">Open map</a>
+              <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Join Discord</a>
+            </div>
+          </div>
+
+          <div class="homefront__media">
+            <div class="homefront__visual">
+              <div class="homefront__visualGlow" aria-hidden="true"></div>
+              <img class="homefront__visualImage" src="${escapeHtml(BRAND_LOGO_BANNER_URL)}" alt="SGCNR branding" loading="eager" />
+            </div>
+            <div class="homefront__statusGrid" id="homefrontStatusGrid">
+              ${renderHomefrontStatusCards()}
+            </div>
+          </div>
+        </section>
+
+        <section class="homefront__signalRow" data-reveal aria-label="Homepage routing">
+          <a class="homefront__signal" href="/start">
+            <span class="homefront__signalIcon" aria-hidden="true">01</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Start here</span>
+              <strong class="homefront__signalTitle">Join the city the right way</strong>
+              <span class="homefront__signalText">Use Start for first steps, Rules for standards, and Map for locations.</span>
+            </div>
+          </a>
+          <a class="homefront__signal" href="/live">
+            <span class="homefront__signalIcon" aria-hidden="true">02</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Live</span>
+              <strong class="homefront__signalTitle">Check the two signals that matter</strong>
+              <span class="homefront__signalText">See the server and Discord bot state before you move.</span>
+            </div>
+          </a>
+          <a class="homefront__signal" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">
+            <span class="homefront__signalIcon" aria-hidden="true">03</span>
+            <div class="homefront__signalCopy">
+              <span class="homefront__signalLabel">Support</span>
+              <strong class="homefront__signalTitle">Tickets stay in Discord</strong>
+              <span class="homefront__signalText">Support, ban history, and staff contact stay tracked in the ticket channel.</span>
+            </div>
+          </a>
+        </section>
+
+        <section class="homefront__grid" aria-label="Homepage shortcuts">
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">S</span>
+            <span class="homefront__cardLabel">Start</span>
+            <strong class="homefront__cardTitle">First steps</strong>
+            <span class="homefront__cardText">Find the server, check the basics, and keep the useful pages close.</span>
+            <a class="homefront__cardButton" href="/start">View page</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">W</span>
+            <span class="homefront__cardLabel">Wiki</span>
+            <strong class="homefront__cardTitle">Jobs and systems</strong>
+            <span class="homefront__cardText">Browse roles, city jobs, systems, and activity pages through one filtered library.</span>
+            <a class="homefront__cardButton" href="/wiki">View page</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">M</span>
+            <span class="homefront__cardLabel">Map</span>
+            <strong class="homefront__cardTitle">City layout</strong>
+            <span class="homefront__cardText">Keep service locations and route context visible while you play.</span>
+            <a class="homefront__cardButton" href="/map">View map</a>
+          </article>
+          <article class="homefront__card" data-reveal>
+            <span class="homefront__cardIcon" aria-hidden="true">D</span>
+            <span class="homefront__cardLabel">Support</span>
+            <strong class="homefront__cardTitle">Discord tickets</strong>
+            <span class="homefront__cardText">Support, ban history, and staff contact now stay inside the Discord ticket channel.</span>
+            <a class="homefront__cardButton" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer">Open Discord</a>
+          </article>
+        </section>
+      </div>
+    `);
+
+    void hydrateHomefrontStatus();
+  };
+
   route();
 })();
