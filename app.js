@@ -1727,7 +1727,7 @@ function renderLandingHome() {
       <section class="section section--hero landing-hub__hero" aria-label="Welcome" data-reveal>
         <div class="landing-hub__eyebrow">SGCNR Network</div>
         <h1 class="landing-hub__title">Built for the city. Ready for the grind.</h1>
-        <p class="landing-hub__text">Step into SGCNR with the core pages that matter most: entry, map, live status, and applications, all in one cleaner front door.</p>
+        <p class="landing-hub__text">Step into SGCNR with the core pages that matter most: entry, map, live status, and support, all in one cleaner front door.</p>
         <div class="landing-hub__actions">
           <a class="auth__btn auth__btn--primary" href="/start">Enter Start</a>
           <a class="auth__btn" href="${escapeHtml(DISCORD_INVITE_URL)}" target="_blank" rel="noopener noreferrer">Join Discord</a>
@@ -2025,7 +2025,7 @@ function renderAccountGuest() {
       <section class="section section--hero account-hero account-hero--compact">
         <div class="section__eyebrow">Discord account</div>
         <h2>Sign in with Discord</h2>
-        <p class="doc-p">Use your Discord identity to unlock linked services, applications, and synced community access on the website.</p>
+        <p class="doc-p">Use your Discord identity to unlock linked services, synced community access, and website account features.</p>
         <div class="status-actions">
           ${SERVER_CONFIG.discordOAuthUrl ? `<a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordOAuthUrl)}">Continue with Discord</a>` : `<button class="auth__btn auth__btn--primary" id="accountLoginCta" type="button">Discord login setup</button>`}
         </div>
@@ -2278,7 +2278,7 @@ function renderAdminDashboard(account) {
           <h2>What should live here</h2>
           <div class="stack-list stack-list--compact">
             <div class="stack-list__item"><span class="stack-list__index">01</span><span><strong>Announcements:</strong> homepage alerts, restart banners, maintenance notices, and event callouts.</span></div>
-            <div class="stack-list__item"><span class="stack-list__index">02</span><span><strong>Applications & appeals:</strong> review queues for staff applications, ban appeals, and player reports.</span></div>
+            <div class="stack-list__item"><span class="stack-list__index">02</span><span><strong>Reports & appeals:</strong> review queues for player reports, ban appeals, and moderation follow-up.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">03</span><span><strong>Live ops controls:</strong> toggle active events, hottest zones, and manager-side notices shown on the Live page.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">04</span><span><strong>Account oversight:</strong> inspect Discord-linked accounts, verification status, and identity mismatches.</span></div>
             <div class="stack-list__item"><span class="stack-list__index">05</span><span><strong>Support overview:</strong> pending reports, pending reviews, website health, and backend sync checks.</span></div>
@@ -2305,8 +2305,6 @@ function renderAdminDashboard(account) {
   const label = SERVER_CONFIG.adminPanelLabel || "Manager";
   const payload = adminOverviewState.data || {};
   const recentLogins = Array.isArray(payload?.recentLogins?.items) ? payload.recentLogins.items : [];
-  const applicationCounts = payload?.applications?.counts || {};
-  const recentApplications = Array.isArray(payload?.applications?.recent) ? payload.applications.recent : [];
   const loading = adminOverviewState.loading && !adminOverviewState.loaded;
 
   if (!adminOverviewState.loading && !adminOverviewState.loaded) {
@@ -2316,18 +2314,18 @@ function renderAdminDashboard(account) {
   const metricCards = [
     {
       label: "Recent website logins",
-      value: payload?.recentLogins?.available ? String(recentLogins.length) : "—",
+      value: payload?.recentLogins?.available ? String(recentLogins.length) : "-",
       meta: "Latest Discord-authenticated sessions"
     },
     {
-      label: "Open applications",
-      value: payload?.applications?.available ? String(applicationCounts.open || 0) : "—",
-      meta: "Submitted, review, info, interview"
+      label: "Support route",
+      value: "Discord",
+      meta: "Applications and support stay in tickets"
     },
     {
-      label: "Pending review",
-      value: payload?.applications?.available ? String((applicationCounts.in_review || 0) + (applicationCounts.needs_info || 0)) : "—",
-      meta: "Needs staff attention"
+      label: "Staff intake",
+      value: "Tickets",
+      meta: "Website apply path removed"
     },
     {
       label: "Signed in as",
@@ -2343,7 +2341,7 @@ function renderAdminDashboard(account) {
       <section class="section section--hero admin-hero">
         <div class="section__eyebrow">Website control</div>
         <h2>${escapeHtml(label)} dashboard</h2>
-        <p class="doc-p">Keep an eye on website Discord logins, applications, and the main shortcuts staff actually needs instead of digging through a placeholder page.</p>
+        <p class="doc-p">Keep an eye on website Discord logins, the live page, and the direct Discord ticket route without digging through filler panels.</p>
         <div class="status-grid admin-metrics">
           ${metricCards.map((card) => `
             <div class="status-card">
@@ -2354,11 +2352,11 @@ function renderAdminDashboard(account) {
           `).join("")}
         </div>
         <div class="status-actions">
-          <a class="auth__btn auth__btn--primary" href="#/apply">Applications</a>
-          <a class="auth__btn" href="#/live">Live page</a>
+          <a class="auth__btn auth__btn--primary" href="#/live">Live page</a>
+          <a class="auth__btn" href="#/rules">Rules</a>
           <a class="auth__btn" href="${escapeHtml(SERVER_CONFIG.discordTicketChannelUrl || SERVER_CONFIG.discordUrl || "#")}" target="_blank" rel="noopener noreferrer">Discord tickets</a>
         </div>
-        ${loading ? `<div class="status-note">Loading the admin overview…</div>` : ""}
+        ${loading ? `<div class="status-note">Loading the admin overview...</div>` : ""}
         ${adminOverviewState.error ? `<div class="status-note"><strong>Admin overview:</strong> ${escapeHtml(adminOverviewState.error)}</div>` : ""}
       </section>
 
@@ -2372,7 +2370,7 @@ function renderAdminDashboard(account) {
                   ${recentLogins.map((entry) => `
                     <article class="admin-list__item">
                       <div class="admin-list__title">${escapeHtml(entry.username || entry.discordId || "Unknown account")}</div>
-                      <div class="admin-list__meta">${escapeHtml(entry.discordId || "No Discord ID")} · ${escapeHtml(formatServerTimestamp(entry.lastSeen || "") || "Recently")}</div>
+                      <div class="admin-list__meta">${escapeHtml(entry.discordId || "No Discord ID")} � ${escapeHtml(formatServerTimestamp(entry.lastSeen || "") || "Recently")}</div>
                     </article>
                   `).join("")}
                 </div>`
@@ -2381,28 +2379,12 @@ function renderAdminDashboard(account) {
         </section>
 
         <aside class="section section--stack">
-          <div class="section__eyebrow">Application review</div>
-          <h2>Application activity</h2>
-          ${payload?.applications?.available
-            ? `
-              <div class="admin-counts">
-                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.submitted || 0))}</strong><span>Submitted</span></div>
-                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.in_review || 0))}</strong><span>In review</span></div>
-                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.needs_info || 0))}</strong><span>Needs info</span></div>
-                <div class="admin-counts__item"><strong>${escapeHtml(String(applicationCounts.interview || 0))}</strong><span>Interview</span></div>
-              </div>
-              ${recentApplications.length
-                ? `<div class="admin-list">
-                    ${recentApplications.map((entry) => `
-                      <article class="admin-list__item">
-                        <div class="admin-list__title">${escapeHtml(entry.publicId || "Application")} · ${escapeHtml(entry.roleRequested || "Role")}</div>
-                        <div class="admin-list__meta">${escapeHtml(entry.applicantName || "Unknown applicant")} · ${escapeHtml(APPLICATION_STATUS_LABELS[entry.status] || entry.status || "Open")}</div>
-                      </article>
-                    `).join("")}
-                  </div>`
-                : `<div class="empty">No applications are stored yet.</div>`}
-            `
-            : `<div class="empty">Applications need live database access for <code>staff_applications</code> and <code>staff_application_messages</code>, plus an optional Discord webhook if you want staff notifications.</div>`}
+          <div class="section__eyebrow">Support route</div>
+          <h2>Discord tickets only</h2>
+          <div class="empty">Staff applications, ban history requests, and player support now stay in the Discord ticket channel instead of a website application page.</div>
+          <div class="status-actions">
+            <a class="auth__btn auth__btn--primary" href="${escapeHtml(SERVER_CONFIG.discordTicketChannelUrl || SERVER_CONFIG.discordUrl || "#")}" target="_blank" rel="noopener noreferrer">Open Discord tickets</a>
+          </div>
         </aside>
       </div>
     </div>
@@ -6127,7 +6109,7 @@ function parseRoute() {
 
   if (parts[0] === "start") return { name: "start" };
   if (parts[0] === "rules") return { name: "rules" };
-  if (parts[0] === "apply" || parts[0] === "applications") return { name: "apply" };
+  if (parts[0] === "apply" || parts[0] === "applications") return { name: "help" };
   if (parts[0] === "faq" || parts[0] === "help") return { name: "help" };
   if (parts[0] === "account") return { name: "account" };
   if (parts[0] === "admin") return { name: "admin" };
@@ -6173,12 +6155,12 @@ function route() {
   }
   updateDockActive(r.name);
 
-  const isStandardPage = !["home", "map", "wiki", "apply"].includes(r.name);
+  const isStandardPage = !["home", "map", "wiki"].includes(r.name);
   document.body.classList.toggle("is-landing", r.name === "home");
   document.body.classList.toggle("is-map", r.name === "map");
   document.body.classList.toggle("is-wiki", r.name === "wiki");
   document.body.classList.toggle("is-standard", isStandardPage);
-  document.body.classList.toggle("is-apply", r.name === "apply");
+  document.body.classList.toggle("is-apply", false);
   clearTopMeta();
 
   const inRulesFlow = (r.name === "rules" && ruleSections.length > 0) || r.name === "section" || r.name === "rule";
@@ -6191,10 +6173,6 @@ function route() {
 
   if (r.name === "start") {
     renderStart();
-    return;
-  }
-  if (r.name === "apply") {
-    renderApply();
     return;
   }
   if (r.name === "help") {

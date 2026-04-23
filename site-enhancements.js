@@ -1849,7 +1849,7 @@
           <div class="neo-home__copy">
             <span class="neo-home__eyebrow">Los Santos network</span>
             <h2 class="neo-home__title">One clean front door for SGCNR.</h2>
-            <p class="neo-home__text">Jump into the pages players actually use: getting started, the map, live status, applications, and support. No filler, no duplicate routes, just the essentials in one place.</p>
+            <p class="neo-home__text">Jump into the pages players actually use: getting started, the map, live status, and support. No filler, no duplicate routes, just the essentials in one place.</p>
             <div class="neo-home__actions">
               <a class="auth__btn auth__btn--primary" href="/start">Start here</a>
               <a class="auth__btn" href="/map">Open map</a>
@@ -1891,10 +1891,10 @@
             <strong class="neo-card__title">City layout</strong>
             <span class="neo-card__text">Keep service locations and route context visible while you play.</span>
           </a>
-          <a class="neo-card" href="/apply" data-reveal>
-            <span class="neo-card__label">Apply</span>
-            <strong class="neo-card__title">Staff applications</strong>
-            <span class="neo-card__text">Send one application, track one private case, and keep follow-up in one thread.</span>
+          <a class="neo-card" href="${escapeHtml(DISCORD_TICKET_CHANNEL_URL)}" target="_blank" rel="noopener noreferrer" data-reveal>
+            <span class="neo-card__label">Support</span>
+            <strong class="neo-card__title">Discord tickets</strong>
+            <span class="neo-card__text">Staff applications, ban history, and support now stay inside the Discord ticket channel.</span>
           </a>
         </section>
       </div>
@@ -1995,25 +1995,6 @@
         <div id="serverStatusMount">${renderServerStatusLoading()}</div>
       </div>
     `;
-  };
-
-  const originalRenderApplyFinalBase = renderApply;
-  renderApply = function renderApplyFinal() {
-    originalRenderApplyFinalBase();
-
-    const hero = document.querySelector(".apply-stage__hero");
-    if (hero) {
-      const heading = hero.querySelector("h2");
-      const copy = hero.querySelector(".doc-p");
-      if (heading) heading.textContent = "Staff applications";
-      if (copy) copy.textContent = "Use the website form once your ban history is ready. Staff replies and status updates stay inside your private case thread here.";
-    }
-
-    document.querySelectorAll(".apply-stage__hero .auth__btn--primary").forEach((button) => {
-      if (/discord/i.test(button.textContent || "")) {
-        button.textContent = "Sign in";
-      }
-    });
   };
 
   renderMapStageAside = function renderMapStageAsideFinal(location) {
